@@ -118,4 +118,8 @@ Durga/
 ## 9. Deployment Details
 - **Production Server:** Hostinger VPS (`myworks.sbs`)
 - **Configured Host:** `31.97.225.172` (SSH alias: `myworks`, user: `u996219523`, port: `65002`)
-- **Target Subdirectory:** `public_html/durga` -> `https://myworks.sbs/durga`
+- **Remote Webroot:** `domains/myworks.sbs/public_html/durga`
+- **Live Production URL:** **[https://myworks.sbs/durga/](https://myworks.sbs/durga/)**
+  - Devotee Front Desk: `https://myworks.sbs/durga/`
+  - Temple Management Desk: `https://myworks.sbs/durga/#admin`
+  - On-Premises QR Desk: `https://myworks.sbs/durga/?spot=entrance`

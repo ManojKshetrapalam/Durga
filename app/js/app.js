@@ -398,7 +398,7 @@ class DigitalMandapaApp {
 
   _registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then(() => console.log('[PWA] Service Worker active'))
         .catch(err => console.log('[PWA] SW register skipped or offline:', err.message));
     }
