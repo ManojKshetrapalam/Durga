@@ -1,0 +1,12 @@
+# Dependencies & Node
+node_modules/
+npm-debug.log*
+
+# Scratch & Temporary
+scratch/
+.system_generated/
+*.tmp
+
+# Operating System
+.DS_Store
+Thumbs.db

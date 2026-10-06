@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Sri Durga Devi Temple — Digital Mandapa</title>
+<!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Verbatim Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#9e3e4b",
+            "secondary-container": "#fece57",
+            "on-secondary-container": "#735700",
+            "on-tertiary-fixed": "#351000",
+            "on-surface": "#1e1b19",
+            "on-primary-fixed": "#40000e",
+            "primary-container": "#721c2b",
+            "background": "#fff8f5",
+            "outline-variant": "#dbc0c1",
+            "tertiary-fixed": "#ffdbcc",
+            "on-secondary-fixed": "#251a00",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed-variant": "#5a4300",
+            "tertiary-container": "#6a2800",
+            "inverse-primary": "#ffb2b8",
+            "surface-container-high": "#eee7e3",
+            "surface-variant": "#e9e1dd",
+            "inverse-on-surface": "#f7efeb",
+            "surface-container-highest": "#e9e1dd",
+            "secondary-fixed": "#ffdf98",
+            "surface-dim": "#e0d8d5",
+            "on-error-container": "#93000a",
+            "on-surface-variant": "#554243",
+            "surface-container-lowest": "#ffffff",
+            "primary-fixed-dim": "#ffb2b8",
+            "on-primary-fixed-variant": "#802735",
+            "primary-fixed": "#ffdadb",
+            "tertiary-fixed-dim": "#ffb694",
+            "secondary": "#775a00",
+            "surface": "#fff8f5",
+            "secondary-fixed-dim": "#eec14b",
+            "error": "#ba1a1a",
+            "inverse-surface": "#33302d",
+            "on-tertiary-container": "#ff8647",
+            "on-secondary": "#ffffff",
+            "on-primary-container": "#f98490",
+            "surface-bright": "#fff8f5",
+            "primary": "#540317",
+            "on-background": "#1e1b19",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#faf2ee",
+            "surface-container": "#f4ece8",
+            "outline": "#887273",
+            "tertiary": "#471800"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-tablet": "1.5rem",
+            "gutter": "1rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "margin-desktop": "3rem",
+            "margin": "1rem",
+            "gutter-desktop": "2rem"
+          },
+          "fontFamily": {
+            "headline-sm": [
+              "Playfair Display"
+            ],
+            "label-lg": [
+              "Plus Jakarta Sans"
+            ],
+            "headline-md": [
+              "Playfair Display"
+            ],
+            "label-md": [
+              "Plus Jakarta Sans"
+            ],
+            "body-md": [
+              "Plus Jakarta Sans"
+            ],
+            "display-lg": [
+              "Playfair Display"
+            ],
+            "body-xl": [
+              "Plus Jakarta Sans"
+            ],
+            "body-lg": [
+              "Plus Jakarta Sans"
+            ],
+            "label-sm": [
+              "Plus Jakarta Sans"
+            ],
+            "headline-lg": [
+              "Playfair Display"
+            ],
+            "display-lg-mobile": [
+              "Playfair Display"
+            ]
+          },
+          "fontSize": {
+            "headline-sm": [
+              "19px",
+              {
+                "lineHeight": "26px",
+                "fontWeight": "600"
+              }
+            ],
+            "label-lg": [
+              "15px",
+              {
+                "lineHeight": "20px",
+                "letterSpacing": "0.02em",
+                "fontWeight": "600"
+              }
+            ],
+            "headline-md": [
+              "22px",
+              {
+                "lineHeight": "30px",
+                "fontWeight": "600"
+              }
+            ],
+            "label-md": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "letterSpacing": "0.03em",
+                "fontWeight": "600"
+              }
+            ],
+            "body-md": [
+              "15px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "400"
+              }
+            ],
+            "display-lg": [
+              "40px",
+              {
+                "lineHeight": "48px",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "700"
+              }
+            ],
+            "body-xl": [
+              "18px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "400"
+              }
+            ],
+            "body-lg": [
+              "16px",
+              {
+                "lineHeight": "26px",
+                "fontWeight": "400"
+              }
+            ],
+            "label-sm": [
+              "12px",
+              {
+                "lineHeight": "16px",
+                "letterSpacing": "0.05em",
+                "fontWeight": "700"
+              }
+            ],
+            "headline-lg": [
+              "28px",
+              {
+                "lineHeight": "36px",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "700"
+              }
+            ],
+            "display-lg-mobile": [
+              "30px",
+              {
+                "lineHeight": "38px",
+                "letterSpacing": "0em",
+                "fontWeight": "700"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .diya-halo {
+      box-shadow: 0 0 16px 2px rgba(197, 155, 39, 0.22);
+    }
+    .mandapa-card {
+      box-shadow: 0 10px 25px -5px rgba(114, 28, 43, 0.05), 0 8px 10px -6px rgba(197, 155, 39, 0.04);
+    }
+    /* Smooth tap pulse */
+    .tap-active:active {
+      transform: scale(0.98);
+      transition: transform 120ms ease;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-on-secondary-fixed min-h-screen flex flex-col justify-between font-body-md text-body-md">
+<!-- ================= TOP APP BAR (Shared Component Anchor) ================= -->
+<!-- Executing style_shell_layout, style_bg_color, style_separation_logic without prohibited borders -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-margin h-16 w-full max-w-md mx-auto bg-surface shadow-sm">
+<div class="flex items-center gap-space-sm">
+<button aria-label="Temple Emblem" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors duration-150 active:scale-95 text-primary">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="temple_hindu" style="font-variation-settings: 'FILL' 1;">temple_hindu</span>
+</button>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-semibold text-primary tracking-tight">Sri Durga Devi Temple</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Chandra Layout, Bengaluru</span>
+</div>
+</div>
+<button aria-label="Notifications" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors duration-150 active:scale-95 text-on-surface-variant">
+<span class="material-symbols-outlined text-2xl" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- ================= MAIN SCROLLABLE CONTENT CANVAS ================= -->
+<main class="w-full max-w-md mx-auto pt-20 pb-28 px-margin flex flex-col gap-space-lg">
+<!-- 1. PHYSICAL QR LOCATION BADGE & TEMPLE SANCTUM HERO -->
+<section class="flex flex-col gap-space-sm">
+<!-- Physical Location Spot Chip -->
+<div class="diya-halo rounded-xl bg-surface-container-lowest border border-secondary-container p-space-sm flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0 text-on-secondary-container">
+<span class="material-symbols-outlined text-xl" data-icon="near_me" style="font-variation-settings: 'FILL' 1;">near_me</span>
+</div>
+<div class="flex-1">
+<p class="font-label-sm text-label-sm text-secondary font-bold tracking-wider">ON-PREMISES VERIFIED SCAN</p>
+<p class="font-label-lg text-label-lg text-primary font-bold leading-tight">📍 Main Temple Entrance &amp; Navagraha Sanctum</p>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container animate-pulse shrink-0"></span>
+</div>
+<!-- Devotional Welcome Sanctum Card -->
+<div class="rounded-xl bg-surface-container-lowest border border-outline-variant/40 p-space-md mandapa-card relative overflow-hidden">
+<!-- Subtle gold ornamental corner glow -->
+<div class="absolute -right-10 -top-10 w-28 h-28 rounded-full bg-secondary-fixed/30 blur-2xl pointer-events-none"></div>
+<div class="flex items-start justify-between gap-space-sm mb-space-sm">
+<div>
+<h1 class="font-headline-md text-headline-md text-primary font-semibold tracking-tight">Namaskara 🙏 Welcome to the Divine Sanctum</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 leading-relaxed">
+              Your instant digital mandapa front desk while visiting our holy shrine.
+            </p>
+</div>
+</div>
+<!-- Live Sanctum Status Indicator -->
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/60">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">
+            Temple Sanctum is OPEN <span class="text-on-surface-variant font-normal">(Darshan until 12:30 PM)</span>
+</span>
+</div>
+</div>
+</section>
+<!-- 2. QUICK IN-TEMPLE RITUAL TILES (Bento Grid Layout) -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between px-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-primary font-semibold">In-Temple Quick Actions</h2>
+<span class="font-label-sm text-label-sm text-secondary font-bold">CURRENT PRAHAARA</span>
+</div>
+<div class="grid grid-cols-1 gap-space-sm">
+<!-- Tile 1: Aarti & Darshan Timings -->
+<div class="tap-active rounded-xl bg-surface-container-lowest border border-outline-variant/50 p-space-md flex flex-col justify-between relative transition-all duration-150">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-2xl" data-icon="schedule" style="font-variation-settings: 'FILL' 1;">schedule</span>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary-container animate-pulse"></span>
+              15 mins away
+            </span>
+</div>
+<div class="mt-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Today's Aarti &amp; Darshan Timings</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Next Aarti: <span class="font-bold text-primary">Maha Mangalarathi at 12:00 PM</span>
+</p>
+</div>
+<div class="mt-space-md pt-space-sm border-t border-surface-container-high flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary font-bold">EVENING AARTI: 7:30 PM</span>
+<span class="material-symbols-outlined text-primary text-xl" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Tile 2: Offer Seva / Book Archana -->
+<div class="tap-active rounded-xl bg-surface-container-lowest border border-outline-variant/50 p-space-md flex flex-col justify-between transition-all duration-150">
+<div class="flex items-start justify-between">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-2xl" data-icon="local_fire_department" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-bold">
+              Instant Counter Token
+            </span>
+</div>
+<div class="mt-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Offer Seva / Book Archana</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Select authentic sevas, generate sankalpa receipt, and present at counter.
+            </p>
+</div>
+<div class="mt-space-md">
+<button class="w-full h-12 rounded-full bg-primary text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 tap-active hover:bg-primary-container transition-colors shadow-sm">
+<span>View Available Sevas &amp; Rates</span>
+<span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- 2-Column Sub Bento -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Tile 3: Today's Panchanga -->
+<div class="tap-active rounded-xl bg-surface-container-lowest border border-outline-variant/50 p-space-md flex flex-col justify-between">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="auto_stories" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<div class="mt-space-sm">
+<p class="font-label-sm text-label-sm text-secondary font-bold">PANCHANGAM</p>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-snug">Shukla Ashtami</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 text-xs leading-tight">Rohini Nakshatra</p>
+<div class="mt-2 text-xs font-semibold text-error bg-error-container/30 px-2 py-1 rounded-md inline-block">
+                Rahu: 10:30-12:00
+              </div>
+</div>
+</div>
+<!-- Tile 4: Ask Temple Desk / WhatsApp -->
+<div class="tap-active rounded-xl bg-surface-container-lowest border border-outline-variant/50 p-space-md flex flex-col justify-between">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="forum" style="font-variation-settings: 'FILL' 1;">forum</span>
+</div>
+<div class="mt-space-sm">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-secondary-fixed font-label-sm text-[10px] text-on-secondary-fixed font-bold mb-1">OFFICE DESK</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-snug">Priest &amp; Sankalpa</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 text-xs">Direct queries for special homa &amp; dates.</p>
+</div>
+<a class="mt-space-sm flex items-center gap-1 font-label-sm text-label-sm font-bold text-primary" href="https://wa.me/919845012345">
+<span>WhatsApp</span>
+<span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. PHYSICAL COUNTER & TEMPLE DESK GUIDELINES -->
+<section class="rounded-xl bg-surface-container-lowest border border-outline-variant/40 p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container-high">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="account_balance">account_balance</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary font-semibold">Counter &amp; Temple Desk Guidelines</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Important notices for devotees inside premises</p>
+</div>
+</div>
+<div class="space-y-3 mt-1">
+<!-- Guideline Row 1 -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-base" data-icon="storefront">storefront</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Pooja Booking Counter Hours</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Morning: 6:30 AM – 12:00 PM | Evening: 5:30 PM – 8:30 PM</p>
+</div>
+</div>
+<!-- Guideline Row 2 -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-base" data-icon="receipt_long">receipt_long</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Kanike &amp; Seva Receipts</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Official computerized receipts provided at counter. Cash, UPI, GPay, and PhonePe are supported.</p>
+</div>
+</div>
+<!-- Guideline Row 3 -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-base" data-icon="directions_car">directions_car</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Vehicle Pooja (Vahana Pooja)</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Conducted at North Prakaara: 9:00 AM – 11:00 AM &amp; 6:00 PM – 8:00 PM daily.</p>
+</div>
+</div>
+<!-- Guideline Row 4 -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-base" data-icon="checkroom">checkroom</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-semibold">Devotee Dress Code</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Traditional and modest attire encouraged inside the inner pradakshina and sanctum.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. INSTANT "ADD TO HOME SCREEN" PWA PROMOTION -->
+<section class="rounded-xl bg-gradient-to-br from-surface-container-low to-surface-container border border-secondary-container p-space-md relative overflow-hidden mandapa-card">
+<div class="flex items-start gap-space-sm mb-space-sm">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-2xl" data-icon="install_mobile">install_mobile</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-secondary font-bold">SEAMLESS DEVOTION</span>
+<h2 class="font-headline-sm text-headline-sm text-primary font-semibold">Keep Sri Durga Devi Temple in your pocket</h2>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Install this Progressive App for instant offline daily Panchanga, timely festival alerts, and faster seva counter access without app store downloads.
+      </p>
+<div class="mt-space-md">
+<button class="w-full min-h-[52px] rounded-full bg-primary-container text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 tap-active hover:bg-primary transition-all shadow-md" id="pwa-install-btn">
+<span class="material-symbols-outlined text-xl" data-icon="download">download</span>
+<span>Install Digital Mandapa App 📲</span>
+</button>
+</div>
+<p class="font-label-sm text-label-sm text-center text-on-surface-variant mt-2">Zero storage overhead • Updates automatically</p>
+</section>
+<!-- 5. TEMPLE CONTACT & EMERGENCY OFFICE STRIP -->
+<section class="rounded-xl bg-surface-container-lowest border border-outline-variant/40 p-space-md text-center flex flex-col gap-2">
+<p class="font-label-md text-label-md text-on-surface font-semibold">Temple Office: <a class="text-primary underline" href="tel:08023394447">080-23394447</a></p>
+<p class="font-label-md text-label-md text-on-surface-variant">Priest Desk WhatsApp: <a class="text-primary font-bold" href="https://wa.me/919845012345">+91 98450 12345</a></p>
+<div class="mt-2 pt-2 border-t border-surface-container-high flex justify-center">
+<a class="inline-flex items-center gap-1.5 font-label-md text-label-md text-secondary font-semibold hover:text-primary transition-colors py-2 px-4 rounded-full bg-surface-container-low" href="https://maps.google.com" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-base" data-icon="share_location">share_location</span>
+<span>Open in Google Maps / Share Temple Location</span>
+</a>
+</div>
+</section>
+</main>
+<!-- ================= BOTTOM NAVIGATION BAR (Shared Component Anchor) ================= -->
+<!-- Executing style_shell_layout, style_bg_color, style_separation_logic without borders, active on Home -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-space-xs pb-safe pt-space-xs w-full max-w-md mx-auto bg-surface shadow-md">
+<!-- Home (Active destination as per QR On-Premises Landing Intent) -->
+<button aria-label="Home" class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] text-primary font-bold active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-2xl" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</button>
+<!-- Poojas -->
+<button aria-label="Poojas" class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] text-on-surface-variant active:scale-95 transition-transform duration-150 hover:text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="local_fire_department">local_fire_department</span>
+<span class="font-label-sm text-label-sm">Poojas</span>
+</button>
+<!-- Calendar -->
+<button aria-label="Calendar" class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] text-on-surface-variant active:scale-95 transition-transform duration-150 hover:text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-sm text-label-sm">Calendar</span>
+</button>
+<!-- Panchanga -->
+<button aria-label="Panchanga" class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] text-on-surface-variant active:scale-95 transition-transform duration-150 hover:text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-sm text-label-sm">Panchanga</span>
+</button>
+<!-- More -->
+<button aria-label="More" class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] text-on-surface-variant active:scale-95 transition-transform duration-150 hover:text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="menu">menu</span>
+<span class="font-label-sm text-label-sm">More</span>
+</button>
+</nav>
+<!-- Interactive PWA Prompt Script -->
+<script>
+    document.getElementById('pwa-install-btn')?.addEventListener('click', () => {
+      const btn = document.getElementById('pwa-install-btn');
+      if (btn) {
+        btn.innerHTML = `<span class="material-symbols-outlined text-xl" data-icon="check_circle">check_circle</span><span>Added to Home Screen!</span>`;
+        btn.classList.remove('bg-primary-container');
+        btn.classList.add('bg-secondary');
+        setTimeout(() => {
+          btn.innerHTML = `<span class="material-symbols-outlined text-xl" data-icon="download">download</span><span>Install Digital Mandapa App 📲</span>`;
+          btn.classList.remove('bg-secondary');
+          btn.classList.add('bg-primary-container');
+        }, 3000);
+      }
+    });
+  </script>
+</body></html>

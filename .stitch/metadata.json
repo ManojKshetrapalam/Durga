@@ -1,0 +1,70 @@
+{
+  "name": "projects/2845673280044936200",
+  "projectId": "2845673280044936200",
+  "title": "Sri Durga Devi Temple - Digital Mandapa",
+  "visibility": "PRIVATE",
+  "createTime": "2026-10-06T11:36:00.403670Z",
+  "updateTime": "2026-10-06T11:50:31.000000Z",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "deviceType": "MOBILE",
+  "designSystem": "assets/f4171e90036c40a296896ae7efec685e",
+  "designTheme": {
+    "colorMode": "LIGHT",
+    "font": "PLAYFAIR_DISPLAY",
+    "bodyFont": "PLUS_JAKARTA_SANS",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#721c2b"
+  },
+  "screens": {
+    "home": {
+      "id": "21f510891a634dd2907e1b516886f728",
+      "sourceScreen": "projects/2845673280044936200/screens/21f510891a634dd2907e1b516886f728",
+      "width": 780,
+      "height": 5904,
+      "title": "Devotee Dashboard — Digital Mandapa"
+    },
+    "pooja-detail": {
+      "id": "e427ecbba8344636b32a963edbf8bc10",
+      "sourceScreen": "projects/2845673280044936200/screens/e427ecbba8344636b32a963edbf8bc10",
+      "width": 780,
+      "height": 6198,
+      "title": "Durga Homa — Pooja & Homa Detail"
+    },
+    "calendar-availability": {
+      "id": "3f6e2e551d3a4ccd8fa3577108ddc380",
+      "sourceScreen": "projects/2845673280044936200/screens/3f6e2e551d3a4ccd8fa3577108ddc380",
+      "width": 780,
+      "height": 5218,
+      "title": "Smart Spiritual Calendar & Date Availability"
+    },
+    "panchanga-daily": {
+      "id": "3ebbb42a193d45209ab7a2025094b68a",
+      "sourceScreen": "projects/2845673280044936200/screens/3ebbb42a193d45209ab7a2025094b68a",
+      "width": 780,
+      "height": 6334,
+      "title": "Daily Panchanga & Temple Timings"
+    },
+    "booking-request": {
+      "id": "a0c71c23f3cf4f9793ac1701fd29e7e3",
+      "sourceScreen": "projects/2845673280044936200/screens/a0c71c23f3cf4f9793ac1701fd29e7e3",
+      "width": 780,
+      "height": 4022,
+      "title": "Devotee Booking & Seva Request"
+    },
+    "qr-landing": {
+      "id": "a71a0fcb768a4913a4ea607b306d1cbd",
+      "sourceScreen": "projects/2845673280044936200/screens/a71a0fcb768a4913a4ea607b306d1cbd",
+      "width": 780,
+      "height": 4386,
+      "title": "Physical Temple QR Landing"
+    },
+    "admin-dashboard": {
+      "id": "45ab8e7be68f4da4ab890be9dcb3b5e5",
+      "sourceScreen": "projects/2845673280044936200/screens/45ab8e7be68f4da4ab890be9dcb3b5e5",
+      "width": 780,
+      "height": 5604,
+      "title": "Temple Admin & Desk Controller"
+    }
+  }
+}

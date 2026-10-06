@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sri Durga Devi Temple — Digital Mandapa Desk</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-high": "#eee7e3",
+            "inverse-surface": "#33302d",
+            "primary-fixed": "#ffdadb",
+            "on-surface": "#1e1b19",
+            "surface-dim": "#e0d8d5",
+            "tertiary-container": "#6a2800",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#eec14b",
+            "primary": "#540317",
+            "on-primary-container": "#f98490",
+            "on-primary-fixed": "#40000e",
+            "surface-tint": "#9e3e4b",
+            "surface-container-low": "#faf2ee",
+            "surface-container-highest": "#e9e1dd",
+            "on-secondary-fixed-variant": "#5a4300",
+            "background": "#fff8f5",
+            "surface": "#fff8f5",
+            "on-tertiary-fixed": "#351000",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "on-tertiary-container": "#ff8647",
+            "on-secondary": "#ffffff",
+            "inverse-primary": "#ffb2b8",
+            "on-primary-fixed-variant": "#802735",
+            "surface-bright": "#fff8f5",
+            "tertiary": "#471800",
+            "surface-container-lowest": "#ffffff",
+            "secondary": "#775a00",
+            "primary-container": "#721c2b",
+            "tertiary-fixed": "#ffdbcc",
+            "secondary-container": "#fece57",
+            "outline-variant": "#dbc0c1",
+            "error-container": "#ffdad6",
+            "tertiary-fixed-dim": "#ffb694",
+            "on-background": "#1e1b19",
+            "surface-container": "#f4ece8",
+            "on-tertiary": "#ffffff",
+            "surface-variant": "#e9e1dd",
+            "outline": "#887273",
+            "on-secondary-container": "#735700",
+            "inverse-on-surface": "#f7efeb",
+            "primary-fixed-dim": "#ffb2b8",
+            "error": "#ba1a1a",
+            "on-secondary-fixed": "#251a00",
+            "on-error": "#ffffff",
+            "secondary-fixed": "#ffdf98",
+            "on-surface-variant": "#554243"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "gutter": "1rem",
+            "margin-desktop": "3rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem",
+            "gutter-tablet": "1.5rem",
+            "margin-tablet": "2rem",
+            "gutter-desktop": "2rem",
+            "margin": "1rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "label-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Playfair Display"],
+            "body-xl": ["Plus Jakarta Sans"],
+            "headline-lg": ["Playfair Display"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-md": ["Playfair Display"],
+            "display-lg": ["Playfair Display"],
+            "label-md": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Playfair Display"],
+            "body-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "label-lg": ["15px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+            "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+            "headline-sm": ["19px", {"lineHeight": "26px", "fontWeight": "600"}],
+            "body-xl": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "body-md": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-md": ["22px", {"lineHeight": "30px", "fontWeight": "600"}],
+            "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+            "display-lg-mobile": ["30px", {"lineHeight": "38px", "letterSpacing": "0em", "fontWeight": "700"}],
+            "body-lg": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Subtle Sacred Watermark Texture */
+    .sacred-mandala-bg {
+      background-image: radial-gradient(#eadfcd 0.75px, transparent 0.75px), radial-gradient(#eadfcd 0.75px, #faf7f2 0.75px);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen sacred-mandala-bg pb-28 selection:bg-secondary-fixed selection:text-primary">
+<!-- TOP APP BAR / ADMINISTRATIVE DESK HEADER -->
+<header class="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-outline-variant/60 shadow-sm w-full max-w-md mx-auto px-4 py-3 transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shadow-inner">
+<span class="material-symbols-outlined fill-icon text-2xl text-secondary-fixed">temple_hindu</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h1 class="font-headline-sm text-headline-sm text-primary tracking-tight leading-none font-semibold">Sri Durga Devi Temple</h1>
+</div>
+<p class="font-label-sm text-label-sm text-secondary font-medium tracking-wide">Digital Mandapa • Admin Desk</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button aria-label="Notifications" class="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center text-primary transition-colors relative" type="button">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-tertiary-container ring-2 ring-surface"></span>
+</button>
+<button aria-label="Desk Security Lock" class="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined">lock</span>
+</button>
+</div>
+</div>
+<!-- Trustee Credential Bar -->
+<div class="mt-3 pt-2.5 border-t border-outline-variant/40 flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5 bg-secondary-fixed/40 px-2.5 py-1 rounded-full text-on-secondary-fixed-variant font-medium">
+<span class="material-symbols-outlined text-sm text-secondary fill-icon">verified_user</span>
+<span class="font-label-sm text-label-sm font-semibold">Trustee &amp; Archaka Desk</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+<span class="font-medium text-on-surface truncate max-w-[140px]">Sri S. Ramesh (Chief)</span>
+<span class="material-symbols-outlined text-sm cursor-pointer hover:text-primary">swap_horiz</span>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS CONTAINER -->
+<main class="w-full max-w-md mx-auto px-4 pt-4 space-y-6">
+<!-- 1. LIVE NOTICE BOARD BROADCAST BANNER -->
+<section class="bg-surface-container-lowest border border-outline-variant/70 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 opacity-5 pointer-events-none text-primary">
+<span class="material-symbols-outlined text-9xl">campaign</span>
+</div>
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-2">
+<span class="p-1.5 rounded-lg bg-tertiary-fixed text-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-lg fill-icon">campaign</span>
+</span>
+<div>
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">Public Announcement Broadcast</span>
+<p class="font-headline-sm text-headline-sm text-primary font-bold">Devotee App Live Notice</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Active
+        </span>
+</div>
+<p class="mt-2.5 text-on-surface text-sm bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/40 leading-relaxed font-body-md">
+        "Navaratri Darshan hours extended by 1 hour (Sanctum open till 9:30 PM) from 12 Oct to 22 Oct for devotees."
+      </p>
+<div class="mt-3 flex items-center justify-between pt-1">
+<span class="text-xs text-on-surface-variant font-label-sm">Syncs instantly with 1,840 devotees</span>
+<button class="px-3 py-1.5 rounded-full text-xs font-semibold text-primary hover:bg-surface-container border border-outline-variant/80 flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span> Edit Notice
+        </button>
+</div>
+</section>
+<!-- 2. QUICK ADMINISTRATIVE METRICS ROW -->
+<section>
+<div class="flex items-center justify-between mb-2 px-1">
+<h2 class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Sanctum Operations Today</h2>
+<span class="text-xs text-secondary font-medium">As of 06:30 AM Muhurtham</span>
+</div>
+<div class="grid grid-cols-3 gap-2.5">
+<!-- Metric 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant/70 rounded-2xl p-3 shadow-sm flex flex-col justify-between hover:border-secondary transition-all">
+<div class="flex items-center justify-between text-secondary">
+<span class="material-symbols-outlined text-lg fill-icon">local_fire_department</span>
+<span class="text-[10px] uppercase font-bold tracking-tight bg-secondary-fixed/50 px-1 rounded text-on-secondary-fixed-variant">Confirmed</span>
+</div>
+<div class="mt-2">
+<span class="text-2xl font-bold font-headline-md text-primary">18</span>
+<p class="text-[11px] font-medium text-on-surface-variant leading-tight mt-0.5">Today's Sevas &amp; Archanas</p>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant/70 rounded-2xl p-3 shadow-sm flex flex-col justify-between hover:border-secondary transition-all relative overflow-hidden">
+<div class="flex items-center justify-between text-tertiary-container">
+<span class="material-symbols-outlined text-lg fill-icon">chat</span>
+<span class="text-[10px] uppercase font-bold tracking-tight bg-tertiary-fixed px-1 rounded text-tertiary-container animate-pulse">Action</span>
+</div>
+<div class="mt-2">
+<span class="text-2xl font-bold font-headline-md text-tertiary-container">3</span>
+<p class="text-[11px] font-medium text-on-surface-variant leading-tight mt-0.5">Pending WhatsApp Slips</p>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant/70 rounded-2xl p-3 shadow-sm flex flex-col justify-between hover:border-secondary transition-all">
+<div class="flex items-center justify-between text-primary">
+<span class="material-symbols-outlined text-lg fill-icon">event_available</span>
+<span class="text-[10px] uppercase font-bold tracking-tight bg-primary-fixed px-1 rounded text-primary">4 Days</span>
+</div>
+<div class="mt-2">
+<span class="text-xs font-bold font-headline-sm text-primary truncate block">Navaratri D4</span>
+<p class="text-[11px] font-medium text-on-surface-variant leading-tight mt-0.5">15 Oct Chandi Homa</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. DATE BLOCKING & CALENDAR CONTROL PANEL -->
+<section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-4 shadow-sm space-y-4">
+<div class="flex items-start justify-between border-b border-outline-variant/40 pb-3">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary fill-icon">event_busy</span>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Spiritual Calendar Controller</h2>
+</div>
+<p class="font-body-md text-xs text-on-surface-variant mt-0.5">
+            Block ritual dates during Utsavas or Grahanam and offer recommended alternative Muhurthams to devotees.
+          </p>
+</div>
+</div>
+<!-- Currently Active Blocked Rule Card -->
+<div class="bg-surface-container-low border-l-4 border-l-primary border border-outline-variant/60 rounded-xl p-3.5 space-y-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">event</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface">15 Oct 2026</span>
+</div>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-primary text-on-primary uppercase">
+            Sanctum Reserved
+          </span>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-primary">Navaratri Chandi Homa (Maha Utsavam)</h3>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">
+<strong class="text-on-surface">Public Devotee Notice:</strong> Sanctum reserved for community Chandi Parayana. Individual family homas and private archanas paused for public safety.
+          </p>
+</div>
+<div class="pt-2 border-t border-outline-variant/40 flex items-center justify-between text-xs">
+<div>
+<span class="text-on-surface-variant">Recommended: </span>
+<span class="font-semibold text-secondary">16 Oct, 18 Oct, 23 Oct</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-primary hover:underline font-semibold text-xs flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">edit</span> Edit
+            </button>
+<span class="text-outline-variant">|</span>
+<button class="text-error hover:underline font-semibold text-xs flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">lock_open</span> Unblock
+            </button>
+</div>
+</div>
+</div>
+<!-- Quick Block a Date Collapsible Form Area -->
+<div class="bg-surface-bright border border-outline-variant/80 rounded-xl p-3.5 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-secondary">
+<span class="material-symbols-outlined text-sm font-bold">add_circle</span>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">Quick Block a Date</h4>
+</div>
+<span class="text-[11px] text-on-surface-variant font-medium">Auto-syncs with booking engine</span>
+</div>
+<div class="space-y-3 pt-1">
+<div>
+<label class="block text-xs font-semibold text-on-surface mb-1">Select Ritual Date to Lock</label>
+<div class="relative">
+<input class="w-full text-sm bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2.5 text-on-surface font-medium focus:ring-1 focus:ring-primary focus:border-primary" type="text" value="28 Oct 2026 (Wednesday)"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant text-lg">calendar_month</span>
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold text-on-surface mb-1">Primary Spiritual Reason</label>
+<select class="w-full text-sm bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2.5 text-on-surface font-medium focus:ring-1 focus:ring-primary focus:border-primary">
+<option selected="">Grand Festival / Temple Brahmotsava</option>
+<option>Sanctum Renovation / Jeernodhara</option>
+<option>Grahanam (Solar / Lunar Eclipse Sanctum Closure)</option>
+<option>Archaka Veda Agama Training &amp; Leave</option>
+<option>Temple Annual Cleaning &amp; Tailabhisheka</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-semibold text-on-surface mb-1">Devotee Guidance Notice (PWA Banner)</label>
+<input class="w-full text-sm bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-on-surface placeholder:text-outline focus:ring-1 focus:ring-primary focus:border-primary" placeholder="e.g. Special Deepavali Alankara; individual archanas paused until 5 PM." type="text"/>
+</div>
+<div>
+<label class="block text-xs font-semibold text-on-surface mb-1">Suggested Alternate Muhurtham Dates</label>
+<input class="w-full text-sm bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2 text-on-surface focus:ring-1 focus:ring-primary focus:border-primary" type="text" value="29 Oct, 02 Nov, 05 Nov"/>
+</div>
+<button class="w-full min-h-[48px] bg-primary text-on-primary font-semibold text-sm rounded-xl py-3 px-4 flex items-center justify-center gap-2 hover:bg-primary/95 active:scale-[0.99] transition-all shadow-sm">
+<span class="material-symbols-outlined text-lg">broadcast_on_personal</span>
+<span>Save &amp; Broadcast Block Rule</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 4. DEVOTEE WHATSAPP BOOKING & REQUEST INBOX -->
+<section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-4 shadow-sm space-y-4">
+<div class="flex items-center justify-between border-b border-outline-variant/40 pb-3">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg fill-icon">forum</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Devotee Booking &amp; Sankalpa Inbox</h2>
+<p class="font-body-md text-xs text-on-surface-variant">Incoming WhatsApp tokens awaiting Archaka review</p>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-tertiary-fixed text-tertiary-container">
+          2 Urgent
+        </span>
+</div>
+<div class="space-y-3">
+<!-- Request 1: Pending Archaka Assignment -->
+<div class="border border-outline-variant/70 rounded-xl p-3.5 bg-surface-bright space-y-3 transition-shadow hover:shadow-sm">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Suresh Kumar</span>
+<span class="text-xs text-on-surface-variant font-mono">+91 98450 12345</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">Token: <span class="font-mono font-medium text-secondary">SDD-2026-1024-042</span></p>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Needs Archaka
+            </span>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg text-xs space-y-1">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Seva Requested:</span>
+<span class="font-bold text-primary">Durga Homa (24 Oct 2026)</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Sankalpa Gothra / Nakshatra:</span>
+<span class="font-medium text-on-surface">Kashyapa • Rohini 3rd Pada</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Contribution Dakshina:</span>
+<span class="font-semibold text-secondary">₹1,501 (UPI Paid)</span>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<a class="flex-1 min-h-[44px] bg-[#128C7E] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#075E54] active:scale-[0.98] transition-transform" href="https://wa.me/919845012345" target="_blank">
+<span class="material-symbols-outlined text-base">chat</span>
+<span>WhatsApp Devotee</span>
+</a>
+<button class="flex-1 min-h-[44px] bg-primary text-on-primary rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-primary/95 active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined text-base">how_to_reg</span>
+<span>Assign Priest</span>
+</button>
+</div>
+</div>
+<!-- Request 2: Confirmed Item -->
+<div class="border border-outline-variant/60 rounded-xl p-3.5 bg-surface-container-low/50 space-y-2.5 opacity-90 hover:opacity-100 transition-opacity">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Ananya Rao</span>
+<span class="text-xs text-on-surface-variant font-mono">+91 94481 55620</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">Token: <span class="font-mono font-medium text-secondary">SDD-2026-1007-018</span></p>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-xs">check_circle</span> Confirmed
+            </span>
+</div>
+<div class="text-xs flex items-center justify-between text-on-surface-variant">
+<span>Rahukala Deepada Seva (Tomorrow 3:30 PM)</span>
+<span class="font-semibold text-on-surface">₹101</span>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded-lg border border-outline-variant/40 flex items-center justify-between text-xs">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-secondary">face</span>
+<span>Assigned Archaka:</span>
+</span>
+<span class="font-semibold text-primary">Pandit Narayana Bhat</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. SEVA OFFERINGS & KANIKE CATALOG MANAGEMENT -->
+<section class="bg-surface-container-lowest border border-outline-variant/80 rounded-2xl p-4 shadow-sm space-y-4">
+<div class="flex items-center justify-between border-b border-outline-variant/40 pb-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Seva Offerings &amp; Contribution Rates</h2>
+<p class="font-body-md text-xs text-on-surface-variant">Control public availability, duration, and samagri requirements</p>
+</div>
+<span class="material-symbols-outlined text-secondary">tune</span>
+</div>
+<div class="space-y-3">
+<!-- Seva Row 1 -->
+<div class="p-3 rounded-xl border border-outline-variant/70 bg-surface-bright flex items-center justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Durga Homa</span>
+<span class="text-xs font-bold text-primary font-headline-sm bg-primary-fixed/50 px-2 py-0.5 rounded">₹1,501</span>
+</div>
+<p class="text-xs text-on-surface-variant flex items-center gap-2">
+<span>⏱️ 150 mins</span>
+<span>•</span>
+<span class="text-secondary font-medium">Sanctum Fire Altar</span>
+</p>
+</div>
+<div class="flex items-center gap-2.5">
+<button class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors" title="Edit Seva">
+<span class="material-symbols-outlined text-lg">settings</span>
+</button>
+<!-- Toggle Switch ON -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<!-- Seva Row 2 -->
+<div class="p-3 rounded-xl border border-outline-variant/70 bg-surface-bright flex items-center justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Rahukala Deepada Seva</span>
+<span class="text-xs font-bold text-primary font-headline-sm bg-primary-fixed/50 px-2 py-0.5 rounded">₹101</span>
+</div>
+<p class="text-xs text-on-surface-variant flex items-center gap-2">
+<span>⏱️ 45 mins</span>
+<span>•</span>
+<span class="text-secondary font-medium">Tuesdays &amp; Fridays</span>
+</p>
+</div>
+<div class="flex items-center gap-2.5">
+<button class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors" title="Edit Seva">
+<span class="material-symbols-outlined text-lg">settings</span>
+</button>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+<!-- Seva Row 3: Limited Capacity Ritual -->
+<div class="p-3 rounded-xl border border-secondary/50 bg-secondary-fixed/15 flex items-center justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Maha Navaratri Chandi Homa</span>
+<span class="text-xs font-bold text-primary font-headline-sm bg-primary-fixed/80 px-2 py-0.5 rounded">₹5,001</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="text-tertiary-container font-semibold">Limited: Only 5 Slots Left</span>
+<span>•</span>
+<span class="text-on-surface-variant">Grand Yagashala</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5">
+<button class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors" title="Edit Seva">
+<span class="material-symbols-outlined text-lg">settings</span>
+</button>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- Add New Seva Trigger -->
+<button class="w-full min-h-[48px] border-2 border-dashed border-primary/40 rounded-xl text-primary font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary-fixed/20 transition-colors">
+<span class="material-symbols-outlined text-lg">add</span>
+<span>Add New Seva / Special Utsava Offering</span>
+</button>
+</section>
+<!-- 6. AUDIT LOG & TRUSTEE SIGN-OFF SUMMARY -->
+<section class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/50 text-xs space-y-2">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-semibold flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-sm">history_edu</span> Mandapa Audit Trail
+        </span>
+<span class="font-mono text-[11px]">Today, 07:15 AM IST</span>
+</div>
+<p class="text-on-surface-variant leading-relaxed">
+        Rule updated by <strong>Sri S. Ramesh</strong>: 15 Oct Chandi Homa declared Sanctum Reserved. WhatsApp acknowledgment templates updated for Navaratri darshan queues.
+      </p>
+</section>
+</main>
+<!-- BOTTOM ADMIN DOCKED NAVIGATION (Preserving Shell Tokens & Minimum Footprints) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-surface/98 backdrop-blur-md shadow-[0_-4px_12px_rgba(0,0,0,0.05)] border-t border-outline-variant/60 w-full max-w-md mx-auto px-2 py-1.5 flex items-center justify-around">
+<!-- Tab 1: Overview (Active) -->
+<a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] text-primary font-bold transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined fill-icon text-2xl">dashboard</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Overview</span>
+</a>
+<!-- Tab 2: Calendar Blocks -->
+<a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] text-on-surface-variant font-medium hover:text-primary transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined text-2xl">event_busy</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Calendar</span>
+</a>
+<!-- Tab 3: Seva Catalog -->
+<a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] text-on-surface-variant font-medium hover:text-primary transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined text-2xl">menu_book</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Sevas</span>
+</a>
+<!-- Tab 4: Booking Inbox -->
+<a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] text-on-surface-variant font-medium hover:text-primary transition-transform active:scale-95 relative" href="#">
+<span class="material-symbols-outlined text-2xl">mark_chat_unread</span>
+<span class="absolute top-1 right-2.5 w-2 h-2 rounded-full bg-tertiary-container ring-1 ring-surface"></span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Inbox</span>
+</a>
+<!-- Tab 5: Settings / Archaka Desk -->
+<a class="flex flex-col items-center justify-center min-w-[56px] min-h-[48px] text-on-surface-variant font-medium hover:text-primary transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Security</span>
+</a>
+</nav>
+</body></html>

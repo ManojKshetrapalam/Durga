@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="sacredBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#802735"/>
+      <stop offset="100%" stop-color="#540317"/>
+    </radialGradient>
+    <radialGradient id="flameGrad" cx="50%" cy="80%" r="70%">
+      <stop offset="0%" stop-color="#FFFDF8"/>
+      <stop offset="40%" stop-color="#FECE57"/>
+      <stop offset="80%" stop-color="#D95D0F"/>
+      <stop offset="100%" stop-color="#721C2B"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF7E7"/>
+      <stop offset="50%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#775A00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle -->
+  <rect width="512" height="512" rx="128" fill="url(#sacredBg)"/>
+
+  <!-- Golden Temple Mandapa Halo Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#goldGrad)" stroke-width="6" stroke-dasharray="8 6"/>
+  <circle cx="256" cy="256" r="195" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
+
+  <!-- Gopuram Spire / Kalasha Silhouette -->
+  <path d="M 256 90 L 272 135 L 240 135 Z" fill="url(#goldGrad)"/>
+  <rect x="252" y="70" width="8" height="20" rx="3" fill="url(#goldGrad)"/>
+  <circle cx="256" cy="65" r="5" fill="#FECE57"/>
+
+  <!-- Sacred Diya Base -->
+  <path d="M 140 320 C 140 380, 372 380, 372 320 C 372 305, 350 295, 256 295 C 162 295, 140 305, 140 320 Z" fill="url(#goldGrad)"/>
+  <ellipse cx="256" cy="305" rx="100" ry="14" fill="#540317"/>
+
+  <!-- Sacred Oil Ghee Pool -->
+  <ellipse cx="256" cy="305" rx="85" ry="10" fill="#775A00"/>
+
+  <!-- Sacred Diya Flame -->
+  <path d="M 256 160 C 275 220, 305 245, 290 285 C 280 305, 232 305, 222 285 C 207 245, 237 220, 256 160 Z" fill="url(#flameGrad)"/>
+
+  <!-- Inner Pure Flame Core -->
+  <path d="M 256 200 C 265 240, 280 255, 272 280 C 265 292, 247 292, 240 280 C 232 255, 247 240, 256 200 Z" fill="#FFFDF8" opacity="0.9"/>
+</svg>

@@ -1,0 +1,37 @@
+{
+  "name": "Sri Durga Devi Temple — Digital Mandapa",
+  "short_name": "Durga Mandapa",
+  "description": "Digital devotee front desk, daily Vedic Panchanga, Darshan timings, and Seva bookings for Sri Durga Parameshwari Temple, Chandra Layout.",
+  "start_url": "./",
+  "id": "./?source=pwa",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF7F2",
+  "theme_color": "#721C2B",
+  "categories": ["lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Panchanga",
+      "url": "./#panchanga",
+      "description": "Check Tithi, Nakshatra, and Rahu Kala"
+    },
+    {
+      "name": "Book Seva",
+      "url": "./#poojas",
+      "description": "Explore Poojas, Homas, and Archanas"
+    },
+    {
+      "name": "Temple Timings",
+      "url": "./#timings",
+      "description": "Daily Darshan and Aarti Schedule"
+    }
+  ]
+}
