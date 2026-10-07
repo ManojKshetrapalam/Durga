@@ -67,7 +67,7 @@ export function renderHomeView() {
         </div>
         <p class="card-subtitle num-tabular">${todayPanchanga.formattedDate} • ${todayPanchanga.samvatsara}</p>
 
-        <!-- Today's Festival Alert (if any) -->
+        <!-- Today's Festival Alert or Next Upcoming Festival Strip -->
         ${todayPanchanga.hasFestival ? `
           <div style="margin: 8px 0; padding: 6px 12px; background: linear-gradient(135deg, #FFFDF8 0%, #FFF5EB 100%); border: 1px solid #F97316; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 6px;">
@@ -76,7 +76,15 @@ export function renderHomeView() {
             </div>
             <span class="badge badge-gold" style="font-size: 0.68rem;">${todayPanchanga.masa} Masa</span>
           </div>
-        ` : ''}
+        ` : (todayPanchanga.upcomingFestivals && todayPanchanga.upcomingFestivals.length > 0 ? `
+          <div style="margin: 8px 0; padding: 6px 12px; background: #FFFDF8; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 0.95rem;">🗓️</span>
+              <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 700;">Upcoming: ${todayPanchanga.upcomingFestivals[0].name}</span>
+            </div>
+            <span class="badge badge-gold" style="font-size: 0.68rem;">${todayPanchanga.upcomingFestivals[0].relativeLabel}</span>
+          </div>
+        ` : '')}
 
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px;">
           <div style="padding: 10px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);">

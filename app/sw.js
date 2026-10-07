@@ -1,8 +1,11 @@
 /**
  * Sri Durga Devi Temple — Digital Mandapa: Offline Service Worker
+ * Network-First strategy for HTML/JS/CSS ensures devotees and admins always receive
+ * the latest Vedic Panchanga, Sevas, and date overrides without stale browser caching.
+ * Offline shell fallback ensures temple sanctum resilience when connectivity drops.
  */
 
-const CACHE_NAME = 'durga-mandapa-v2';
+const CACHE_NAME = 'durga-mandapa-v5';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -37,13 +40,14 @@ const PRECACHE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Precaching app shell assets');
+      console.log('[SW v5] Precaching app shell assets');
       return cache.addAll(PRECACHE_ASSETS).catch(err => {
-        console.warn('[SW] Some assets failed to precache during install:', err);
+        console.warn('[SW v5] Some assets failed to precache during install:', err);
       });
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
@@ -51,23 +55,65 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('[SW v5] Deleting legacy cache:', key);
+            return caches.delete(key);
+          }
+        })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      console.log('[SW v5] Claiming clients');
+      return self.clients.claim();
+    })
   );
 });
 
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
 
+  // Network-First for HTML pages, scripts, styles, manifests, and configs
+  const isCodeOrDoc = event.request.mode === 'navigate' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.json') ||
+    url.pathname.endsWith('.webmanifest');
+
+  if (isCodeOrDoc) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Offline fallback
+          return caches.match(event.request).then((cached) => {
+            if (cached) return cached;
+            if (event.request.mode === 'navigate') {
+              return caches.match('./index.html');
+            }
+          });
+        })
+    );
+    return;
+  }
+
+  // Cache-First with Network update for static assets (images, audio, icons)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
       return fetch(event.request).then((networkResponse) => {
-        // Cache dynamic resources
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -75,11 +121,6 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // Offline fallback for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
       });
     })
   );

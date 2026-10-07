@@ -86,7 +86,17 @@ export function renderPanchangaView(currentDate = new Date()) {
             </div>
           `).join('')}
         </section>
-      ` : ''}
+      ` : `
+        <div class="card" style="padding: 10px 14px; background: #FFFDF8; border-left: 3px solid var(--color-gold); display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 0.7rem; color: var(--color-gold-hover); font-weight: 700; text-transform: uppercase;">Today's Sanctum Observance</div>
+            <div style="font-size: 0.88rem; font-weight: 700; color: var(--color-primary); margin-top: 2px;">
+              🪔 Nitya Mahamangalarathi & ${panchanga.tithi.name} Archana
+            </div>
+          </div>
+          <span class="badge badge-gold" style="font-size: 0.72rem;">${panchanga.masa} Masa</span>
+        </div>
+      `}
 
       <!-- Sacred Panchanga (The 5 Limbs) -->
       <section class="card card-gold-accent">
@@ -123,9 +133,17 @@ export function renderPanchangaView(currentDate = new Date()) {
 
           <!-- Karana -->
           <div style="padding: 10px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);">
-            <div style="font-size: 0.72rem; color: var(--color-text-soft); font-weight: 700; text-transform: uppercase;">4. Karana</div>
-            <div style="font-weight: 700; color: var(--color-text-main); font-size: 0.95rem;">${panchanga.karana.split(' ')[0]}</div>
-            <div style="font-size: 0.72rem; color: var(--color-text-soft);">Half-Tithi Period</div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <div style="font-size: 0.72rem; color: var(--color-text-soft); font-weight: 700; text-transform: uppercase;">4. Karana</div>
+              ${panchanga.karanaDetails && panchanga.karanaDetails.isVishti ? '<span class="badge" style="background:#DC2626;color:#FFF;font-size:0.62rem;padding:1px 5px;font-weight:800;border-radius:4px;">⚠️ Bhadra</span>' : ''}
+            </div>
+            <div style="font-weight: 800; color: var(--color-primary); font-size: 1rem;">
+              ${panchanga.karanaDetails ? panchanga.karanaDetails.current : panchanga.karana.split(' ')[0]}
+              <span style="font-size: 0.75rem; color: var(--color-gold-hover); font-weight: 600;">(${panchanga.karanaDetails ? panchanga.karanaDetails.currentKannada : ''})</span>
+            </div>
+            <div class="num-tabular" style="font-size: 0.72rem; color: var(--color-text-soft); line-height: 1.25; margin-top: 2px;">
+              Till ${panchanga.karanaDetails ? panchanga.karanaDetails.transitionTime : '12:30 PM'}, then ${panchanga.karanaDetails ? panchanga.karanaDetails.next : ''}
+            </div>
           </div>
         </div>
 
@@ -135,6 +153,35 @@ export function renderPanchangaView(currentDate = new Date()) {
           <span style="font-weight: 800; color: var(--color-primary);">${panchanga.rashi}</span>
         </div>
       </section>
+
+      <!-- Upcoming Sacred Festivals & Temple Utsavas -->
+      ${panchanga.upcomingFestivals && panchanga.upcomingFestivals.length > 0 ? `
+        <section class="card" style="padding: 12px 14px;">
+          <div class="card-header-row" style="margin-bottom: 8px;">
+            <h3 class="card-title" style="font-size: 0.95rem;">
+              <span>🗓️</span> Upcoming Festivals & Vratas
+            </h3>
+            <span style="font-size: 0.72rem; color: var(--color-gold-hover); font-weight: 600;">${panchanga.masa} Masa</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${panchanga.upcomingFestivals.map(uf => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);">
+                <div>
+                  <div style="font-weight: 700; color: var(--color-primary); font-size: 0.85rem;">
+                    ${uf.name}
+                  </div>
+                  <div style="font-size: 0.72rem; color: var(--color-text-soft);">
+                    ${uf.kannada} • ${uf.formattedDate}
+                  </div>
+                </div>
+                <span class="badge badge-gold" style="font-size: 0.7rem; font-weight: 700; white-space: nowrap;">
+                  ${uf.relativeLabel}
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      ` : ''}
 
       <!-- Important Timings & Kaala Safeguards (Interactive) -->
       <section class="card">

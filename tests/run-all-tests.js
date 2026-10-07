@@ -169,6 +169,50 @@ test("Festival Detection Engine identifies authentic festivals based on Tithi & 
   assert.ok(deepavali.festivals.some(f => f.name.includes("Naraka Chaturdashi")), "Detects Naraka Chaturdashi");
 });
 
+test("Dynamic 11 Vedic Karanas: Advances across days and cycles through half-tithis", () => {
+  const p1 = PanchangaService.getPanchanga(new Date(2026, 9, 6)); // Tuesday
+  const p2 = PanchangaService.getPanchanga(new Date(2026, 9, 7)); // Wednesday
+  const p3 = PanchangaService.getPanchanga(new Date(2026, 9, 8)); // Thursday
+
+  assert.ok(p1.karanaDetails, "KaranaDetails exists for Day 1");
+  assert.ok(p2.karanaDetails, "KaranaDetails exists for Day 2");
+  assert.ok(p3.karanaDetails, "KaranaDetails exists for Day 3");
+
+  // Karana changes from day to day
+  assert.notStrictEqual(p1.karanaDetails.current, p2.karanaDetails.current, "Karana changes between Day 1 and Day 2");
+  assert.notStrictEqual(p2.karanaDetails.current, p3.karanaDetails.current, "Karana changes between Day 2 and Day 3");
+
+  // Verify transition format
+  assert.ok(p1.karana.includes("till"), "Karana string includes half-tithi transition");
+  assert.ok(p1.karanaDetails.next, "KaranaDetails includes next Karana");
+});
+
+test("Authentic Sthira & Chara Karana mapping: Kintughna, Shakuni, Naga & Vishti (Bhadra)", () => {
+  // Slot 0 (Shukla Prathama 1st half) must be Kintughna
+  const k0 = PanchangaService.getKaranaDetails(0);
+  assert.strictEqual(k0.current, "Kintughna", "Slot 0 is Kintughna (Sthira)");
+  assert.strictEqual(k0.next, "Bava", "Slot 1 is Bava (Chara)");
+
+  // Krishna Chaturdashi (tithi index 28: slots 56, 57)
+  const k28 = PanchangaService.getKaranaDetails(28);
+  assert.strictEqual(k28.current, "Vishti (Bhadra)", "Slot 56 is Vishti (Bhadra)");
+  assert.strictEqual(k28.isVishti, true, "Vishti flags isVishti as true");
+  assert.strictEqual(k28.next, "Shakuni", "Slot 57 is Shakuni (Sthira)");
+
+  // Amavasya (tithi index 29: slots 58, 59)
+  const k29 = PanchangaService.getKaranaDetails(29);
+  assert.strictEqual(k29.current, "Chatushpada", "Slot 58 is Chatushpada (Sthira)");
+  assert.strictEqual(k29.next, "Naga", "Slot 59 is Naga (Sthira)");
+});
+
+test("Upcoming Festivals Engine: Returns next scheduled festivals with relative countdown labels", () => {
+  const upcoming = PanchangaService.getUpcomingFestivals(new Date(2026, 9, 6), 4);
+  assert.ok(Array.isArray(upcoming), "Returns array of upcoming festivals");
+  assert.strictEqual(upcoming.length, 4, "Returns 4 upcoming festivals");
+  assert.ok(upcoming[0].daysAway >= 1, "Days away is in future");
+  assert.ok(upcoming[0].relativeLabel.includes("days") || upcoming[0].relativeLabel.includes("Tomorrow"), "Has relative label");
+});
+
 // --- SUITE 4: WHATSAPP DEEP-LINK & TOKEN GENERATOR ---
 console.log("\nSuite 4: WhatsApp Deep-Link & Token Generator");
 

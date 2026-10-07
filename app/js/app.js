@@ -2,21 +2,21 @@
  * Sri Durga Devi Temple — Digital Mandapa: Core App Controller & Router
  */
 
-import { renderHeader } from './components/header.js';
-import { renderBottomNav } from './components/bottomNav.js';
-import { showToast } from './components/toast.js';
-import { renderHomeView } from './views/homeView.js';
-import { renderPoojasView } from './views/poojasView.js';
-import { renderPoojaDetailView } from './views/poojaDetailView.js';
-import { renderCalendarView } from './views/calendarView.js';
-import { renderPanchangaView } from './views/panchangaView.js';
-import { renderBookingView } from './views/bookingView.js';
-import { renderQrLandingView } from './views/qrLandingView.js';
-import { renderAdminView } from './views/adminView.js';
+import { renderHeader } from './components/header.js?v=20261007_05';
+import { renderBottomNav } from './components/bottomNav.js?v=20261007_05';
+import { showToast } from './components/toast.js?v=20261007_05';
+import { renderHomeView } from './views/homeView.js?v=20261007_05';
+import { renderPoojasView } from './views/poojasView.js?v=20261007_05';
+import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_05';
+import { renderCalendarView } from './views/calendarView.js?v=20261007_05';
+import { renderPanchangaView } from './views/panchangaView.js?v=20261007_05';
+import { renderBookingView } from './views/bookingView.js?v=20261007_05';
+import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_05';
+import { renderAdminView } from './views/adminView.js?v=20261007_05';
 
-import { templeStore } from './services/store.js';
-import { WhatsAppService } from './services/whatsappService.js';
-import { PanchangaService } from './services/panchangaService.js';
+import { templeStore } from './services/store.js?v=20261007_05';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_05';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_05';
 
 class DigitalMandapaApp {
   constructor() {
@@ -565,9 +565,34 @@ class DigitalMandapaApp {
 
   _registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('[PWA] Service Worker active'))
+      navigator.serviceWorker.register('./sw.js?v=20261007_05', { updateViaCache: 'none' })
+        .then((reg) => {
+          console.log('[PWA v5] Service Worker registered & active');
+          // Check for worker updates immediately
+          reg.update();
+        })
         .catch(err => console.log('[PWA] SW register skipped or offline:', err.message));
+    }
+  }
+
+  forceRefreshCache() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        const unregPromises = regs.map(r => r.unregister());
+        Promise.all(unregPromises).then(() => {
+          if ('caches' in window) {
+            caches.keys().then(keys => {
+              Promise.all(keys.map(k => caches.delete(k))).then(() => {
+                window.location.reload(true);
+              });
+            });
+          } else {
+            window.location.reload(true);
+          }
+        });
+      });
+    } else {
+      window.location.reload(true);
     }
   }
 }

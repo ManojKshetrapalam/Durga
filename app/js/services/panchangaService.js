@@ -83,6 +83,31 @@ const LUNAR_EPOCH_MS = Date.UTC(2026, 2, 19, 0, 0, 0);
 const SYNODIC_MONTH_DAYS = 29.53058867;
 const SIDEREAL_MONTH_DAYS = 27.321661;
 
+// 11 Authentic Vedic Karanas (4 Fixed Sthira + 7 Movable Chara cycling 8 times over 60 half-tithis)
+const KARANAS_METADATA = {
+  kintughna: { name: "Kintughna", kannada: "ಕಿಂತುಘ್ನ", sanskrit: "किंस्तुघ्न", type: "Sthira (Fixed)", isVishti: false },
+  bava: { name: "Bava", kannada: "ಬವ", sanskrit: "बव", type: "Chara (Movable)", isVishti: false },
+  balava: { name: "Balava", kannada: "ಬಾಲವ", sanskrit: "बालव", type: "Chara (Movable)", isVishti: false },
+  kaulava: { name: "Kaulava", kannada: "ಕೌಲವ", sanskrit: "कौलव", type: "Chara (Movable)", isVishti: false },
+  taitila: { name: "Taitila", kannada: "ತೈತಿಲ", sanskrit: "तैतिल", type: "Chara (Movable)", isVishti: false },
+  gara: { name: "Gara", kannada: "ಗರ", sanskrit: "गर", type: "Chara (Movable)", isVishti: false },
+  vanija: { name: "Vanija", kannada: "ವಣಿಜ", sanskrit: "वणिज", type: "Chara (Movable)", isVishti: false },
+  vishti: { name: "Vishti (Bhadra)", kannada: "ವಿಷ್ಟಿ (ಭದ್ರಾ)", sanskrit: "विष्टि (भद्रा)", type: "Chara (Movable)", isVishti: true },
+  shakuni: { name: "Shakuni", kannada: "ಶಕುನಿ", sanskrit: "शकुनि", type: "Sthira (Fixed)", isVishti: false },
+  chatushpada: { name: "Chatushpada", kannada: "ಚತುಷ್ಪಾದ", sanskrit: "चतुष्पाद", type: "Sthira (Fixed)", isVishti: false },
+  naga: { name: "Naga", kannada: "ನಾಗ", sanskrit: "नाग", type: "Sthira (Fixed)", isVishti: false }
+};
+
+const CHARA_KARANAS = [
+  KARANAS_METADATA.bava,
+  KARANAS_METADATA.balava,
+  KARANAS_METADATA.kaulava,
+  KARANAS_METADATA.taitila,
+  KARANAS_METADATA.gara,
+  KARANAS_METADATA.vanija,
+  KARANAS_METADATA.vishti
+];
+
 export class PanchangaService {
   /**
    * Astronomical solar position and sunrise/sunset for Bengaluru (12.9716° N, 77.5946° E)
@@ -644,6 +669,87 @@ export class PanchangaService {
   }
 
   /**
+   * 11 Authentic Vedic Karanas mapped dynamically across the 60 half-tithis of the lunar month:
+   * - Slot 0: Kintughna (Shukla Prathama 1st half, Sthira)
+   * - Slots 1 to 56: 7 Chara Karanas cycle 8 times (Bava, Balava, Kaulava, Taitila, Gara, Vanija, Vishti/Bhadra)
+   * - Slot 57: Shakuni (Krishna Chaturdashi 2nd half, Sthira)
+   * - Slot 58: Chatushpada (Amavasya 1st half, Sthira)
+   * - Slot 59: Naga (Amavasya 2nd half, Sthira)
+   */
+  static getKaranaDetails(tithiIndex, solarNoonMin = 727) {
+    const slot1 = (tithiIndex * 2) % 60;
+    const slot2 = (tithiIndex * 2 + 1) % 60;
+
+    const getSlotKarana = (slot) => {
+      if (slot === 0) return KARANAS_METADATA.kintughna;
+      if (slot === 57) return KARANAS_METADATA.shakuni;
+      if (slot === 58) return KARANAS_METADATA.chatushpada;
+      if (slot === 59) return KARANAS_METADATA.naga;
+      const charaIdx = (slot - 1) % 7;
+      return CHARA_KARANAS[charaIdx];
+    };
+
+    const k1 = getSlotKarana(slot1);
+    const k2 = getSlotKarana(slot2);
+
+    // Transition between first half and second half of the tithi around solar noon
+    const transitionMin = solarNoonMin + 25;
+    const transitionTime = this.minutesToTimeString(transitionMin);
+
+    const fullText = `${k1.name} (till ${transitionTime}, then ${k2.name})`;
+
+    return {
+      current: k1.name,
+      currentKannada: k1.kannada,
+      currentSanskrit: k1.sanskrit,
+      currentType: k1.type,
+      next: k2.name,
+      nextKannada: k2.kannada,
+      nextSanskrit: k2.sanskrit,
+      nextType: k2.type,
+      transitionTime,
+      fullText,
+      isVishti: k1.isVishti || k2.isVishti,
+      activeVishti: k1.isVishti ? 'Current' : (k2.isVishti ? 'Next' : null),
+      slot1,
+      slot2
+    };
+  }
+
+  /**
+   * Retrieves the next upcoming festivals starting from the specified date
+   */
+  static getUpcomingFestivals(fromDate = new Date(), count = 4) {
+    const start = new Date(fromDate);
+    const upcoming = [];
+    const seenNames = new Set();
+
+    for (let dayOffset = 1; dayOffset <= 45 && upcoming.length < count; dayOffset++) {
+      const targetDate = new Date(start);
+      targetDate.setDate(targetDate.getDate() + dayOffset);
+      const lunar = this.getLunarDetails(targetDate);
+      const dayFestivals = this.detectFestivals(targetDate, lunar);
+
+      for (const fest of dayFestivals) {
+        if (!seenNames.has(fest.name)) {
+          seenNames.add(fest.name);
+          const daysAway = dayOffset;
+          const relativeLabel = daysAway === 1 ? "Tomorrow" : `In ${daysAway} days`;
+          upcoming.push({
+            ...fest,
+            date: targetDate.toISOString().split('T')[0],
+            formattedDate: targetDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }),
+            daysAway,
+            relativeLabel
+          });
+          if (upcoming.length >= count) break;
+        }
+      }
+    }
+    return upcoming;
+  }
+
+  /**
    * Generates complete Vedic astronomical details for a given Date
    * Calibrated for Bengaluru, Karnataka.
    * @param {Date|string} dateInput 
@@ -695,6 +801,9 @@ export class PanchangaService {
     const yogaName = YOGAS[lunar.yogaIndex];
     const rashiName = RASHIS[lunar.rashiIndex];
 
+    // Dynamic 11 Vedic Karanas
+    const karanaDetails = this.getKaranaDetails(lunar.tithiIndex, solarNoonMin);
+
     // Dynamic Ritu, Ayana & Samvatsara
     const rituObj = this.getVedicRitu(d, lunar);
     const ayanaObj = this.getVedicAyana(d);
@@ -703,6 +812,7 @@ export class PanchangaService {
     // Dynamic Festivals & Vratas
     const festivals = this.detectFestivals(d, lunar);
     const primaryFestival = festivals.length > 0 ? festivals[0] : null;
+    const upcomingFestivals = this.getUpcomingFestivals(d, 4);
 
     // Format daylight duration
     const dlHours = Math.floor(dayLengthMin / 60);
@@ -752,7 +862,8 @@ export class PanchangaService {
         endTime: "04:15 PM"
       },
       yoga: yogaName,
-      karana: "Bava (upto 12:30 PM, then Balava)",
+      karana: karanaDetails.fullText,
+      karanaDetails,
       rashi: rashiName,
       rahuKala: `${this.minutesToTimeString(rahuStart)} – ${this.minutesToTimeString(rahuEnd)}`,
       rahuKalaRaw: { startMin: rahuStart, endMin: rahuEnd },
@@ -775,6 +886,7 @@ export class PanchangaService {
       festivals,
       primaryFestival,
       hasFestival: festivals.length > 0,
+      upcomingFestivals,
       coordinates: "12.97° N, 77.59° E (Bengaluru)"
     };
   }

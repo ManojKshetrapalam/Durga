@@ -66,14 +66,25 @@ class TempleLandingController {
         </div>
         <span class="badge" style="background: #EA580C; color: #FFF; font-weight: 800; font-size: 0.75rem;">${p.masa} Masa Vrata</span>
       </div>
-    ` : '';
+    ` : (p.upcomingFestivals && p.upcomingFestivals.length > 0 ? `
+      <div style="grid-column: 1 / -1; background: rgba(255, 253, 248, 0.08); border: 1px solid rgba(197, 155, 39, 0.4); border-radius: var(--radius-lg); padding: 10px 18px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.2rem;">🗓️</span>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: #FFFDF8;">Upcoming Festival: ${p.upcomingFestivals[0].name} (${p.upcomingFestivals[0].kannada})</div>
+            <div style="font-size: 0.78rem; color: #E7E5E4;">${p.upcomingFestivals[0].formattedDate} • ${p.upcomingFestivals[0].description}</div>
+          </div>
+        </div>
+        <span class="badge badge-gold" style="font-size: 0.75rem; font-weight: 800;">${p.upcomingFestivals[0].relativeLabel}</span>
+      </div>
+    ` : '');
 
     stripEl.innerHTML = `
       ${festivalBanner}
       <div class="panchanga-strip-card">
         <div class="label">Tithi Today</div>
         <div class="val">${p.tithi.name}</div>
-        <div class="sub">${p.tithi.isShukla ? 'Shukla Paksha' : 'Krishna Paksha'} • Till ${p.tithi.endTime}</div>
+        <div class="sub">${p.tithi.isShukla ? 'Shukla' : 'Krishna'} • Karana: ${p.karanaDetails ? p.karanaDetails.current : 'Bava'}</div>
       </div>
 
       <div class="panchanga-strip-card">
