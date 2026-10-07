@@ -140,6 +140,35 @@ test("Fix Underline 3: Solar horizon computes dynamic Bengaluru winter sunrise (
   assert.strictEqual(p.daylightDuration, "11 hrs 22 mins", "Bengaluru daylight on Dec 28 is 11 hrs 22 mins");
 });
 
+test("Saturday, 13 Mar 2027: Dynamically calculates Paraabhava Samvatsara & Uttarayana", () => {
+  const mar13 = new Date(2027, 2, 13); // 13 Mar 2027
+  const p = PanchangaService.getPanchanga(mar13);
+  assert.strictEqual(p.samvatsara, "Paraabhava Samvatsara", "March 13, 2027 is Paraabhava Samvatsara prior to Ugadi");
+  assert.strictEqual(p.ayana, "Uttarayana", "March 13, 2027 is in Uttarayana");
+  // After Ugadi in April 2027, it transitions to Plavanga
+  const apr15 = new Date(2027, 3, 15);
+  const pApr = PanchangaService.getPanchanga(apr15);
+  assert.strictEqual(pApr.samvatsara, "Plavanga Samvatsara", "After Ugadi 2027 it becomes Plavanga Samvatsara");
+});
+
+test("Festival Detection Engine identifies authentic festivals based on Tithi & Masa", () => {
+  // Durgashtami
+  const ashtami = PanchangaService.getPanchanga(new Date(2026, 9, 19));
+  assert.ok(ashtami.festivals.some(f => f.name.includes("Durgashtami")), "Detects Durgashtami");
+
+  // Ayudha Pooja
+  const navami = PanchangaService.getPanchanga(new Date(2026, 9, 20));
+  assert.ok(navami.festivals.some(f => f.name.includes("Ayudha Pooja")), "Detects Ayudha Pooja");
+
+  // Sankashta Hara Chaturthi
+  const chaturthi = PanchangaService.getPanchanga(new Date(2026, 9, 30));
+  assert.ok(chaturthi.festivals.some(f => f.name.includes("Sankashta Hara Chaturthi")), "Detects Sankashta Hara Chaturthi");
+
+  // Naraka Chaturdashi
+  const deepavali = PanchangaService.getPanchanga(new Date(2026, 10, 9));
+  assert.ok(deepavali.festivals.some(f => f.name.includes("Naraka Chaturdashi")), "Detects Naraka Chaturdashi");
+});
+
 // --- SUITE 4: WHATSAPP DEEP-LINK & TOKEN GENERATOR ---
 console.log("\nSuite 4: WhatsApp Deep-Link & Token Generator");
 

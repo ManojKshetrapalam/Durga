@@ -54,10 +54,22 @@ class TempleLandingController {
   _renderLivePanchangaStrip() {
     const stripEl = document.getElementById('panchanga-strip-container');
     if (!stripEl) return;
-
     const p = PanchangaService.getPanchanga(new Date());
+    const festivalBanner = p.hasFestival ? `
+      <div style="grid-column: 1 / -1; background: rgba(234, 88, 12, 0.25); border: 1.5px solid #F97316; border-radius: var(--radius-lg); padding: 12px 18px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">🎉</span>
+          <div>
+            <div style="font-weight: 800; font-size: 1.05rem; color: #FFFDF8;">${p.primaryFestival.name} (${p.primaryFestival.kannada})</div>
+            <div style="font-size: 0.8rem; color: #FED7AA;">${p.primaryFestival.description}</div>
+          </div>
+        </div>
+        <span class="badge" style="background: #EA580C; color: #FFF; font-weight: 800; font-size: 0.75rem;">${p.masa} Masa Vrata</span>
+      </div>
+    ` : '';
 
     stripEl.innerHTML = `
+      ${festivalBanner}
       <div class="panchanga-strip-card">
         <div class="label">Tithi Today</div>
         <div class="val">${p.tithi.name}</div>

@@ -59,6 +59,35 @@ export function renderPanchangaView(currentDate = new Date()) {
         </div>
       </div>
 
+      <!-- Sacred Festival & Vrata Alert (if active on this day) -->
+      ${panchanga.hasFestival ? `
+        <section class="card" style="background: linear-gradient(135deg, #FFFDF8 0%, #FFF5EB 100%); border: 1.5px solid #F97316; box-shadow: 0 4px 14px rgba(217, 93, 15, 0.12);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <span class="badge" style="background: #EA580C; color: #FFF; font-weight: 800; font-size: 0.72rem; padding: 3px 8px;">
+              🎉 SACRED FESTIVAL / VRATA TODAY
+            </span>
+            <span style="font-size: 0.75rem; color: var(--color-gold-hover); font-weight: 700;">
+              ${panchanga.masa} Masa
+            </span>
+          </div>
+          ${panchanga.festivals.map(fest => `
+            <div style="margin-top: 6px; padding-top: 4px; ${panchanga.festivals.indexOf(fest) > 0 ? 'border-top: 1px dashed #FDBA74;' : ''}">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap;">
+                <h3 style="font-family: var(--font-serif); font-size: 1.12rem; color: var(--color-primary); font-weight: 700; margin-bottom: 2px;">
+                  ${fest.name}
+                </h3>
+                <span style="font-family: var(--font-serif); font-size: 0.82rem; color: var(--color-gold-hover); font-weight: 600;">
+                  ${fest.kannada}
+                </span>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--color-text-main); margin-top: 2px; line-height: 1.45;">
+                ${fest.description}
+              </p>
+            </div>
+          `).join('')}
+        </section>
+      ` : ''}
+
       <!-- Sacred Panchanga (The 5 Limbs) -->
       <section class="card card-gold-accent">
         <div class="card-header-row">
