@@ -5,7 +5,7 @@
  * Offline shell fallback ensures temple sanctum resilience when connectivity drops.
  */
 
-const CACHE_NAME = 'durga-mandapa-v5';
+const CACHE_NAME = 'durga-mandapa-v6';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ const PRECACHE_ASSETS = [
   './css/app.css',
   './css/landing.css',
   './css/admin.css',
+  './js/lib/astronomy.js',
   './js/app.js',
   './js/adminApp.js',
   './js/landingApp.js',

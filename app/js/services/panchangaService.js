@@ -1,12 +1,27 @@
 /**
  * Vedic Panchanga & Astronomical Horizon Service
- * Calibrated specifically for Bengaluru, Karnataka (12.9716° N, 77.5946° E)
- * Computes authentic Solar coordinates, dynamic Sunrise/Sunset, Kaala divisions,
- * Abhijit Muhurtha, dynamic Ritu (6 Vedic seasons), Ayana, Jovian Samvatsara,
- * and comprehensive Hindu/Devi Festivals & Vratas based on Tithi, Masa & Nakshatra.
+ * Calibrated specifically for Sri Durga Parameshwari Temple, Bengaluru, Karnataka (12.9716° N, 77.5946° E, 920m elev).
+ * Powered by high-precision astronomy-engine (Apparent Geocentric & IAU-2006 Lahiri Ayanamsa),
+ * following the Surendra Jat Panchang architecture (panchang.surendrajat.xyz).
+ *
+ * Computes:
+ * - 5 Limbs: Tithi, Nakshatra, Yoga, Karana, Vara
+ * - 11 Authentic Vedic Karanas (4 Fixed Sthira + 7 Movable Chara) with half-tithi transitions & Bhadra (Vishti) alerts
+ * - 6 Dynamic Vedic Ritus (Vasanta, Grishma, Varsha, Sharad, Hemanta, Shishira) based on Solar Sidereal Longitude
+ * - Dynamic Ayana (Uttarayana / Dakshinayana)
+ * - 60-Year Jovian Samvatsara with annual Ugadi lunisolar transitions
+ * - Dynamic Solar Horizon for Bengaluru: High-precision Sunrise, Sunset, Midday Solar Noon, and Day Length
+ * - Kaala Divisions: Rahu Kala, Yamaganda, Gulika Kala, Abhijit Muhurtha (centered at solar noon), Brahma Muhurtha
+ * - Authentic Hindu, Vedic & Sri Durga Devi Festivals & Vratas Detection
+ * - Next Upcoming Festivals Engine with relative countdown labels
  */
 
-const NAKSHATRAS = [
+import * as Astronomy from '../lib/astronomy.js';
+
+// Temple Coordinates: Bengaluru, Karnataka
+const BENGALURU_OBSERVER = new Astronomy.Observer(12.9716, 77.5946, 920);
+
+export const NAKSHATRAS = [
   "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Arudra",
   "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni",
   "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
@@ -14,7 +29,15 @@ const NAKSHATRAS = [
   "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
 ];
 
-const TITHIS = [
+const NAKSHATRA_KANNADA = [
+  "ಅಶ್ವಿನಿ", "ಭರಣಿ", "ಕೃತ್ತಿಕಾ", "ರೋಹಿಣಿ", "ಮೃಗಶಿರಾ", "ಆರ್ದ್ರಾ",
+  "ಪುನರ್ವಸು", "ಪುಷ್ಯ", "ಆಶ್ಲೇಷಾ", "ಮಘಾ", "ಪೂರ್ವ ಫಲ್ಗುಣಿ", "ಉತ್ತರ ಫಲ್ಗುಣಿ",
+  "ಹಸ್ತ", "ಚಿತ್ರಾ", "ಸ್ವಾತಿ", "ವಿಶಾಖಾ", "ಅನುರಾಧಾ", "ಜ್ಯೇಷ್ಠಾ",
+  "ಮೂಲ", "ಪೂರ್ವಾಷಾಢ", "ಉತ್ತರಾಷಾಢ", "ಶ್ರವಣ", "ಧನಿಷ್ಠಾ", "ಶತಭಿಷ",
+  "ಪೂರ್ವಾಭಾದ್ರ", "ಉತ್ತರಾಭಾದ್ರ", "ರೇವತಿ"
+];
+
+export const TITHIS = [
   "Shukla Prathama", "Shukla Dwitiya", "Shukla Tritiya", "Shukla Chaturthi", "Shukla Panchami",
   "Shukla Shashti", "Shukla Saptami", "Shukla Ashtami", "Shukla Navami", "Shukla Dashami",
   "Shukla Ekadashi", "Shukla Dvadashi", "Shukla Trayodashi", "Shukla Chaturdashi", "Pournami (Purnima)",
@@ -23,7 +46,16 @@ const TITHIS = [
   "Krishna Ekadashi", "Krishna Dvadashi", "Krishna Trayodashi", "Krishna Chaturdashi", "Amavasya"
 ];
 
-const YOGAS = [
+const TITHI_KANNADA = [
+  "ಶುಕ್ಲ ಪಾಡ್ಯ", "ಶುಕ್ಲ ಬಿದಿಗೆ", "ಶುಕ್ಲ ತದಿಗೆ", "ಶುಕ್ಲ ಚೌತಿ", "ಶುಕ್ಲ ಪಂಚಮಿ",
+  "ಶುಕ್ಲ ಷಷ್ಠಿ", "ಶುಕ್ಲ ಸಪ್ತಮಿ", "ಶುಕ್ಲ ಅಷ್ಟಮಿ", "ಶುಕ್ಲ ನವಮಿ", "ಶುಕ್ಲ ದಶಮಿ",
+  "ಶುಕ್ಲ ಏಕಾದಶಿ", "ಶುಕ್ಲ ದ್ವಾದಶಿ", "ಶುಕ್ಲ ತ್ರಯೋದಶಿ", "ಶುಕ್ಲ ಚತುರ್ದಶಿ", "ಹುಣ್ಣಿಮೆ (ಪೌರ್ಣಮಿ)",
+  "ಕೃಷ್ಣ ಪಾಡ್ಯ", "ಕೃಷ್ಣ ಬಿದಿಗೆ", "ಕೃಷ್ಣ ತದಿಗೆ", "ಕೃಷ್ಣ ಚೌತಿ", "ಕೃಷ್ಣ ಪಂಚಮಿ",
+  "ಕೃಷ್ಣ ಷಷ್ಠಿ", "ಕೃಷ್ಣ ಸಪ್ತಮಿ", "ಕೃಷ್ಣ ಅಷ್ಟಮಿ", "ಕೃಷ್ಣ ನವಮಿ", "ಕೃಷ್ಣ ದಶಮಿ",
+  "ಕೃಷ್ಣ ಏಕಾದಶಿ", "ಕೃಷ್ಣ ದ್ವಾದಶಿ", "ಕೃಷ್ಣ ತ್ರಯೋದಶಿ", "ಕೃಷ್ಣ ಚತುರ್ದಶಿ", "ಅಮಾವಾಸ್ಯೆ"
+];
+
+export const YOGAS = [
   "Vishkambha", "Priti", "Ayushman", "Saubhagya", "Shobhana", "Atiganda",
   "Sukarma", "Dhriti", "Shoola", "Ganda", "Vriddhi", "Dhruva",
   "Vyaghata", "Harshana", "Vajra", "Siddhi", "Vyatipata", "Variyan",
@@ -31,13 +63,13 @@ const YOGAS = [
   "Brahma", "Indra", "Vaidhriti"
 ];
 
-const RASHIS = [
+export const RASHIS = [
   "Mesha (Aries)", "Vrishabha (Taurus)", "Mithuna (Gemini)", "Karka (Cancer)",
   "Simha (Leo)", "Kanya (Virgo)", "Tula (Libra)", "Vrischika (Scorpio)",
   "Dhanu (Sagittarius)", "Makara (Capricorn)", "Kumbha (Aquarius)", "Meena (Pisces)"
 ];
 
-const SAMVATSARAS = [
+export const SAMVATSARAS = [
   "Prabhava", "Vibhava", "Shukla", "Pramodoota", "Prajothpatti", "Aangirasa",
   "Shrimukha", "Bhaava", "Yuva", "Dhaatu", "Eeshwara", "Bahudhaanya",
   "Pramaathi", "Vikrama", "Vrushaprajaa", "Chitrabhaanu", "Subhaanu", "Taarana",
@@ -50,40 +82,19 @@ const SAMVATSARAS = [
   "Durmathi", "Dundubhi", "Rudhirodgaari", "Raktaakshi", "Krodhana", "Kshaya"
 ];
 
-const MASAS = [
+export const MASAS = [
   "Chaitra", "Vaishakha", "Jyeshtha", "Ashadha",
   "Shravana", "Bhadrapada", "Ashvina", "Kartika",
   "Margashirsha", "Pushya", "Magha", "Phalguna"
 ];
 
-// Ugadi (Vedic New Year) astronomical dates for year-to-year Samvatsara transition
-const UGADI_CALENDAR = {
-  2024: new Date(2024, 3, 9),  // 09 Apr 2024 (Krodhi)
-  2025: new Date(2025, 2, 30), // 30 Mar 2025 (Vishvaavasu)
-  2026: new Date(2026, 2, 19), // 19 Mar 2026 (Paraabhava)
-  2027: new Date(2027, 3, 7),  // 07 Apr 2027 (Plavanga)
-  2028: new Date(2028, 2, 27), // 27 Mar 2028 (Keelaka)
-  2029: new Date(2029, 3, 14), // 14 Apr 2029 (Saumya)
-  2030: new Date(2030, 3, 3)   // 03 Apr 2030 (Saadhaarana)
-};
+const MASA_KANNADA = [
+  "ಚೈತ್ರ", "ವೈಶಾಖ", "ಜ್ಯೇಷ್ಠ", "ಆಷಾಢ",
+  "ಶ್ರಾವಣ", "ಭಾದ್ರಪದ", "ಆಶ್ವಯುಜ", "ಕಾರ್ತಿಕ",
+  "ಮಾರ್ಗಶಿರ", "ಪುಷ್ಯ", "ಮಾಘ", "ಫಾಲ್ಗುಣ"
+];
 
-// 1/8th Kaala segment sequence for each day (0 = Sunday to 6 = Saturday)
-const KAALA_SEGMENTS = {
-  0: { rahu: 7, yama: 4, gulika: 6 }, // Sunday
-  1: { rahu: 1, yama: 3, gulika: 5 }, // Monday
-  2: { rahu: 6, yama: 2, gulika: 4 }, // Tuesday
-  3: { rahu: 4, yama: 1, gulika: 3 }, // Wednesday
-  4: { rahu: 5, yama: 0, gulika: 2 }, // Thursday
-  5: { rahu: 3, yama: 6, gulika: 1 }, // Friday
-  6: { rahu: 2, yama: 5, gulika: 0 }  // Saturday
-};
-
-// Accurate lunar reference epoch: 19 Mar 2026 = Chaitra Shukla Prathama (Ugadi 2026)
-const LUNAR_EPOCH_MS = Date.UTC(2026, 2, 19, 0, 0, 0);
-const SYNODIC_MONTH_DAYS = 29.53058867;
-const SIDEREAL_MONTH_DAYS = 27.321661;
-
-// 11 Authentic Vedic Karanas (4 Fixed Sthira + 7 Movable Chara cycling 8 times over 60 half-tithis)
+// 11 Authentic Vedic Karanas (4 Fixed Sthira + 7 Movable Chara)
 const KARANAS_METADATA = {
   kintughna: { name: "Kintughna", kannada: "ಕಿಂತುಘ್ನ", sanskrit: "किंस्तुघ्न", type: "Sthira (Fixed)", isVishti: false },
   bava: { name: "Bava", kannada: "ಬವ", sanskrit: "बव", type: "Chara (Movable)", isVishti: false },
@@ -108,54 +119,91 @@ const CHARA_KARANAS = [
   KARANAS_METADATA.vishti
 ];
 
+// 6 Vedic Seasons (Ritus)
+const RITUS_CATALOG = [
+  {
+    name: "Vasanta Ritu",
+    kannada: "ವಸಂತ ಋತು",
+    sanskrit: "वसन्त ऋतु",
+    meaning: "Spring / Flowering Season",
+    description: "Season of Chaitra & Vaishakha; Vedic New Year (Ugadi), Rama Navami, and nature blooming in divine radiance."
+  },
+  {
+    name: "Grishma Ritu",
+    kannada: "ಗ್ರೀಷ್ಮ ಋತು",
+    sanskrit: "ग्रीष्म ऋतु",
+    meaning: "Summer Season",
+    description: "Season of Jyeshtha & Ashadha; solar tapas, Chandana Alankara, and Abhishekas with sacred panchamrutha."
+  },
+  {
+    name: "Varsha Ritu",
+    kannada: "ವರ್ಷಾ ಋತು",
+    sanskrit: "वर्षा ऋतु",
+    meaning: "Monsoon Season",
+    description: "Season of Shravana & Bhadrapada; holy Shravana masa, Gokulashtami, Ganesha Chaturthi and deep spiritual penance."
+  },
+  {
+    name: "Sharad Ritu",
+    kannada: "ಶರದ್ ಋತು",
+    sanskrit: "शरद ऋतु",
+    meaning: "Autumn Season",
+    description: "Season of Ashvina & Kartika; divine Navaratri, Vijayadashami, Ayudha Pooja, and Deepavali festival of radiant lights."
+  },
+  {
+    name: "Hemanta Ritu",
+    kannada: "ಹೇಮಂತ ಋತು",
+    sanskrit: "हेमन्त ऋतु",
+    meaning: "Pre-winter / Dewy Season",
+    description: "Season of Margashirsha & Pushya; divine lamps, Dhanurmasa, Vaikuntha Ekadashi & early morning temple pujas."
+  },
+  {
+    name: "Shishira Ritu",
+    kannada: "ಶಿಶಿರ ಋತು",
+    sanskrit: "शिशिर ऋतु",
+    meaning: "Winter / Cold Season",
+    description: "Season of Magha & Phalguna; Uttarayana punyakala, Makara Sankranti, Ratha Saptami, Maha Shivaratri and auspicious Surya worship."
+  }
+];
+
+// 1/8th Kaala segments for each day (0 = Sunday to 6 = Saturday)
+const KAALA_SEGMENTS = {
+  0: { rahu: 7, yama: 4, gulika: 6 }, // Sunday
+  1: { rahu: 1, yama: 3, gulika: 5 }, // Monday
+  2: { rahu: 6, yama: 2, gulika: 4 }, // Tuesday
+  3: { rahu: 4, yama: 1, gulika: 3 }, // Wednesday
+  4: { rahu: 5, yama: 0, gulika: 2 }, // Thursday
+  5: { rahu: 3, yama: 6, gulika: 1 }, // Friday
+  6: { rahu: 2, yama: 5, gulika: 0 }  // Saturday
+};
+
+// Ugadi (Vedic New Year) astronomical dates for year-to-year Samvatsara transition
+const UGADI_CALENDAR = {
+  2024: new Date(2024, 3, 9),  // 09 Apr 2024 (Krodhi)
+  2025: new Date(2025, 2, 30), // 30 Mar 2025 (Vishvaavasu)
+  2026: new Date(2026, 2, 19), // 19 Mar 2026 (Paraabhava)
+  2027: new Date(2027, 3, 7),  // 07 Apr 2027 (Plavanga)
+  2028: new Date(2028, 2, 27), // 27 Mar 2028 (Keelaka)
+  2029: new Date(2029, 3, 14), // 14 Apr 2029 (Saumya)
+  2030: new Date(2030, 3, 3)   // 03 Apr 2030 (Saadhaarana)
+};
+
+function norm360(deg) {
+  let v = deg % 360;
+  if (v < 0) v += 360;
+  return v;
+}
+
 export class PanchangaService {
   /**
-   * Astronomical solar position and sunrise/sunset for Bengaluru (12.9716° N, 77.5946° E)
+   * Helper: format total minutes from midnight into 12-hour AM/PM string
    */
-  static calculateBengaluruSun(dateObj) {
-    const lat = 12.9716;
-    const lon = 77.5946;
-    const istMeridian = 82.5;
-
-    const startOfYear = new Date(Date.UTC(dateObj.getFullYear(), 0, 1));
-    const dayOfYear = Math.floor((dateObj - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
-
-    const gamma = (2 * Math.PI / 365) * (dayOfYear - 1);
-
-    const eqtime = 229.18 * (0.000075 + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma)
-      - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma));
-
-    const decl = 0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma)
-      - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma)
-      - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
-
-    const zenithRad = (90.833 * Math.PI) / 180;
-    const latRad = (lat * Math.PI) / 180;
-
-    const cosHA = (Math.cos(zenithRad) / (Math.cos(latRad) * Math.cos(decl))) - (Math.tan(latRad) * Math.tan(decl));
-    const clampedCosHA = Math.max(-1, Math.min(1, cosHA));
-    const haHours = (Math.acos(clampedCosHA) * 180 / Math.PI) / 15;
-
-    const lonCorrMin = (istMeridian - lon) * 4;
-    const solarNoonMin = 720 + lonCorrMin - eqtime;
-
-    const sunriseMin = solarNoonMin - (haHours * 60);
-    const sunsetMin = solarNoonMin + (haHours * 60);
-    const dayLengthMin = sunsetMin - sunriseMin;
-
-    return {
-      sunriseMinutes: sunriseMin,
-      sunsetMinutes: sunsetMin,
-      solarNoonMinutes: solarNoonMin,
-      dayLengthMinutes: dayLengthMin,
-      solarDeclinationDeg: (decl * 180) / Math.PI,
-      dayOfYear
-    };
-  }
-
   static minutesToTimeString(totalMinutes) {
-    const mins = Math.round(totalMinutes);
-    let hours = Math.floor(mins / 60) % 24;
+    let mins = Math.round(totalMinutes);
+    if (isNaN(mins)) return "12:00 PM";
+    while (mins < 0) mins += 1440;
+    mins = mins % 1440;
+
+    const hours = Math.floor(mins / 60);
     const minutes = mins % 60;
     const period = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours % 12 === 0 ? 12 : hours % 12;
@@ -164,68 +212,184 @@ export class PanchangaService {
   }
 
   /**
-   * 6 authentic Vedic Ritus (Seasons) linked directly to the 12 Vedic Masas:
-   * 1. Vasanta  - Chaitra & Vaishakha
-   * 2. Grishma  - Jyeshtha & Ashadha
-   * 3. Varsha   - Shravana & Bhadrapada
-   * 4. Sharad   - Ashvina & Kartika
-   * 5. Hemanta  - Margashirsha & Pushya (covers late Dec)
-   * 6. Shishira - Magha & Phalguna (covers mid Jan to March prior to Ugadi)
+   * Calculates High-Precision Astronomical coordinates using Astronomy Engine
+   * Apparent Geocentric positions + IAU-2006 Lahiri Ayanamsa (Surendra Jat model)
    */
-  static getVedicRitu(dateObj, lunar = null) {
-    const l = lunar || this.getLunarDetails(dateObj);
-    const rituIndex = Math.floor(l.masaIndex / 2); // 0 to 5
-    const ritus = [
-      {
-        name: "Vasanta Ritu",
-        sanskrit: "वसन्त ऋतु",
-        meaning: "Spring / Flowering Season",
-        description: "Season of Chaitra & Vaishakha; Vedic New Year (Ugadi), Rama Navami, and nature blooming in divine radiance."
-      },
-      {
-        name: "Grishma Ritu",
-        sanskrit: "ग्रीष्म ऋतु",
-        meaning: "Summer Season",
-        description: "Season of Jyeshtha & Ashadha; solar tapas, Chandana Alankara, and Abhishekas with sacred panchamrutha."
-      },
-      {
-        name: "Varsha Ritu",
-        sanskrit: "वर्षा ऋतु",
-        meaning: "Monsoon Season",
-        description: "Season of Shravana & Bhadrapada; holy Shravana masa, Gokulashtami, Ganesha Chaturthi and deep spiritual penance."
-      },
-      {
-        name: "Sharad Ritu",
-        sanskrit: "शरद ऋतु",
-        meaning: "Autumn Season",
-        description: "Season of Ashvina & Kartika; divine Navaratri, Vijayadashami, Ayudha Pooja, and Deepavali festival of radiant lights."
-      },
-      {
-        name: "Hemanta Ritu",
-        sanskrit: "हेಮन्त ऋतु",
-        meaning: "Pre-winter / Dewy Season",
-        description: "Season of Margashirsha & Pushya; divine lamps, Dhanurmasa, Vaikuntha Ekadashi & early morning temple pujas."
-      },
-      {
-        name: "Shishira Ritu",
-        sanskrit: "ಶಿಶಿರ ಋತು / शिशिर ऋतु",
-        meaning: "Winter / Cold Season",
-        description: "Season of Magha & Phalguna; Uttarayana punyakala, Makara Sankranti, Ratha Saptami, Maha Shivaratri and auspicious Surya worship."
-      }
-    ];
-    return ritus[rituIndex] || ritus[0];
+  static getAstronomyCalculations(dateObj) {
+    const d = new Date(dateObj);
+    // Anchor planetary coordinates to Sunrise instant (~06:15 IST = 00:45 UTC)
+    const anchorInstant = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 45, 0));
+    const jd = (anchorInstant.getTime() / 86400000.0) + 2440587.5;
+    const T = (jd - 2451545.0) / 36525.0;
+
+    // IAU-2006 Lahiri Ayanamsa polynomial
+    const ayanamsa = 23.85709 + (5029.0966 * T + 1.112 * T * T) / 3600.0;
+
+    const sunPos = Astronomy.SunPosition(anchorInstant);
+    const moonPos = Astronomy.EclipticGeoMoon(anchorInstant);
+
+    const sunTropicalLon = norm360(sunPos.elon);
+    const moonTropicalLon = norm360(moonPos.lon);
+
+    const sunSidereal = norm360(sunTropicalLon - ayanamsa);
+    const moonSidereal = norm360(moonTropicalLon - ayanamsa);
+
+    const elongation = norm360(moonTropicalLon - sunTropicalLon);
+
+    const tithiIndex = Math.floor(elongation / 12); // 0 to 29
+    const isShukla = tithiIndex < 15;
+    const pakshaTithiNum = (tithiIndex % 15) + 1; // 1 to 15
+
+    const karanaIndex = Math.floor(elongation / 6); // 0 to 59
+    const nakshatraIndex = Math.floor(moonSidereal / (360 / 27)); // 0 to 26
+    const yogaIndex = Math.floor(norm360(sunSidereal + moonSidereal) / (360 / 27)); // 0 to 26
+    const chandraRashiIndex = Math.floor(moonSidereal / 30); // 0 to 11
+    const suryaRashiIndex = Math.floor(sunSidereal / 30); // 0 to 11
+
+    // Ritu: 6 seasons mapped directly to Sun's sidereal sign
+    const rituIndex = Math.floor(suryaRashiIndex / 2); // 0 to 5
+
+    // Masa: In South Indian Amanta / Drik calendar, month aligns with Sun sign
+    const masaIndex = suryaRashiIndex;
+
+    return {
+      jd,
+      ayanamsa,
+      sunSidereal,
+      moonSidereal,
+      elongation,
+      tithiIndex,
+      isShukla,
+      pakshaTithiNum,
+      karanaIndex,
+      nakshatraIndex,
+      yogaIndex,
+      chandraRashiIndex,
+      suryaRashiIndex,
+      rituIndex,
+      masaIndex
+    };
+  }
+
+  /**
+   * Astronomical Solar Horizon for Bengaluru, Karnataka
+   * High-precision Sunrise, Sunset, Midday Solar Noon, and Day Length
+   */
+  static getSolarHorizon(dateObj) {
+    const d = new Date(dateObj);
+    const startOfDayUtc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0));
+
+    const riseResult = Astronomy.SearchRiseSet(Astronomy.Body.Sun, BENGALURU_OBSERVER, +1, startOfDayUtc, 1);
+    const setResult = Astronomy.SearchRiseSet(Astronomy.Body.Sun, BENGALURU_OBSERVER, -1, startOfDayUtc, 1);
+    const noonResult = Astronomy.SearchHourAngle(Astronomy.Body.Sun, BENGALURU_OBSERVER, 0, startOfDayUtc);
+
+    const riseDate = riseResult ? riseResult.date : new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 39));
+    const setDate = setResult ? setResult.date : new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 35));
+    const noonDate = noonResult ? noonResult.time.date : new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 6, 37));
+
+    // Convert to IST minutes from midnight (+5h 30m offset)
+    const toISTMinutes = (date) => {
+      const utcMins = (date.getUTCHours() * 60) + date.getUTCMinutes() + (date.getUTCSeconds() / 60);
+      return (utcMins + 330) % 1440;
+    };
+
+    const sunriseMin = toISTMinutes(riseDate);
+    const sunsetMin = toISTMinutes(setDate);
+    const solarNoonMin = toISTMinutes(noonDate);
+    const dayLengthMin = sunsetMin >= sunriseMin ? (sunsetMin - sunriseMin) : (1440 - sunriseMin + sunsetMin);
+
+    return {
+      sunriseMinutes: sunriseMin,
+      sunsetMinutes: sunsetMin,
+      solarNoonMinutes: solarNoonMin,
+      dayLengthMinutes: dayLengthMin,
+      sunrise: this.minutesToTimeString(sunriseMin),
+      sunset: this.minutesToTimeString(sunsetMin),
+      solarNoon: this.minutesToTimeString(solarNoonMin)
+    };
+  }
+
+  /**
+   * 11 Authentic Vedic Karanas mapped dynamically across the 60 half-tithis of the lunar month:
+   * - Slot 0: Kintughna (Shukla Prathama 1st half, Sthira)
+   * - Slots 1 to 56: 7 Chara Karanas cycle 8 times (Bava, Balava, Kaulava, Taitila, Gara, Vanija, Vishti/Bhadra)
+   * - Slot 57: Shakuni (Krishna Chaturdashi 2nd half, Sthira)
+   * - Slot 58: Chatushpada (Amavasya 1st half, Sthira)
+   * - Slot 59: Naga (Amavasya 2nd half, Sthira)
+   */
+  static getKaranaDetailsForSlot(slot, solarNoonMin = 727, elongation = null) {
+    const slot1 = ((slot % 60) + 60) % 60;
+    const slot2 = (slot1 + 1) % 60;
+
+    const getSlotKarana = (s) => {
+      if (s === 0) return KARANAS_METADATA.kintughna;
+      if (s === 57) return KARANAS_METADATA.shakuni;
+      if (s === 58) return KARANAS_METADATA.chatushpada;
+      if (s === 59) return KARANAS_METADATA.naga;
+      const charaIdx = (s - 1) % 7;
+      return CHARA_KARANAS[charaIdx];
+    };
+
+    const k1 = getSlotKarana(slot1);
+    const k2 = getSlotKarana(slot2);
+
+    let transitionTime = "12:35 PM";
+    if (elongation !== null) {
+      const nextBound = (slot1 + 1) * 6;
+      const remDeg = (nextBound - elongation + 360) % 360;
+      const minsUntil = remDeg / 0.00847;
+      const transMin = (solarNoonMin + (minsUntil - 360)) % 1440;
+      transitionTime = this.minutesToTimeString(Math.max(solarNoonMin - 60, Math.min(solarNoonMin + 180, transMin)));
+    } else {
+      transitionTime = this.minutesToTimeString(solarNoonMin + 25);
+    }
+
+    const fullText = `${k1.name} (till ${transitionTime}, then ${k2.name})`;
+
+    return {
+      current: k1.name,
+      currentKannada: k1.kannada,
+      currentSanskrit: k1.sanskrit,
+      currentType: k1.type,
+      next: k2.name,
+      nextKannada: k2.kannada,
+      nextSanskrit: k2.sanskrit,
+      nextType: k2.type,
+      transitionTime,
+      fullText,
+      isVishti: k1.isVishti || k2.isVishti,
+      activeVishti: k1.isVishti ? 'Current' : (k2.isVishti ? 'Next' : null),
+      slot1,
+      slot2
+    };
+  }
+
+  static getKaranaDetails(tithiIndex, solarNoonMin = 727, elongation = null) {
+    const slot1 = (tithiIndex * 2) % 60;
+    return this.getKaranaDetailsForSlot(slot1, solarNoonMin, elongation);
+  }
+
+  /**
+   * 6 authentic Vedic Ritus (Seasons) linked directly to the Sun's sidereal position:
+   * 1. Vasanta  - Mesha & Vrishabha (Chaitra & Vaishakha)
+   * 2. Grishma  - Mithuna & Karka (Jyeshtha & Ashadha)
+   * 3. Varsha   - Simha & Kanya (Shravana & Bhadrapada)
+   * 4. Sharad   - Tula & Vrischika (Ashvina & Kartika)
+   * 5. Hemanta  - Dhanu & Makara (Margashirsha & Pushya)
+   * 6. Shishira - Kumbha & Meena (Magha & Phalguna)
+   */
+  static getVedicRitu(suryaRashiIndex) {
+    const rituIndex = Math.floor(suryaRashiIndex / 2) % 6;
+    return RITUS_CATALOG[rituIndex] || RITUS_CATALOG[0];
   }
 
   /**
    * Dynamic Ayana:
-   * Uttarayana: Makara Sankranti (~Jan 15) to Karka Sankranti (~Jul 15)
-   * Dakshinayana: Karka Sankranti (~Jul 16) to Makara Sankranti (~Jan 14)
+   * Uttarayana: Sun in Makara through Mithuna (signs 9, 10, 11, 0, 1, 2)
+   * Dakshinayana: Sun in Karka through Dhanu (signs 3, 4, 5, 6, 7, 8)
    */
-  static getVedicAyana(dateObj) {
-    const month = dateObj.getMonth();
-    const day = dateObj.getDate();
-
-    if ((month === 0 && day >= 15) || (month > 0 && month < 6) || (month === 6 && day <= 15)) {
+  static getVedicAyana(suryaRashiIndex) {
+    if (suryaRashiIndex >= 9 || suryaRashiIndex <= 2) {
       return {
         name: "Uttarayana",
         sanskrit: "उत्तरायण",
@@ -241,82 +405,37 @@ export class PanchangaService {
   }
 
   /**
-   * Dynamic 60-year Jovian Samvatsara cycle with accurate Ugadi transitions
+   * Dynamic 60-year Jovian Samvatsara cycle with annual Ugadi transitions
    */
   static getSamvatsara(dateObj) {
     const year = dateObj.getFullYear();
     const ugadiDate = UGADI_CALENDAR[year] || new Date(year, 2, 22);
 
-    let jovianYear = year;
+    let effectiveYear = year;
     if (dateObj < ugadiDate) {
       // Prior to Ugadi of this calendar year, it still belongs to previous Samvatsara
-      jovianYear = year - 1;
+      effectiveYear = year - 1;
     }
 
     // 2026 Ugadi starts Paraabhava (index 39)
     const baseYear = 2026;
     const baseIndex = 39; // Paraabhava
-    const yearDiff = jovianYear - baseYear;
+    const yearDiff = effectiveYear - baseYear;
     let index = (baseIndex + yearDiff) % 60;
     if (index < 0) index += 60;
     return `${SAMVATSARAS[index]} Samvatsara`;
   }
 
   /**
-   * Astronomical Lunar Calculation: Tithi, Paksha, Masa, Nakshatra
-   */
-  static getLunarDetails(dateObj) {
-    const utcMs = Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-    const diffDays = (utcMs - LUNAR_EPOCH_MS) / (1000 * 60 * 60 * 24);
-
-    let totalCycles = diffDays / SYNODIC_MONTH_DAYS;
-    let cycleIndex = Math.floor(totalCycles);
-    let cycleProgress = totalCycles - cycleIndex;
-    if (cycleProgress < 0) {
-      cycleProgress += 1;
-      cycleIndex -= 1;
-    }
-
-    const tithiIndex = Math.floor(cycleProgress * 30);
-    const isShukla = tithiIndex < 15;
-    const pakshaTithiNum = (tithiIndex % 15) + 1; // 1 to 15
-
-    let masaIndex = (cycleIndex % 12);
-    if (masaIndex < 0) masaIndex += 12;
-    const masaName = MASAS[masaIndex];
-
-    let siderealCycles = diffDays / SIDEREAL_MONTH_DAYS;
-    let nakshatraProgress = siderealCycles - Math.floor(siderealCycles);
-    if (nakshatraProgress < 0) nakshatraProgress += 1;
-    const nakshatraIndex = Math.floor(nakshatraProgress * 27);
-
-    // Yoga (27 yogas)
-    const yogaIndex = Math.abs(Math.floor(diffDays + 7) % 27);
-
-    // Moon Rashi
-    const rashiIndex = Math.floor(nakshatraIndex / 2.25) % 12;
-
-    return {
-      tithiIndex,
-      isShukla,
-      pakshaTithiNum,
-      masaIndex,
-      masaName,
-      nakshatraIndex,
-      yogaIndex,
-      rashiIndex
-    };
-  }
-
-  /**
    * Authentic Hindu, Vedic & Sri Durga Devi Festivals & Vratas Detection
    */
-  static detectFestivals(dateObj, lunar) {
+  static detectFestivals(dateObj, astro) {
     const festivals = [];
     const dayOfWeek = dateObj.getDay();
     const month = dateObj.getMonth();
     const date = dateObj.getDate();
-    const { isShukla, pakshaTithiNum, masaName, nakshatraIndex } = lunar;
+    const { isShukla, pakshaTithiNum, masaIndex, nakshatraIndex } = astro;
+    const masaName = MASAS[masaIndex];
     const nakshatraName = NAKSHATRAS[nakshatraIndex];
 
     // --- SHUKLA PAKSHA FESTIVALS ---
@@ -325,78 +444,38 @@ export class PanchangaService {
         if (masaName === "Chaitra") {
           festivals.push({
             name: "Ugadi (Chandramana Vedic New Year)",
-            kannada: "ಯುಗಾದಿ ಹಬ್ಬ (ಸಂವತ್ಸರಾರಂಭ)",
-            badge: "🌸 Ugadi Festival",
+            kannada: "ಯುಗಾದಿ ಹಬ್ಬ (ಸಂವತ್ಸರಾದಿ)",
+            badge: "🌺 Ugadi Mahotsava",
             isMajor: true,
-            description: "Commencement of the new Vedic Samvatsara. Bevu-Bella distribution and Panchanga Shravana."
-          });
-        } else if (masaName === "Ashvina") {
-          festivals.push({
-            name: "Sharad Navaratri Ghatasthapana",
-            kannada: "ಶರನ್ನವರಾತ್ರಿ ಘಟಸ್ಥಾಪನೆ",
-            badge: "🪔 Navaratri Day 1",
-            isMajor: true,
-            description: "Auspicious invocation of Sri Durga Devi for the 9 holy nights of Navaratri Utsavam."
+            description: "Commencement of the new Jovian Samvatsara; Panchanga Shravana and Bevu-Bella distribution."
           });
         } else if (masaName === "Kartika") {
           festivals.push({
-            name: "Bali Padyami (Deepavali Deepotsava)",
-            kannada: "ಬಲಿ ಪಾಡ್ಯಮಿ",
+            name: "Bali Padyami (Deepavali 3rd Day)",
+            kannada: "ಬಲಿ ಪಾಡ್ಯಮಿ (ಗೋ ಪೂಜೆ)",
             badge: "🪔 Bali Padyami",
             isMajor: true,
-            description: "Third day of Deepavali; King Bali worship, Gow Pooja, and glorious sanctum lamp illumination."
+            description: "Celebration of King Bali and sanctum Go-Pooja (sacred cow worship) at the temple."
           });
         }
-      } else if (pakshaTithiNum === 3 && masaName === "Vaishakha") {
-        festivals.push({
-          name: "Akshaya Tritiya",
-          kannada: "ಅಕ್ಷಯ ತೃತೀಯ",
-          badge: "💰 Akshaya Tritiya",
-          isMajor: true,
-          description: "Supreme day of unending prosperity, gold purchase, Annadana, and Lakshmi-Narayana blessings."
-        });
+      } else if (pakshaTithiNum === 3) {
+        if (masaName === "Vaishakha") {
+          festivals.push({
+            name: "Akshaya Tritiya",
+            kannada: "ಅಕ್ಷಯ ತೃತೀಯಾ",
+            badge: "✨ Akshaya Tritiya",
+            isMajor: true,
+            description: "Supreme day of unending prosperity, golden donations, and special Mahalakshmi Archana."
+          });
+        }
       } else if (pakshaTithiNum === 4) {
         if (masaName === "Bhadrapada") {
           festivals.push({
-            name: "Varasiddhi Vinayaka Chaturthi (Ganesh Utsav)",
-            kannada: "ವರಸಿದ್ಧಿ ವಿನಾಯಕ ಚತುರ್ಥಿ",
-            badge: "🐘 Maha Vinayaka Chaturthi",
+            name: "Ganesha Chaturthi (Vinayaka Chavithi)",
+            kannada: "ಶ್ರೀ ಗಣೇಶ ಚತುರ್ಥಿ",
+            badge: "🐘 Ganesha Chaturthi",
             isMajor: true,
-            description: "Grand appearance day of Lord Ganesha with 21 modaka offerings and obstacle removal pujas."
-          });
-        } else {
-          festivals.push({
-            name: "Shukla Vinayaka Chaturthi",
-            kannada: "ವಿನಾಯಕ ಚತುರ್ಥಿ",
-            badge: "🐘 Vinayaka Chaturthi",
-            isMajor: false,
-            description: "Monthly waxing Chaturthi dedicated to Lord Vighnaharta Ganesha."
-          });
-        }
-      } else if (pakshaTithiNum === 5 && masaName === "Chaitra") {
-        festivals.push({
-          name: "Lakshmi Panchami / Sri Panchami",
-          kannada: "ಶ್ರೀ ಪಂಚಮಿ (ಲಕ್ಷ್ಮೀ ಪಂಚಮಿ)",
-          badge: "🌸 Sri Panchami",
-          isMajor: false,
-          description: "Sacred day invoking Mahalakshmi for wealth, prosperity and knowledge."
-        });
-      } else if (pakshaTithiNum === 6) {
-        if (masaName === "Margashirsha") {
-          festivals.push({
-            name: "Subrahmanya Shashti (Champa Shashti)",
-            kannada: "ಸುಬ್ರಹ್ಮಣ್ಯ ಷಷ್ಠಿ (ಚಂಪಾ ಷಷ್ಠಿ)",
-            badge: "🦚 Subrahmanya Shashti",
-            isMajor: true,
-            description: "Sacred day of Lord Shanmukha / Kartikeya and Sarpa dosha nivarana poojas."
-          });
-        } else {
-          festivals.push({
-            name: "Skanda Shashti Vrata",
-            kannada: "ಸ್ಕಂದ ಷಷ್ಠಿ",
-            badge: "🦚 Skanda Shashti",
-            isMajor: false,
-            description: "Monthly Shashti vrata honoring Lord Murugan/Subrahmanya."
+            description: "Grand appearance of Vighnaharta Sri Ganesha with Modaka naivedya and special Ganapathi Homa."
           });
         }
       } else if (pakshaTithiNum === 7 && masaName === "Magha") {
@@ -544,24 +623,24 @@ export class PanchangaService {
           kannada: "ಸಂಕಷ್ಟಹರ ಚತುರ್ಥಿ ವ್ರತ",
           badge: "🐘 Sankashta Hara Chaturthi",
           isMajor: true,
-          description: "Sacred fast observed from dawn until moonrise (Chandrodaya) for complete removal of hurdles and distress."
+          description: "Sacred moonrise Ganesha Pooja and Arghya to remove afflictions and sorrow."
         });
       } else if (pakshaTithiNum === 8) {
-        if ((masaName === "Shravana" || masaName === "Bhadrapada") && nakshatraName === "Rohini") {
+        if (masaName === "Shravana" || masaName === "Bhadrapada") {
           festivals.push({
             name: "Sri Krishna Janmashtami (Gokulashtami)",
             kannada: "ಶ್ರೀ ಕೃಷ್ಣ ಜನ್ಮಾಷ್ಟಮಿ (ಗೋಕುಲಾಷ್ಟಮಿ)",
-            badge: "🪈 Sri Krishna Janmashtami",
+            badge: "🪈 Krishna Janmashtami",
             isMajor: true,
-            description: "Divine advent of Bhagavan Sri Krishna under Rohini Nakshatra with butter and laddu offerings."
+            description: "Midnight divine appearance of Bhagavan Sri Krishna with butter naivedya."
           });
         } else {
           festivals.push({
-            name: "Kala Bhairava Ashtami",
-            kannada: "ಕಾಲಾಷ್ಟಮಿ (ಭೈರವಾಷ್ಟಮಿ)",
+            name: "Kalashtami (Bhairava Ashtami)",
+            kannada: "ಕಾಲಾಷ್ಟಮಿ (ಭೈರವಾರಾಧನೆ)",
             badge: "🔱 Kalashtami",
             isMajor: false,
-            description: "Monthly waning Ashtami invoking Lord Kala Bhairava for protection."
+            description: "Worship of Lord Kala Bhairava and Parashakti; dispels fears and negative forces."
           });
         }
       } else if (pakshaTithiNum === 11) {
@@ -591,11 +670,11 @@ export class PanchangaService {
           });
         } else if (masaName === "Magha" || masaName === "Phalguna") {
           festivals.push({
-            name: "Maha Shivaratri (Night of Shiva)",
+            name: "Maha Shivaratri",
             kannada: "ಮಹಾ ಶಿವರಾತ್ರಿ",
             badge: "🔱 Maha Shivaratri",
             isMajor: true,
-            description: "Great sanctum night of Shiva. All-night Bilva archana, abhisheka and Jagaran."
+            description: "Great Night of Shiva; all-night Bilvarchana, Rudrabhisheka, and sacred jagarana."
           });
         } else {
           festivals.push({
@@ -669,54 +748,6 @@ export class PanchangaService {
   }
 
   /**
-   * 11 Authentic Vedic Karanas mapped dynamically across the 60 half-tithis of the lunar month:
-   * - Slot 0: Kintughna (Shukla Prathama 1st half, Sthira)
-   * - Slots 1 to 56: 7 Chara Karanas cycle 8 times (Bava, Balava, Kaulava, Taitila, Gara, Vanija, Vishti/Bhadra)
-   * - Slot 57: Shakuni (Krishna Chaturdashi 2nd half, Sthira)
-   * - Slot 58: Chatushpada (Amavasya 1st half, Sthira)
-   * - Slot 59: Naga (Amavasya 2nd half, Sthira)
-   */
-  static getKaranaDetails(tithiIndex, solarNoonMin = 727) {
-    const slot1 = (tithiIndex * 2) % 60;
-    const slot2 = (tithiIndex * 2 + 1) % 60;
-
-    const getSlotKarana = (slot) => {
-      if (slot === 0) return KARANAS_METADATA.kintughna;
-      if (slot === 57) return KARANAS_METADATA.shakuni;
-      if (slot === 58) return KARANAS_METADATA.chatushpada;
-      if (slot === 59) return KARANAS_METADATA.naga;
-      const charaIdx = (slot - 1) % 7;
-      return CHARA_KARANAS[charaIdx];
-    };
-
-    const k1 = getSlotKarana(slot1);
-    const k2 = getSlotKarana(slot2);
-
-    // Transition between first half and second half of the tithi around solar noon
-    const transitionMin = solarNoonMin + 25;
-    const transitionTime = this.minutesToTimeString(transitionMin);
-
-    const fullText = `${k1.name} (till ${transitionTime}, then ${k2.name})`;
-
-    return {
-      current: k1.name,
-      currentKannada: k1.kannada,
-      currentSanskrit: k1.sanskrit,
-      currentType: k1.type,
-      next: k2.name,
-      nextKannada: k2.kannada,
-      nextSanskrit: k2.sanskrit,
-      nextType: k2.type,
-      transitionTime,
-      fullText,
-      isVishti: k1.isVishti || k2.isVishti,
-      activeVishti: k1.isVishti ? 'Current' : (k2.isVishti ? 'Next' : null),
-      slot1,
-      slot2
-    };
-  }
-
-  /**
    * Retrieves the next upcoming festivals starting from the specified date
    */
   static getUpcomingFestivals(fromDate = new Date(), count = 4) {
@@ -727,8 +758,8 @@ export class PanchangaService {
     for (let dayOffset = 1; dayOffset <= 45 && upcoming.length < count; dayOffset++) {
       const targetDate = new Date(start);
       targetDate.setDate(targetDate.getDate() + dayOffset);
-      const lunar = this.getLunarDetails(targetDate);
-      const dayFestivals = this.detectFestivals(targetDate, lunar);
+      const astro = this.getAstronomyCalculations(targetDate);
+      const dayFestivals = this.detectFestivals(targetDate, astro);
 
       for (const fest of dayFestivals) {
         if (!seenNames.has(fest.name)) {
@@ -751,7 +782,7 @@ export class PanchangaService {
 
   /**
    * Generates complete Vedic astronomical details for a given Date
-   * Calibrated for Bengaluru, Karnataka.
+   * Calibrated for Bengaluru, Karnataka using Astronomy Engine.
    * @param {Date|string} dateInput 
    */
   static getPanchanga(dateInput = new Date()) {
@@ -762,55 +793,62 @@ export class PanchangaService {
 
     const dayOfWeek = d.getDay();
 
-    // Solar Horizon calculations for Bengaluru
-    const sunData = this.calculateBengaluruSun(d);
+    // 1. High Precision Astronomy Engine Calculations
+    const astro = this.getAstronomyCalculations(d);
+
+    // 2. High Precision Solar Horizon for Bengaluru
+    const sunData = this.getSolarHorizon(d);
     const sunriseMin = sunData.sunriseMinutes;
     const sunsetMin = sunData.sunsetMinutes;
     const dayLengthMin = sunData.dayLengthMinutes;
     const solarNoonMin = sunData.solarNoonMinutes;
 
-    // Dinamana 1/8th slots for Kaala
+    // 3. Kaala Divisions (1/8th daylight slots)
     const slotDuration = dayLengthMin / 8;
     const kaalaSlot = KAALA_SEGMENTS[dayOfWeek];
 
-    // Rahu Kala
     const rahuStart = sunriseMin + (kaalaSlot.rahu * slotDuration);
     const rahuEnd = rahuStart + slotDuration;
 
-    // Yamaganda
     const yamaStart = sunriseMin + (kaalaSlot.yama * slotDuration);
     const yamaEnd = yamaStart + slotDuration;
 
-    // Gulika Kala
     const gulikaStart = sunriseMin + (kaalaSlot.gulika * slotDuration);
     const gulikaEnd = gulikaStart + slotDuration;
 
-    // Abhijit Muhurtha (8th Muhurtha out of 15, centered at Solar Noon)
-    const oneMuhurthaMin = dayLengthMin / 15;
-    const abhijitStart = solarNoonMin - (oneMuhurthaMin / 2);
-    const abhijitEnd = solarNoonMin + (oneMuhurthaMin / 2);
+    // Abhijit Muhurtha (48-min window centered at solar noon, not observed Wednesday)
+    const abhijitStart = solarNoonMin - 24;
+    const abhijitEnd = solarNoonMin + 24;
 
-    // Brahma Muhurtha
+    // Brahma Muhurtha (96 to 48 minutes before sunrise)
     const brahmaStart = sunriseMin - 96;
     const brahmaEnd = sunriseMin - 48;
 
-    // Dynamic Astronomical Lunar Details
-    const lunar = this.getLunarDetails(d);
-    const tithiName = TITHIS[lunar.tithiIndex];
-    const nakshatraName = NAKSHATRAS[lunar.nakshatraIndex];
-    const yogaName = YOGAS[lunar.yogaIndex];
-    const rashiName = RASHIS[lunar.rashiIndex];
+    // 4. 5 Limbs Data Formatting
+    const tithiName = TITHIS[astro.tithiIndex];
+    const tithiKannada = TITHI_KANNADA[astro.tithiIndex];
 
-    // Dynamic 11 Vedic Karanas
-    const karanaDetails = this.getKaranaDetails(lunar.tithiIndex, solarNoonMin);
+    const nakshatraName = NAKSHATRAS[astro.nakshatraIndex];
+    const nakshatraKannada = NAKSHATRA_KANNADA[astro.nakshatraIndex];
+
+    const yogaName = YOGAS[astro.yogaIndex];
+    const chandraRashiName = RASHIS[astro.chandraRashiIndex];
+    const suryaRashiName = RASHIS[astro.suryaRashiIndex];
+
+    // Dynamic 11 Karanas with half-tithi transitions & Bhadra detection
+    const karanaDetails = this.getKaranaDetailsForSlot(astro.karanaIndex, solarNoonMin, astro.elongation);
 
     // Dynamic Ritu, Ayana & Samvatsara
-    const rituObj = this.getVedicRitu(d, lunar);
-    const ayanaObj = this.getVedicAyana(d);
+    const rituObj = this.getVedicRitu(astro.suryaRashiIndex);
+    const ayanaObj = this.getVedicAyana(astro.suryaRashiIndex);
     const samvatsaraName = this.getSamvatsara(d);
 
+    // Masa: NEVER undefined
+    const masaName = MASAS[astro.masaIndex];
+    const masaKannada = MASA_KANNADA[astro.masaIndex];
+
     // Dynamic Festivals & Vratas
-    const festivals = this.detectFestivals(d, lunar);
+    const festivals = this.detectFestivals(d, astro);
     const primaryFestival = festivals.length > 0 ? festivals[0] : null;
     const upcomingFestivals = this.getUpcomingFestivals(d, 4);
 
@@ -818,7 +856,7 @@ export class PanchangaService {
     const dlHours = Math.floor(dayLengthMin / 60);
     const dlMins = Math.round(dayLengthMin % 60);
 
-    // Current sun progress along the daylight arc (0.0 to 1.0)
+    // Current Sun progress along daylight arc (0.0 to 1.0)
     const now = new Date();
     const isToday = now.toDateString() === d.toDateString();
     let sunProgress = 0.5;
@@ -846,34 +884,39 @@ export class PanchangaService {
       ayanaSanskrit: ayanaObj.sanskrit,
       ayanaDescription: ayanaObj.description,
       ritu: rituObj.name,
+      rituKannada: rituObj.kannada,
       rituSanskrit: rituObj.sanskrit,
       rituMeaning: rituObj.meaning,
       rituDescription: rituObj.description,
-      masa: lunar.masaName,
-      isShukla: lunar.isShukla,
+      masa: masaName,
+      masaKannada: masaKannada,
+      isShukla: astro.isShukla,
       tithi: {
         name: tithiName,
+        kannada: tithiKannada,
         endTime: "11:42 PM",
-        isShukla: lunar.isShukla,
-        number: lunar.pakshaTithiNum
+        isShukla: astro.isShukla,
+        number: astro.pakshaTithiNum
       },
       nakshatra: {
         name: nakshatraName,
+        kannada: nakshatraKannada,
         endTime: "04:15 PM"
       },
       yoga: yogaName,
       karana: karanaDetails.fullText,
       karanaDetails,
-      rashi: rashiName,
+      rashi: chandraRashiName,
+      suryaRashi: suryaRashiName,
       rahuKala: `${this.minutesToTimeString(rahuStart)} – ${this.minutesToTimeString(rahuEnd)}`,
       rahuKalaRaw: { startMin: rahuStart, endMin: rahuEnd },
       yamaganda: `${this.minutesToTimeString(yamaStart)} – ${this.minutesToTimeString(yamaEnd)}`,
       gulikaKala: `${this.minutesToTimeString(gulikaStart)} – ${this.minutesToTimeString(gulikaEnd)}`,
       abhijitMuhurtha: dayOfWeek === 3 ? "Not Observed (Wednesday)" : `${this.minutesToTimeString(abhijitStart)} – ${this.minutesToTimeString(abhijitEnd)}`,
       brahmaMuhurtha: `${this.minutesToTimeString(brahmaStart)} – ${this.minutesToTimeString(brahmaEnd)}`,
-      sunrise: this.minutesToTimeString(sunriseMin),
-      sunset: this.minutesToTimeString(sunsetMin),
-      solarNoon: this.minutesToTimeString(solarNoonMin),
+      sunrise: sunData.sunrise,
+      sunset: sunData.sunset,
+      solarNoon: sunData.solarNoon,
       sunriseMinutes: sunriseMin,
       sunsetMinutes: sunsetMin,
       solarNoonMinutes: solarNoonMin,

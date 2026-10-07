@@ -212,9 +212,13 @@ class DigitalMandapaApp {
 
   // Panchanga Actions & Interactive Guidance
   stepPanchangaDate(daysOffset) {
-    const cur = new Date(this.viewState.panchangaDate);
-    cur.setDate(cur.getDate() + daysOffset);
-    this.viewState.panchangaDate = cur;
+    if (daysOffset === 'today') {
+      this.viewState.panchangaDate = new Date();
+    } else {
+      const cur = new Date(this.viewState.panchangaDate);
+      cur.setDate(cur.getDate() + Number(daysOffset));
+      this.viewState.panchangaDate = cur;
+    }
     this.render();
   }
 

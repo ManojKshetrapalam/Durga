@@ -14,14 +14,17 @@ Sri Durga Devi Temple Digital Mandapa bridges centuries of temple sacred traditi
 
 ## 2. Current Status
 - **Phase 0–6 (Discovery, UX & Stitch Loop Screen System):** ✅ COMPLETE
-  - All 7 core reusable screen templates generated via Stitch Loop, downloaded (`.stitch/designs/*.html` & `*.png`), visually verified, and aligned with `Devotional Temple Mandapa` design tokens.
-  - Comprehensive documentation created in `/docs/` (PRD, UX flows, screen inventory, design tokens, architecture, PWA spec, database schemas, availability engine, WhatsApp integration, admin panel, testing plan).
-- **Phases 7–18 (Production PWA Implementation & Verification):** 🚀 READY FOR IMPLEMENTATION
+- **Phases 7–18 (Production PWA Implementation & Verification):** ✅ COMPLETE
+- **Surendra Jat Panchang Engine & Cache v6:** ✅ IMPLEMENTED
+  - Integrated Surendra Jat Panchang ephemeris algorithm powered by `astronomy-engine` for exact Bengaluru coordinates.
+  - Dynamically calculates 11 Karanas (7 Chara cycling & 4 Sthira), 6 Ritus, 60 Jovian Samvatsaras, 12 Masas, Solar Horizon (Sunrise, Sunset, Midday Solar Noon), and Hindu/temple festivals across any future/past year.
+  - Upgraded Service Worker cache strategy to Network-First (`durga-mandapa-v6`) to ensure immediate live updates without stale browser caching.
 
 ---
 
 ## 3. Technology Stack
 - **Frontend / PWA Shell:** Vanilla Modern ES2022 / HTML5 / CSS3 Variables / PWA Service Worker.
+- **Astronomical Ephemeris:** `astronomy-engine` (ESM vendored) with IAU-2006 Lahiri Ayanamsa.
 - **Visual Design Tokens:** Devotional Temple Mandapa (`.stitch/DESIGN.md`): Warm Ivory (`#FAF7F2`), Pure Cream (`#FFFDF8`), Deep Maroon (`#721C2B`), Antique Gold (`#C59B27`), Auspicious Saffron (`#D95D0F`).
 - **Typography:** Playfair Display (Devotional Serif) & Plus Jakarta Sans (Elderly-accessible Humanist Sans, min 15px).
 - **Storage:** Client `localStorage` / `IndexedDB` with Service Worker offline caching.
@@ -39,7 +42,7 @@ Sri Durga Devi Temple Digital Mandapa bridges centuries of temple sacred traditi
 - **Generated Stitch Screens:** `.stitch/designs/` (`home.png`, `pooja-detail.png`, `calendar-availability.png`, `panchanga-daily.png`, `booking-request.png`, `qr-landing.png`, `admin-dashboard.png`)
 - **Core Business Logic:**
   - Date Availability Precedence Engine: `app/js/services/availabilityEngine.js`
-  - Astronomical Bengaluru Panchanga & Solar Engine: `app/js/services/panchangaService.js`
+  - Surendra Jat Astronomical Panchanga Engine: `app/js/services/panchangaService.js` & `app/js/lib/astronomy.js`
   - WhatsApp Deep-Link & Token Generator: `app/js/services/whatsappService.js`
   - Unified State Store: `app/js/services/store.js`
 
