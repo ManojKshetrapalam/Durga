@@ -6,6 +6,10 @@ npm-debug.log*
 scratch/
 .system_generated/
 *.tmp
+*.zip
+*.pdf
+pdf_extracted_text.txt
+Duraga Temple source/
 
 # Operating System
 .DS_Store

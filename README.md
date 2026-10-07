@@ -31,15 +31,17 @@ Sri Durga Devi Temple Digital Mandapa bridges centuries of temple sacred traditi
 
 ## 4. AI Quick Start
 - **Entry Points:**
-  - Devotee App: `app/index.html`
-  - Admin Desk: `app/index.html#admin`
-  - Physical QR On-Ramp: `app/index.html?spot=entrance`
-- **Design Specifications & Tokens:** `.stitch/DESIGN.md`, `docs/design-system.md`
+  - Grand Devotional Landing Page: `app/index.html` (Responsive desktop & mobile with audio chant, live Panchanga strip, 21 sevas showcase, phone preview)
+  - Mobile Devotee PWA Front Desk: `app/app.html` (Standalone PWA with bottom nav, touch targets, offline cache)
+  - Standalone Trustee & Archaka Webpage: `app/admin.html` (Full-width responsive desktop portal with PIN 1008 / password login)
+  - Physical QR On-Ramp: `app/app.html?spot=entrance`
+- **Design Specifications & Tokens:** `.stitch/DESIGN.md`, `app/css/tokens.css`
 - **Generated Stitch Screens:** `.stitch/designs/` (`home.png`, `pooja-detail.png`, `calendar-availability.png`, `panchanga-daily.png`, `booking-request.png`, `qr-landing.png`, `admin-dashboard.png`)
 - **Core Business Logic:**
-  - Date Availability Engine: `app/src/utils/availability.js`
-  - Panchanga Engine: `app/src/utils/panchangaCalc.js`
-  - WhatsApp Deep-Link Engine: `app/src/utils/whatsappLink.js`
+  - Date Availability Precedence Engine: `app/js/services/availabilityEngine.js`
+  - Astronomical Bengaluru Panchanga & Solar Engine: `app/js/services/panchangaService.js`
+  - WhatsApp Deep-Link & Token Generator: `app/js/services/whatsappService.js`
+  - Unified State Store: `app/js/services/store.js`
 
 ---
 

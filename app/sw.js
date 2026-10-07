@@ -2,14 +2,20 @@
  * Sri Durga Devi Temple — Digital Mandapa: Offline Service Worker
  */
 
-const CACHE_NAME = 'durga-mandapa-v1';
+const CACHE_NAME = 'durga-mandapa-v2';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
+  './app.html',
+  './admin.html',
   './manifest.webmanifest',
   './css/tokens.css',
   './css/app.css',
+  './css/landing.css',
+  './css/admin.css',
   './js/app.js',
+  './js/adminApp.js',
+  './js/landingApp.js',
   './js/data/sevas.js',
   './js/data/timings.js',
   './js/services/store.js',

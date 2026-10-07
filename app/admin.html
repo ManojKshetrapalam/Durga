@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trustee & Archaka Administrative Desk — Sri Durga Parameshwari Temple</title>
+  
+  <meta name="description" content="Administrative control portal for Sri Durga Devi Temple trustees and archakas. Date availability management, seva pricing, and WhatsApp booking desk.">
+  <meta name="theme-color" content="#721C2B">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+  <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core App Tokens & Admin Styles -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+  <div id="admin-root">
+    <!-- Initial Loading State -->
+    <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center;">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: #721C2B; display: flex; align-items: center; justify-content: center; color: #C59B27; font-size: 26px; box-shadow: 0 4px 16px rgba(114, 28, 43, 0.25);">
+        🪔
+      </div>
+      <div>
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #721C2B; margin-bottom: 4px;">Sri Durga Devi Temple</h1>
+        <p style="font-size: 0.85rem; color: #78716C;">Loading Administrative Desk...</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- Admin Controller Entrypoint -->
+  <script type="module" src="js/adminApp.js"></script>
+</body>
+</html>

@@ -2,48 +2,447 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sri Durga Devi Temple — Digital Mandapa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sri Durga Parameshwari Temple — Digital Mandapa | Chandra Layout, Bengaluru</title>
   
-  <!-- PWA & Mobile Meta Tags -->
-  <meta name="description" content="Digital devotee front desk, daily Vedic Panchanga, Darshan timings, and Seva bookings for Sri Durga Parameshwari Temple, Chandra Layout.">
+  <!-- SEO & Devotional Meta Tags -->
+  <meta name="description" content="Official Digital Mandapa of Sri Durga Parameshwari Temple, Chandra Layout, Bengaluru. Live daily Vedic Panchanga, 21 authentic sevas & homas, darshan timings, and WhatsApp seva booking.">
   <meta name="theme-color" content="#721C2B">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Durga Mandapa">
-  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
 
   <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- App Stylesheets -->
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/landing.css">
 </head>
-<body>
-  <div id="app-shell">
-    <!-- Initial Loading State -->
-    <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center;">
-      <div style="width: 56px; height: 56px; border-radius: 50%; background: #721C2B; display: flex; align-items: center; justify-content: center; color: #C59B27; font-size: 26px; box-shadow: 0 4px 16px rgba(114, 28, 43, 0.25);">
-        🪔
-      </div>
-      <div>
-        <h1 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #721C2B; margin-bottom: 4px;">Sri Durga Devi Temple</h1>
-        <p style="font-size: 0.85rem; color: #78716C;">Digital Mandapa Devotee Front Desk</p>
-      </div>
-      <div style="font-size: 0.8rem; color: #D95D0F; font-weight: 600;">
-        Om Sri Durgayai Namaha 🙏
+<body class="landing-body">
+
+  <!-- ==================== TOP NAVIGATION ==================== -->
+  <header class="landing-navbar">
+    <div class="landing-container landing-nav-inner">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-crest">🪔</div>
+        <div class="nav-brand-text">
+          <h2>Sri Durga Devi Temple</h2>
+          <p>Chandra Layout 1st Phase, Bengaluru</p>
+        </div>
+      </a>
+
+      <ul class="nav-menu">
+        <li><a href="#panchanga" class="nav-link">Live Panchanga</a></li>
+        <li><a href="#sevas" class="nav-link">21 Sacred Sevas</a></li>
+        <li><a href="#timings" class="nav-link">Darshan Timings</a></li>
+        <li><a href="#gallery" class="nav-link">Temple Gallery</a></li>
+        <li><a href="#contact" class="nav-link">Visit & Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="app.html" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 6px;">
+          <span>📱</span> Open Devotee App (PWA)
+        </a>
+        <a href="admin.html" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px;">
+          <span>🛡️</span> Trustee Desk
+        </a>
       </div>
     </div>
-  </div>
+  </header>
 
-  <div id="toast-container" aria-live="polite"></div>
+  <!-- ==================== HERO SECTION ==================== -->
+  <section class="landing-hero">
+    <div class="landing-container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="hero-badge-row">
+            <span class="sacred-ticker">
+              <span class="sacred-ticker-dot"></span>
+              Temple Open • Pratah Kaala Darshana
+            </span>
+            <span class="section-tag" style="margin-bottom: 0;">Digital Mandapa</span>
+          </div>
 
-  <!-- Main ES Module Entrypoint -->
-  <script type="module" src="js/app.js"></script>
+          <h1 class="hero-headline">
+            Plan Your Visit.<br>
+            Prepare Your Prayer.<br>
+            <span class="gold-highlight">Experience the Divine.</span>
+          </h1>
+
+          <p class="hero-lead">
+            Welcome to the digital devotee front desk of <strong>Sri Durga Parameshwari Temple</strong>. Access authentic daily Vedic Panchanga, discover 21 sanctum sevas and homas, verify dates without double-booking, and request sevas directly on WhatsApp.
+          </p>
+
+          <!-- Audio Chant Bar -->
+          <div class="audio-chant-card">
+            <div class="audio-info">
+              <button class="audio-icon-btn" id="btn-play-chant" aria-label="Play sacred chant">
+                ▶
+              </button>
+              <div class="audio-text">
+                <h4>Om Sri Durgayai Namaha 🙏</h4>
+                <p id="chant-status-text">Tap to play authentic temple audio chant</p>
+              </div>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--color-gold-hover); font-weight: 700; text-transform: uppercase;">Sanctum Audio</span>
+          </div>
+
+          <div class="hero-cta-group">
+            <a href="app.html" class="btn btn-primary" style="padding: 14px 24px; font-size: 1rem; font-weight: 700; text-decoration: none;">
+              📱 Launch Devotee PWA App →
+            </a>
+            <button onclick="window.landing.bookSevaWhatsApp('durga-homa')" class="btn btn-whatsapp" style="padding: 14px 22px; font-size: 0.95rem;">
+              💬 Book Seva via WhatsApp
+            </button>
+            <a href="admin.html" class="btn btn-secondary" style="padding: 14px 20px; font-size: 0.95rem; text-decoration: none;">
+              🛡️ Trustee & Archaka Portal
+            </a>
+          </div>
+
+          <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px; font-size: 0.82rem; color: var(--color-text-soft);">
+            <span>✓ No App Store Download</span>
+            <span>•</span>
+            <span>✓ Offline Sanctum Shell</span>
+            <span>•</span>
+            <span>✓ Real Counter Receipts</span>
+          </div>
+        </div>
+
+        <!-- Phone Device Mockup with Live PWA Iframe -->
+        <div class="hero-phone-showcase">
+          <div class="phone-device-frame">
+            <div class="phone-notch"></div>
+            <iframe class="phone-screen-iframe" src="app.html" title="Sri Durga Devi Temple Devotee PWA Preview" loading="lazy"></iframe>
+            <div class="phone-badge-floating">
+              <div style="font-size: 24px;">🪔</div>
+              <div>
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--color-primary);">The Temple In Your Pocket</div>
+                <div style="font-size: 0.7rem; color: var(--color-text-soft);">Live Interactive PWA Shell</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== LIVE BENGALURU PANCHANGA STRIP ==================== -->
+  <section id="panchanga" class="panchanga-strip-section">
+    <div class="landing-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: gap;">
+        <div>
+          <h2 style="font-family: var(--font-serif); font-size: 1.5rem; color: #FFFDF8;">
+            Daily Vedic Panchanga & Astronomical Horizon
+          </h2>
+          <p style="font-size: 0.85rem; color: rgba(255, 253, 248, 0.8);">
+            Calibrated for Bengaluru Horizon (12.97° N, 77.59° E) • Dynamic Solar Declination Engine
+          </p>
+        </div>
+        <a href="app.html#panchanga" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.12); color: #FFF; border-color: rgba(255,255,255,0.3); text-decoration: none;">
+          Full Panchanga View →
+        </a>
+      </div>
+
+      <div class="panchanga-strip-grid" id="panchanga-strip-container">
+        <!-- Dynamically rendered via landingApp.js -->
+        <div class="panchanga-strip-card"><div class="label">Loading Vedic Panchanga...</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== WHY DIGITAL MANDAPA (4 PILLARS) ==================== -->
+  <section class="section-padding" style="background: var(--color-canvas);">
+    <div class="landing-container">
+      <div class="section-header">
+        <span class="section-tag">Devotee-First Architecture</span>
+        <h2 class="section-title">Built for the Sanctum, Ready in Your Pocket</h2>
+        <p class="section-subtitle">
+          Engineered to answer every devotee question before entering the prakaara, eliminating queues and confusion.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;">
+        <div class="card" style="margin: 0;">
+          <div style="font-size: 32px; margin-bottom: 12px;">📱</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin-bottom: 8px;">Zero Download Required</h3>
+          <p style="font-size: 0.88rem; color: var(--color-text-soft);">
+            Install instantly from your browser to your home screen. Fully responsive on all smartphones (360px–430px) without App Store friction.
+          </p>
+        </div>
+
+        <div class="card" style="margin: 0;">
+          <div style="font-size: 32px; margin-bottom: 12px;">📶</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin-bottom: 8px;">Sanctum Offline Shell</h3>
+          <p style="font-size: 0.88rem; color: var(--color-text-soft);">
+            Thick granite temple prakaaras often block mobile signals. Our Service Worker precaches today's Panchanga and pooja guidelines offline.
+          </p>
+        </div>
+
+        <div class="card" style="margin: 0;">
+          <div style="font-size: 32px; margin-bottom: 12px;">🛡️</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin-bottom: 8px;">Admin Date Supremacy</h3>
+          <p style="font-size: 0.88rem; color: var(--color-text-soft);">
+            Temple festival blocks and trustee overrides supersede automated astrological dates, ensuring no double-booking during Brahmotsava or Navaratri.
+          </p>
+        </div>
+
+        <div class="card" style="margin: 0;">
+          <div style="font-size: 32px; margin-bottom: 12px;">💬</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin-bottom: 8px;">WhatsApp Deep-Linking</h3>
+          <p style="font-size: 0.88rem; color: var(--color-text-soft);">
+            Devotees receive structured booking tokens (`SDD-YYYY-MMDD-XXX`) via WhatsApp. Kanike contributions are confirmed at the physical counter.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 21 SACRED SEVAS CATALOG ==================== -->
+  <section id="sevas" class="section-padding" style="background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+    <div class="landing-container">
+      <div class="section-header">
+        <span class="section-tag">21 Authentic Sacred Rituals</span>
+        <h2 class="section-title">Discover Temple Sevas & Sacred Homas</h2>
+        <p class="section-subtitle">
+          From ₹10 Kumkuma Archana to ₹1,501 Durga Homa. Find transparent details, devotee requirements, and reserve seamlessly.
+        </p>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="sevas-filter-bar">
+        <button class="filter-pill-btn active" data-cat="all" onclick="window.landing.filterCategory('all')">All Sevas (21)</button>
+        <button class="filter-pill-btn" data-cat="archana" onclick="window.landing.filterCategory('archana')">Archanas (7)</button>
+        <button class="filter-pill-btn" data-cat="abhisheka" onclick="window.landing.filterCategory('abhisheka')">Abhishekas (4)</button>
+        <button class="filter-pill-btn" data-cat="homa" onclick="window.landing.filterCategory('homa')">Homas & Havanas (4)</button>
+        <button class="filter-pill-btn" data-cat="special" onclick="window.landing.filterCategory('special')">Special Sevas (4)</button>
+        <button class="filter-pill-btn" data-cat="vahana" onclick="window.landing.filterCategory('vahana')">Vehicle Poojas (2)</button>
+      </div>
+
+      <!-- Sevas Grid -->
+      <div class="sevas-grid" id="landing-sevas-grid">
+        <!-- Rendered via landingApp.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TEMPLE TIMINGS & SCHEDULE ==================== -->
+  <section id="timings" class="section-padding" style="background: var(--color-canvas);">
+    <div class="landing-container">
+      <div class="section-header">
+        <span class="section-tag">Temple Hours</span>
+        <h2 class="section-title">Daily Darshan & Aarti Timings</h2>
+        <p class="section-subtitle">
+          Plan your arrival to participate in sacred abhishekams and camphor mangalarathi.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        <!-- Morning Darshan -->
+        <div class="card card-gold-accent" style="margin: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-primary); font-weight: 700;">🌅 Morning Darshana</h3>
+            <span class="badge badge-gold">Pratah Kaala</span>
+          </div>
+          <div class="num-tabular" style="font-size: 1.5rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">
+            06:30 AM – 11:30 AM
+          </div>
+          <ul style="font-size: 0.88rem; color: var(--color-text-main); padding-left: 20px; line-height: 1.8;">
+            <li><strong>06:30 AM:</strong> Nirmalya Visarjana & Suprabhatha Seva</li>
+            <li><strong>07:30 AM – 09:00 AM:</strong> Panchamrutha Abhisheka</li>
+            <li><strong>09:30 AM:</strong> Pratah Kaala Maha Naivedya & Mangalarathi</li>
+            <li><strong>11:30 AM:</strong> Sanctum Closes for Madhyahna</li>
+          </ul>
+        </div>
+
+        <!-- Evening Darshan -->
+        <div class="card card-gold-accent" style="margin: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-primary); font-weight: 700;">🌇 Evening Darshana</h3>
+            <span class="badge badge-maroon">Deepotsava</span>
+          </div>
+          <div class="num-tabular" style="font-size: 1.5rem; font-weight: 800; color: var(--color-primary); margin-bottom: 8px;">
+            05:30 PM – 08:30 PM
+          </div>
+          <ul style="font-size: 0.88rem; color: var(--color-text-main); padding-left: 20px; line-height: 1.8;">
+            <li><strong>05:30 PM:</strong> Sanctum Re-opens for Sandhya Darshana</li>
+            <li><strong>06:30 PM:</strong> Lalitha Sahasranama Stotra Parayana</li>
+            <li><strong>07:30 PM Sharp:</strong> Grand Deepotsava & Maha Mangalarathi</li>
+            <li><strong>08:30 PM:</strong> Shayanotsava & Sanctum Closure</li>
+          </ul>
+        </div>
+
+        <!-- Special Weekly Observances -->
+        <div class="card" style="margin: 0; background: #FFFBF0; border-color: #FDE68A;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: #92400E; font-weight: 700;">🔥 Special Weekly Sevas</h3>
+            <span class="badge badge-gold">Weekly Peak</span>
+          </div>
+          <div style="font-size: 0.9rem; margin-bottom: 12px;">
+            <div style="font-weight: 700; color: #9A3412;">• Tuesday 03:30 PM:</div>
+            <div style="font-size: 0.85rem; color: var(--color-text-main);">Rahukala Nimbe Hannina Deepada Seva (Lemon Lamp offering)</div>
+          </div>
+          <div style="font-size: 0.9rem; margin-bottom: 12px;">
+            <div style="font-weight: 700; color: #9A3412;">• Friday 10:00 AM:</div>
+            <div style="font-size: 0.85rem; color: var(--color-text-main);">Maha Durga Homa & Kumkumarchana Utsavam</div>
+          </div>
+          <div style="font-size: 0.85rem; border-top: 1px solid #FCD5BD; padding-top: 8px; color: var(--color-text-soft);">
+            🚗 <strong>Vehicle Poojas:</strong> Daily 9:00 AM–11:00 AM & 6:00 PM–8:00 PM at North Gate Prakaara.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== AUTHENTIC TEMPLE GALLERY ==================== -->
+  <section id="gallery" class="section-padding" style="background: var(--color-surface);">
+    <div class="landing-container">
+      <div class="section-header">
+        <span class="section-tag">Sanctum Sanctorum</span>
+        <h2 class="section-title">Temple Darshan & Prakaara Gallery</h2>
+        <p class="section-subtitle">
+          Sacred glimpses of Sri Durga Parameshwari, the towering Raja Gopuram, and evening Deepotsava.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="assets/images/1.jpg" alt="Sri Durga Devi Temple Raja Gopuram" loading="lazy">
+          <div class="gallery-caption">Towering Raja Gopuram • Front Prakaara</div>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/images/2.jpg" alt="Illuminated Deepotsava Night Celebration" loading="lazy">
+          <div class="gallery-caption">Grand Deepotsava • Illuminated Prakaara</div>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/images/3.jpg" alt="Sri Durga Parameshwari Idol Alankara" loading="lazy">
+          <div class="gallery-caption">Divine Idol with Sacred Gold & Kumkuma Alankara</div>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/images/4.jpg" alt="Sanctum Sanctorum Garbha Gudi" loading="lazy">
+          <div class="gallery-caption">Garbha Gudi Sanctum Sanctorum</div>
+        </div>
+        <div class="gallery-item">
+          <img src="assets/images/5.jpg" alt="Deepastambha and Temple Lamps" loading="lazy">
+          <div class="gallery-caption">Deepastambha Sacred Ghee Lamps</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CONTACT & LOCATION ==================== -->
+  <section id="contact" class="section-padding" style="background: var(--color-canvas); border-top: 1px solid var(--color-border);">
+    <div class="landing-container">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: center;">
+        <div>
+          <span class="section-tag">Location & Information</span>
+          <h2 class="section-title" style="font-size: 2rem;">Visit Sri Durga Devi Temple</h2>
+          <p style="margin-bottom: 20px; color: var(--color-text-main);">
+            Located peacefully in Chandra Layout 1st Phase, Bengaluru. Devotees from across the city visit for prarthana, sankalpa homas, and vehicle blessings.
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.95rem; margin-bottom: 28px;">
+            <div>
+              <strong>📍 Address:</strong><br>
+              Sri Durga Parameshwari Temple, Chandra Layout 1st Phase, Bengaluru, Karnataka - 560 072
+            </div>
+            <div>
+              <strong>📞 Temple Office Phone:</strong><br>
+              <a href="tel:08023394447" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">080-23394447</a>
+            </div>
+            <div>
+              <strong>💬 Official WhatsApp Helpline:</strong><br>
+              <a href="https://wa.me/919845012345" target="_blank" style="color: #15803D; font-weight: 700; text-decoration: none;">+91 98450 12345</a>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="https://maps.google.com/?q=Sri+Durga+Parameshwari+Temple+Chandra+Layout+Bengaluru" target="_blank" class="btn btn-primary" style="text-decoration: none;">
+              🗺️ Open in Google Maps
+            </a>
+            <button onclick="window.landing.bookSevaWhatsApp('rahukala-deepa')" class="btn btn-whatsapp">
+              💬 Enquire on WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <!-- Devotee Guidelines Card -->
+        <div class="card card-gold-accent" style="margin: 0;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-primary); font-weight: 700; margin-bottom: 12px;">
+            🪔 Devotee Sanctum Guidelines
+          </h3>
+          <ul style="font-size: 0.88rem; color: var(--color-text-main); padding-left: 20px; line-height: 1.8;">
+            <li><strong>Dress Code:</strong> Traditional Indian attire recommended (Dhoti/Kurta for men, Saree/Salwar for women).</li>
+            <li><strong>Footwear:</strong> Please deposit footwear at the complimentary counter outside the Raja Gopuram.</li>
+            <li><strong>Photography:</strong> Allowed in the outer prakaara; strictly prohibited inside the inner Garbha Gudi.</li>
+            <li><strong>Mobile Phones:</strong> Please keep devices in silent mode inside the sanctum.</li>
+            <li><strong>Prasada Counter:</strong> Sacred Kumkuma and laddu prasada available adjacent to North Gate.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== GRAND FOOTER ==================== -->
+  <footer class="landing-footer">
+    <div class="landing-container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); border: 1.5px solid var(--color-gold); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--color-gold);">🪔</div>
+            <h4 style="margin-bottom: 0;">Sri Durga Parameshwari Temple</h4>
+          </div>
+          <p>Chandra Layout 1st Phase, Bengaluru - 560 072.<br>Phone: 080-23394447</p>
+          <p style="font-size: 0.8rem; color: #78716C;">
+            Digital Mandapa PWA: Devotee First • Simple • Useful Every Day • WhatsApp Enabled • Temple Controlled.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Devotee Portals</h4>
+          <ul>
+            <li><a href="app.html">📱 Mobile Devotee App (PWA)</a></li>
+            <li><a href="app.html#panchanga">☀️ Daily Vedic Panchanga</a></li>
+            <li><a href="app.html#calendar">📅 Seva Date Availability</a></li>
+            <li><a href="app.html#poojas">🪔 21 Sacred Sevas</a></li>
+            <li><a href="app.html#qr">📷 QR Prakaara Spot Check</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Administration</h4>
+          <ul>
+            <li><a href="admin.html">🛡️ Trustee & Archaka Desk</a></li>
+            <li><a href="admin.html">🔒 Date Availability Overrides</a></li>
+            <li><a href="admin.html">🖨️ Archaka Daily Seva Sheets</a></li>
+            <li><a href="admin.html">📱 WhatsApp Booking Inbox</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Sacred Dedication</h4>
+          <p style="font-size: 0.85rem; color: #D6D3D1;">
+            Dedicated to Sri Sri Sri Durga Parameshwari. May the divine Mother bestow health, prosperity, and peace upon all devotees and their families.
+          </p>
+          <div style="margin-top: 12px; font-size: 0.85rem; color: var(--color-gold); font-weight: 700;">
+            Om Sri Durgayai Namaha 🙏
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 Sri Durga Parameshwari Temple Trust, Bengaluru. All rights reserved.</div>
+        <div style="display: flex; gap: 16px;">
+          <a href="admin.html" style="color: var(--color-gold); text-decoration: none;">Trustee Admin Portal 🛡️</a>
+          <a href="app.html" style="color: #A8A29E; text-decoration: none;">Devotee PWA 📱</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Landing Controller Script -->
+  <script type="module" src="js/landingApp.js"></script>
 </body>
 </html>

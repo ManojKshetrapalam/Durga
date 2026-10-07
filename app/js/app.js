@@ -16,6 +16,7 @@ import { renderAdminView } from './views/adminView.js';
 
 import { templeStore } from './services/store.js';
 import { WhatsAppService } from './services/whatsappService.js';
+import { PanchangaService } from './services/panchangaService.js';
 
 class DigitalMandapaApp {
   constructor() {
@@ -209,12 +210,178 @@ class DigitalMandapaApp {
     this.render();
   }
 
-  // Panchanga Actions
+  // Panchanga Actions & Interactive Guidance
   stepPanchangaDate(daysOffset) {
     const cur = new Date(this.viewState.panchangaDate);
     cur.setDate(cur.getDate() + daysOffset);
     this.viewState.panchangaDate = cur;
     this.render();
+  }
+
+  showRituGuidance() {
+    const p = PanchangaService.getPanchanga(this.viewState.panchangaDate);
+    const html = `
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🌿</span> ${p.ritu} (${p.rituSanskrit})
+        </div>
+        <button class="icon-btn" onclick="window.app.closeModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="padding: 10px 14px; background: var(--color-gold-light); border-radius: var(--radius-md); margin-bottom: 14px;">
+          <strong style="color: var(--color-gold-hover);">Meaning:</strong> ${p.rituMeaning}
+        </div>
+        <p style="margin-bottom: 12px; color: var(--color-text-main); font-size: 0.92rem;">
+          ${p.rituDescription}
+        </p>
+        <div style="border-top: 1px solid var(--color-border-subtle); padding-top: 10px; font-size: 0.85rem; color: var(--color-text-soft);">
+          <strong>Solar Ayana:</strong> ${p.ayana} (${p.ayanaSanskrit})<br>
+          <em>${p.ayanaDescription}</em>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-sm" onclick="window.app.closeModal()">Understood 🙏</button>
+      </div>
+    `;
+    this.showModal(html);
+  }
+
+  showMuhurthaGuidance(type) {
+    const p = PanchangaService.getPanchanga(this.viewState.panchangaDate);
+    let title = '';
+    let content = '';
+
+    if (type === 'abhijit') {
+      title = '🟢 Abhijit Muhurtha Guidance';
+      content = `
+        <div style="padding: 10px 14px; background: #EBF8EE; border-radius: var(--radius-md); border: 1px solid #B7E4C7; margin-bottom: 14px;">
+          <strong style="color: #166534;">Window for ${p.formattedDate}:</strong><br>
+          <span style="font-size: 1.1rem; font-weight: 800; color: #166534;" class="num-tabular">${p.abhijitMuhurtha}</span>
+        </div>
+        <h4 style="font-size: 0.95rem; color: var(--color-primary); margin-bottom: 6px;">Vedic Significance:</h4>
+        <p style="margin-bottom: 10px; font-size: 0.88rem;">
+          Abhijit is the 8th Muhurtha of daytime, centered squarely around the Sun's apex (Solar Noon). According to Vedic Shastras, this window is blessed by Lord Vishnu and Surya Bhagavan, dispelling planetary afflictions (doshas).
+        </p>
+        <h4 style="font-size: 0.95rem; color: var(--color-primary); margin-bottom: 6px;">Recommended Sacred Actions:</h4>
+        <ul style="padding-left: 20px; font-size: 0.85rem; color: var(--color-text-main); margin-bottom: 12px;">
+          <li>Initiating new business ventures and investments.</li>
+          <li>Performing Sankalpa for Sevas and Homas.</li>
+          <li>Grihapravesha, vehicle purchases, and signing documents.</li>
+        </ul>
+        <div style="font-size: 0.8rem; color: var(--color-text-soft); font-style: italic;">
+          *Note: In authentic Vedic tradition, Abhijit Muhurtha is not observed on Wednesdays.
+        </div>
+      `;
+    } else if (type === 'rahu') {
+      title = '⚠️ Rahu Kala Guidance & Devi Worship';
+      content = `
+        <div style="padding: 10px 14px; background: #FEF3EB; border-radius: var(--radius-md); border: 1px solid #FCD5BD; margin-bottom: 14px;">
+          <strong style="color: #9A3412;">Window for ${p.formattedDate}:</strong><br>
+          <span style="font-size: 1.1rem; font-weight: 800; color: #9A3412;" class="num-tabular">${p.rahuKala}</span>
+        </div>
+        <h4 style="font-size: 0.95rem; color: var(--color-primary); margin-bottom: 6px;">General Rule:</h4>
+        <p style="margin-bottom: 10px; font-size: 0.88rem;">
+          Rahu Kala is governed by the shadow planet Rahu. It is traditionally considered inauspicious for initiating general secular activities, travel, journeys, or signing contracts.
+        </p>
+        <div style="background: #FFFBF0; border-left: 3px solid #D95D0F; padding: 10px 12px; margin-bottom: 12px; border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+          <strong style="color: #D95D0F; font-size: 0.9rem;">🔥 Temple Special Exception (Tuesday Rahukala):</strong>
+          <p style="font-size: 0.85rem; margin-top: 4px; color: var(--color-text-main);">
+            At Sri Durga Parameshwari Temple, Tuesday Rahu Kala (3:30 PM – 5:00 PM) is celebrated as the supreme hour for <strong>Nimbe Hannina Deepada Seva (Lemon Lamp Offering)</strong>. Lighting ghee lamps in inverted lemon halves during Tuesday Rahukala vanquishes Rahu dosha, marriage delays, and adverse planetary transit.
+          </p>
+        </div>
+      `;
+    } else if (type === 'yamaganda') {
+      title = '⏳ Yamaganda Kala Guidance';
+      content = `
+        <div style="padding: 10px 14px; background: var(--color-canvas); border-radius: var(--radius-md); margin-bottom: 14px; border: 1px solid var(--color-border-subtle);">
+          <strong style="color: var(--color-text-soft);">Window for ${p.formattedDate}:</strong><br>
+          <span style="font-size: 1.1rem; font-weight: 800; color: var(--color-primary);" class="num-tabular">${p.yamaganda}</span>
+        </div>
+        <p style="font-size: 0.88rem; margin-bottom: 10px;">
+          Yamaganda is governed by Yama, the deity of righteousness and mortality.
+        </p>
+        <p style="font-size: 0.85rem; color: var(--color-text-soft);">
+          Activities begun during Yamaganda often face uncertainty or delays. Avoid undertaking journeys or important negotiations during this period.
+        </p>
+      `;
+    } else {
+      title = '⏳ Gulika Kala Guidance';
+      content = `
+        <div style="padding: 10px 14px; background: var(--color-canvas); border-radius: var(--radius-md); margin-bottom: 14px; border: 1px solid var(--color-border-subtle);">
+          <strong style="color: var(--color-text-soft);">Window for ${p.formattedDate}:</strong><br>
+          <span style="font-size: 1.1rem; font-weight: 800; color: var(--color-primary);" class="num-tabular">${p.gulikaKala}</span>
+        </div>
+        <p style="font-size: 0.88rem; margin-bottom: 10px;">
+          Gulika Kala is ruled by Gulika (son of Saturn / Shani). Any action performed during Gulika tends to repeat itself.
+        </p>
+        <p style="font-size: 0.85rem; color: var(--color-text-soft);">
+          Ideal for acquiring auspicious assets, learning, or initiating good habits that you wish to continue indefinitely. Avoid repaying debts or beginning treatments.
+        </p>
+      `;
+    }
+
+    const html = `
+      <div class="modal-header">
+        <div class="modal-title">${title}</div>
+        <button class="icon-btn" onclick="window.app.closeModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        ${content}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-sm" onclick="window.app.closeModal()">Close</button>
+      </div>
+    `;
+    this.showModal(html);
+  }
+
+  previewSunPosition(pos) {
+    const panchanga = PanchangaService.getPanchanga(this.viewState.panchangaDate);
+    let progress = pos === 'live' ? panchanga.sunProgress : Number(pos);
+    if (isNaN(progress)) progress = 0.5;
+
+    // Direct DOM update of the SVG for smooth 60fps interaction
+    const sunGroup = document.querySelector('.view-panchanga svg g');
+    const sunPath = document.querySelector('.view-panchanga svg path[stroke="#D95D0F"]');
+    if (sunGroup && sunPath) {
+      const sunX = 20 + (200 * progress);
+      const sunY = 60 - (48 * Math.sin(Math.PI * progress));
+      sunGroup.setAttribute('transform', `translate(${sunX.toFixed(1)}, ${sunY.toFixed(1)})`);
+
+      let traversedPathD = `M 20 60`;
+      const steps = Math.max(2, Math.floor(progress * 20));
+      for (let i = 1; i <= steps; i++) {
+        const t = (progress * i) / steps;
+        const px = 20 + (200 * t);
+        const py = 60 - (48 * Math.sin(Math.PI * t));
+        traversedPathD += ` L ${px.toFixed(1)} ${py.toFixed(1)}`;
+      }
+      sunPath.setAttribute('d', traversedPathD);
+      showToast(`Solar horizon position set to ${(progress * 100).toFixed(0)}%`, 'info');
+    }
+  }
+
+  showModal(html) {
+    let overlay = document.getElementById('app-modal-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'app-modal-overlay';
+      overlay.className = 'modal-overlay';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `<div class="modal-dialog">${html}</div>`;
+    overlay.style.display = 'flex';
+    overlay.onclick = (e) => {
+      if (e.target === overlay) this.closeModal();
+    };
+  }
+
+  closeModal() {
+    const overlay = document.getElementById('app-modal-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+    }
   }
 
   // Devotee Booking Submission
