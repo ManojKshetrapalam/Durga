@@ -139,55 +139,56 @@ export class PanchangaService {
   }
 
   /**
-   * 6 authentic Vedic Ritus (Seasons)
+   * 6 authentic Vedic Ritus (Seasons) linked directly to the 12 Vedic Masas:
+   * 1. Vasanta  - Chaitra & Vaishakha
+   * 2. Grishma  - Jyeshtha & Ashadha
+   * 3. Varsha   - Shravana & Bhadrapada
+   * 4. Sharad   - Ashvina & Kartika
+   * 5. Hemanta  - Margashirsha & Pushya (covers late Dec)
+   * 6. Shishira - Magha & Phalguna (covers mid Jan to March prior to Ugadi)
    */
-  static getVedicRitu(dateObj) {
-    const month = dateObj.getMonth();
-    const day = dateObj.getDate();
-
-    if ((month === 10 && day >= 16) || month === 11 || (month === 0 && day <= 14)) {
-      return {
-        name: "Hemanta Ritu",
-        sanskrit: "हेमन्त ऋतु",
-        meaning: "Pre-winter / Dewy Season",
-        description: "Season of holy Margashirsha & Pushya; divine lamps, Dhanurmasa & early morning temple pujas."
-      };
-    } else if ((month === 0 && day >= 15) || month === 1 || (month === 2 && day <= 14)) {
-      return {
-        name: "Shishira Ritu",
-        sanskrit: "शिशिर ऋतु",
-        meaning: "Winter / Cold Season",
-        description: "Season of Uttarayana punyakala, Makara Sankranti and auspicious Surya worship."
-      };
-    } else if ((month === 2 && day >= 15) || month === 3 || (month === 4 && day <= 14)) {
-      return {
+  static getVedicRitu(dateObj, lunar = null) {
+    const l = lunar || this.getLunarDetails(dateObj);
+    const rituIndex = Math.floor(l.masaIndex / 2); // 0 to 5
+    const ritus = [
+      {
         name: "Vasanta Ritu",
         sanskrit: "वसन्त ऋतु",
         meaning: "Spring / Flowering Season",
-        description: "Vedic New Year (Ugadi), Rama Navami, and nature blooming in divine radiance."
-      };
-    } else if ((month === 4 && day >= 15) || month === 5 || (month === 6 && day <= 15)) {
-      return {
+        description: "Season of Chaitra & Vaishakha; Vedic New Year (Ugadi), Rama Navami, and nature blooming in divine radiance."
+      },
+      {
         name: "Grishma Ritu",
         sanskrit: "ग्रीष्म ऋतु",
         meaning: "Summer Season",
-        description: "Season of solar tapas, Chandana Alankara, and Abhishekas with sacred panchamrutha."
-      };
-    } else if ((month === 6 && day >= 16) || month === 7 || (month === 8 && day <= 15)) {
-      return {
+        description: "Season of Jyeshtha & Ashadha; solar tapas, Chandana Alankara, and Abhishekas with sacred panchamrutha."
+      },
+      {
         name: "Varsha Ritu",
         sanskrit: "वर्षा ऋतु",
         meaning: "Monsoon Season",
-        description: "Holy Shravana masa, Gokulashtami, and deep spiritual penance during Chaturmasya."
-      };
-    } else {
-      return {
+        description: "Season of Shravana & Bhadrapada; holy Shravana masa, Gokulashtami, Ganesha Chaturthi and deep spiritual penance."
+      },
+      {
         name: "Sharad Ritu",
         sanskrit: "शरद ऋतु",
         meaning: "Autumn Season",
-        description: "Divine Navaratri, Vijayadashami, and Deepavali festival of radiant lights."
-      };
-    }
+        description: "Season of Ashvina & Kartika; divine Navaratri, Vijayadashami, Ayudha Pooja, and Deepavali festival of radiant lights."
+      },
+      {
+        name: "Hemanta Ritu",
+        sanskrit: "हेಮन्त ऋतु",
+        meaning: "Pre-winter / Dewy Season",
+        description: "Season of Margashirsha & Pushya; divine lamps, Dhanurmasa, Vaikuntha Ekadashi & early morning temple pujas."
+      },
+      {
+        name: "Shishira Ritu",
+        sanskrit: "ಶಿಶಿರ ಋತು / शिशिर ऋतु",
+        meaning: "Winter / Cold Season",
+        description: "Season of Magha & Phalguna; Uttarayana punyakala, Makara Sankranti, Ratha Saptami, Maha Shivaratri and auspicious Surya worship."
+      }
+    ];
+    return ritus[rituIndex] || ritus[0];
   }
 
   /**
@@ -695,7 +696,7 @@ export class PanchangaService {
     const rashiName = RASHIS[lunar.rashiIndex];
 
     // Dynamic Ritu, Ayana & Samvatsara
-    const rituObj = this.getVedicRitu(d);
+    const rituObj = this.getVedicRitu(d, lunar);
     const ayanaObj = this.getVedicAyana(d);
     const samvatsaraName = this.getSamvatsara(d);
 
