@@ -3,10 +3,10 @@
  * Full Desktop & Responsive Webpage Experience for Trustees and Archakas
  */
 
-import { templeStore } from './services/store.js';
-import { PanchangaService } from './services/panchangaService.js';
-import { AvailabilityEngine } from './services/availabilityEngine.js';
-import { WhatsAppService } from './services/whatsappService.js';
+import { templeStore } from './services/store.js?v=20261007_07';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_07';
+import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_07';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_07';
 
 class TempleAdminController {
   constructor() {
@@ -210,6 +210,9 @@ class TempleAdminController {
           <button class="sidebar-nav-item ${this.currentTab === 'bookings' ? 'active' : ''}" onclick="window.admin.switchTab('bookings')">
             <span>📱</span> WhatsApp Bookings Queue
           </button>
+          <button class="sidebar-nav-item ${this.currentTab === 'events' ? 'active' : ''}" onclick="window.admin.switchTab('events')">
+            <span>🎪</span> Festival & Events CMS
+          </button>
           <button class="sidebar-nav-item ${this.currentTab === 'broadcast' ? 'active' : ''}" onclick="window.admin.switchTab('broadcast')">
             <span>📢</span> Devotee Notice Board
           </button>
@@ -275,6 +278,7 @@ class TempleAdminController {
       case 'calendar': return this._renderCalendarTab();
       case 'sevas': return this._renderSevasTab();
       case 'bookings': return this._renderBookingsTab();
+      case 'events': return this._renderEventsTab();
       case 'broadcast': return this._renderBroadcastTab();
       default: return this._renderOverviewTab();
     }
@@ -637,6 +641,96 @@ class TempleAdminController {
     `;
   }
 
+  // ==================== TAB 6: FESTIVAL & EVENTS CMS ====================
+  _renderEventsTab() {
+    const events = templeStore.getEvents();
+
+    return `
+      <div class="admin-table-card">
+        <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3><span>🎪</span> Festival & Events CMS</h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-top: 2px;">
+              Publish authentic temple celebrations, 10-day Alankara schedules, special sevas, and deity photographs.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary btn-sm" onclick="window.admin.openEventEditor()">
+              ➕ Create New Festival / Event
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+          ${events.map(ev => `
+            <div style="border: 1.5px solid var(--color-border-subtle); border-radius: var(--radius-lg); padding: 18px; background: #FFFDF8; display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+              <!-- Thumbnail preview -->
+              <div style="width: 120px; height: 160px; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--color-gold); flex-shrink: 0; background: #F5EFE6; display: flex; align-items: center; justify-content: center;">
+                ${ev.primaryImage ? `
+                  <img src="${ev.primaryImage}" alt="${ev.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='icons/icon.svg'">
+                ` : `
+                  <span style="font-size: 2rem;">🪔</span>
+                `}
+              </div>
+
+              <!-- Content details -->
+              <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                  <div>
+                    <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: var(--color-primary); margin-bottom: 2px;">
+                      ${ev.kannadaTitle || ev.title}
+                    </h3>
+                    <div style="font-size: 0.95rem; font-weight: 700; color: var(--color-gold-hover);">
+                      ${ev.title}
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 6px;">
+                    ${ev.isFeatured ? '<span class="badge badge-gold" style="font-weight: 800;">🌟 Featured</span>' : ''}
+                    <span class="badge ${ev.isPublished ? 'badge-live' : 'badge-maroon'}">
+                      ${ev.isPublished ? 'Published Live 🟢' : 'Draft ⚪'}
+                    </span>
+                  </div>
+                </div>
+
+                <p style="font-size: 0.85rem; color: var(--color-text-soft); font-style: italic; margin-bottom: 8px;">
+                  "${ev.shloka || ''}"
+                </p>
+
+                <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.85rem; flex-wrap: wrap;">
+                  <span>📅 <strong>Dates:</strong> ${ev.startDate} to ${ev.endDate}</span>
+                  <span>🌸 <strong>Alankara Days:</strong> ${ev.dailySchedule ? ev.dailySchedule.length : 0} days</span>
+                  <span>🪔 <strong>Special Sevas:</strong> ${ev.specialSevas ? ev.specialSevas.length : 0} sevas</span>
+                </div>
+
+                <div style="font-size: 0.82rem; color: var(--color-text-main); margin-bottom: 12px; line-height: 1.4;">
+                  ${ev.highlights}
+                </div>
+
+                <!-- Admin Action Buttons -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button class="btn btn-secondary btn-sm" onclick="window.admin.openEventEditor('${ev.id}')">
+                    ✏️ Edit Event & Images
+                  </button>
+                  <button class="btn btn-secondary btn-sm" onclick="window.admin.toggleEventPublish('${ev.id}')">
+                    ${ev.isPublished ? 'Hide from Devotees ⚪' : 'Publish to Live App 🟢'}
+                  </button>
+                  <a href="app.html" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none;">
+                    📱 View in Devotee App ↗
+                  </a>
+                  ${events.length > 1 ? `
+                    <button class="btn btn-secondary btn-sm" style="color: #DC2626;" onclick="window.admin.deleteEvent('${ev.id}')">
+                      🗑️ Delete
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   // ==================== INTERACTIVE ACTIONS ====================
   toggleLoginMethod(method) {
     const pinForm = document.getElementById('login-pin-form');
@@ -854,6 +948,225 @@ class TempleAdminController {
     });
     alert("Notice board updated and broadcast live!");
     this.render();
+  }
+
+  // ==================== FESTIVAL & EVENTS CMS CONTROLLERS ====================
+  openEventEditor(eventId = null) {
+    const isEdit = !!eventId;
+    const event = isEdit ? (templeStore.getEventById(eventId) || {}) : {
+      id: 'event-' + Date.now(),
+      title: '',
+      kannadaTitle: '',
+      shloka: '',
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date().toISOString().split('T')[0],
+      isPublished: true,
+      isFeatured: false,
+      primaryImage: 'assets/images/navaratri-invitation.jpg',
+      scheduleImage: 'assets/images/navaratri-schedule.jpg',
+      highlights: '',
+      grandFinale: ''
+    };
+
+    this.editingEvent = JSON.parse(JSON.stringify(event));
+
+    let overlay = document.getElementById('admin-modal-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'admin-modal-overlay';
+      overlay.className = 'modal-overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+      document.body.appendChild(overlay);
+    }
+
+    overlay.innerHTML = `
+      <div style="background:#FFFDF8;border-radius:var(--radius-lg);max-width:750px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;border:2px solid var(--color-gold);box-shadow:0 12px 32px rgba(0,0,0,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--color-border-subtle);padding-bottom:12px;margin-bottom:16px;">
+          <h3 style="font-family:var(--font-serif);color:var(--color-primary);margin:0;font-size:1.3rem;">
+            <span>🎪</span> ${isEdit ? 'Edit Temple Festival Event' : 'Create New Festival Event'}
+          </h3>
+          <button class="icon-btn" onclick="window.admin.closeEventEditorModal()" style="font-size:1.2rem;cursor:pointer;border:none;background:none;">✕</button>
+        </div>
+
+        <form onsubmit="event.preventDefault(); window.admin.saveEventFromForm();" style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-weight:700;font-size:0.85rem;color:var(--color-primary);display:block;margin-bottom:4px;">Festival Title (Kannada) *</label>
+              <input type="text" id="event-input-kannada-title" required value="${event.kannadaTitle || ''}" placeholder="e.g. ಶ್ರೀ ಶರನ್ನವರಾತ್ರಿ ಮಹೋತ್ಸವ - ೨೦೨೬" style="width:100%;padding:8px 12px;border:1px solid #D6D3D1;border-radius:6px;">
+            </div>
+            <div>
+              <label style="font-weight:700;font-size:0.85rem;color:var(--color-primary);display:block;margin-bottom:4px;">Festival Title (English) *</label>
+              <input type="text" id="event-input-title" required value="${event.title || ''}" placeholder="e.g. Sri Sharannavaratri Mahotsava 2026" style="width:100%;padding:8px 12px;border:1px solid #D6D3D1;border-radius:6px;">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label style="font-weight:700;font-size:0.85rem;color:var(--color-primary);display:block;margin-bottom:4px;">Start Date *</label>
+              <input type="date" id="event-input-start-date" required value="${event.startDate || ''}" style="width:100%;padding:8px 12px;border:1px solid #D6D3D1;border-radius:6px;">
+            </div>
+            <div>
+              <label style="font-weight:700;font-size:0.85rem;color:var(--color-primary);display:block;margin-bottom:4px;">End Date *</label>
+              <input type="date" id="event-input-end-date" required value="${event.endDate || ''}" style="width:100%;padding:8px 12px;border:1px solid #D6D3D1;border-radius:6px;">
+            </div>
+          </div>
+
+          <div>
+            <label style="font-weight:700;font-size:0.85rem;color:var(--color-primary);display:block;margin-bottom:4px;">Sacred Shloka / Mantra</label>
+            <input type="text" id="event-input-shloka" value="${event.shloka || ''}" placeholder="ಯಾ ದೇವೀ ಸರ್ವಭೂತೇಷು ಛಾಯಾರೂಪೇಣ ಸಂಸ್ಥಿತಾ..." style="width:100%;padding:8px 12px;border:1px solid #D6D3D1;border-radius:6px;">
+          </div>
+
+          <!-- IMAGE UPLOAD SECTION -->
+          <div style="border:1.5px dashed var(--color-gold);background:#FFF9F0;border-radius:8px;padding:16px;">
+            <h4 style="color:var(--color-primary);font-size:0.95rem;margin:0 0 10px 0;">
+              <span>🖼️</span> Festival Poster & Photographs (CMS Uploader)
+            </h4>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <!-- Primary Image -->
+              <div>
+                <label style="font-weight:700;font-size:0.8rem;color:var(--color-text-main);display:block;margin-bottom:4px;">
+                  1. Deity Poster / Invitation Image
+                </label>
+                <input type="file" accept="image/*" onchange="window.admin.handleImageUpload(event, 'primaryImage')" style="font-size:0.8rem;margin-bottom:6px;width:100%;">
+                <div style="font-size:0.75rem;color:var(--color-text-soft);margin-bottom:6px;">Or paste URL / asset path:</div>
+                <input type="text" id="event-input-primary-image" value="${event.primaryImage || ''}" placeholder="assets/images/..." onchange="window.admin.updateImagePreview('primaryImage', this.value)" style="width:100%;padding:6px 10px;font-size:0.8rem;border:1px solid #D6D3D1;border-radius:4px;margin-bottom:8px;">
+                <div style="width:100%;height:120px;border:1px solid #E5D8C3;border-radius:6px;background:#FFF;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                  <img id="cms-preview-primaryImage" src="${event.primaryImage || ''}" alt="Preview" style="max-height:100%;max-width:100%;object-fit:contain;" onerror="this.src='icons/icon.svg'">
+                </div>
+              </div>
+
+              <!-- Schedule Sheet Image -->
+              <div>
+                <label style="font-weight:700;font-size:0.8rem;color:var(--color-text-main);display:block;margin-bottom:4px;">
+                  2. Schedule / Seva Rate Card Image
+                </label>
+                <input type="file" accept="image/*" onchange="window.admin.handleImageUpload(event, 'scheduleImage')" style="font-size:0.8rem;margin-bottom:6px;width:100%;">
+                <div style="font-size:0.75rem;color:var(--color-text-soft);margin-bottom:6px;">Or paste URL / asset path:</div>
+                <input type="text" id="event-input-schedule-image" value="${event.scheduleImage || ''}" placeholder="assets/images/..." onchange="window.admin.updateImagePreview('scheduleImage', this.value)" style="width:100%;padding:6px 10px;font-size:0.8rem;border:1px solid #D6D3D1;border-radius:4px;margin-bottom:8px;">
+                <div style="width:100%;height:120px;border:1px solid #E5D8C3;border-radius:6px;background:#FFF;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                  <img id="cms-preview-scheduleImage" src="${event.scheduleImage || ''}" alt="Preview" style="max-height:100%;max-width:100%;object-fit:contain;" onerror="this.src='icons/icon.svg'">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-weight:700;font-size:0.85rem;color:var(--color-primary);display:block;margin-bottom:4px;">Highlights & Summary</label>
+            <textarea id="event-input-highlights" rows="2" style="width:100%;padding:8px 12px;border:1px solid #D6D3D1;border-radius:6px;">${event.highlights || ''}</textarea>
+          </div>
+
+          <div>
+            <label style="font-weight:700;font-size:0.85rem;color:var(--color-primary);display:block;margin-bottom:4px;">Grand Finale / Rathotsava Announcement</label>
+            <input type="text" id="event-input-finale" value="${event.grandFinale || ''}" placeholder="e.g. ದಿನಾಂಕ : 20-10-2026 ಮಂಗಳವಾರ ವಿಜಯದಶಮಿಯಂದು ರಥೋತ್ಸವ..." style="width:100%;padding:8px 12px;border:1px solid #D6D3D1;border-radius:6px;">
+          </div>
+
+          <div style="display:flex;gap:20px;margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.85rem;color:var(--color-primary);">
+              <input type="checkbox" id="event-input-published" ${event.isPublished ? 'checked' : ''} style="width:18px;height:18px;">
+              Publish to Live Devotee App 🟢
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:0.85rem;color:var(--color-gold-hover);">
+              <input type="checkbox" id="event-input-featured" ${event.isFeatured ? 'checked' : ''} style="width:18px;height:18px;">
+              Featured Top Hero Banner 🌟
+            </label>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;border-top:1.5px solid var(--color-border-subtle);padding-top:14px;">
+            <button type="button" class="btn btn-secondary" onclick="window.admin.closeEventEditorModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">💾 Save Festival Event</button>
+          </div>
+        </form>
+      </div>
+    `;
+    overlay.style.display = 'flex';
+  }
+
+  handleImageUpload(event, targetField) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      if (!this.editingEvent) this.editingEvent = {};
+      this.editingEvent[targetField] = dataUrl;
+
+      // Update text input and preview image
+      const inputEl = document.getElementById(targetField === 'primaryImage' ? 'event-input-primary-image' : 'event-input-schedule-image');
+      if (inputEl) inputEl.value = `[Uploaded File: ${file.name}]`;
+
+      const previewEl = document.getElementById(`cms-preview-${targetField}`);
+      if (previewEl) previewEl.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  updateImagePreview(targetField, url) {
+    if (!this.editingEvent) this.editingEvent = {};
+    this.editingEvent[targetField] = url;
+    const previewEl = document.getElementById(`cms-preview-${targetField}`);
+    if (previewEl) previewEl.src = url;
+  }
+
+  saveEventFromForm() {
+    const kTitle = document.getElementById('event-input-kannada-title').value.trim();
+    const title = document.getElementById('event-input-title').value.trim();
+    const sDate = document.getElementById('event-input-start-date').value;
+    const eDate = document.getElementById('event-input-end-date').value;
+    const shloka = document.getElementById('event-input-shloka').value.trim();
+    const highlights = document.getElementById('event-input-highlights').value.trim();
+    const finale = document.getElementById('event-input-finale').value.trim();
+    const isPub = document.getElementById('event-input-published').checked;
+    const isFeat = document.getElementById('event-input-featured').checked;
+
+    const primaryUrl = document.getElementById('event-input-primary-image').value.trim();
+    const scheduleUrl = document.getElementById('event-input-schedule-image').value.trim();
+
+    if (!this.editingEvent) this.editingEvent = {};
+
+    const updated = {
+      ...this.editingEvent,
+      title,
+      kannadaTitle: kTitle,
+      startDate: sDate,
+      endDate: eDate,
+      shloka,
+      highlights,
+      grandFinale: finale,
+      isPublished: isPub,
+      isFeatured: isFeat,
+      primaryImage: this.editingEvent.primaryImage || primaryUrl || 'assets/images/navaratri-invitation.jpg',
+      scheduleImage: this.editingEvent.scheduleImage || scheduleUrl || 'assets/images/navaratri-schedule.jpg'
+    };
+
+    templeStore.saveEvent(updated);
+    alert(`Success: "${kTitle || title}" has been saved and published to the temple portal!`);
+    this.closeEventEditorModal();
+    this.render();
+  }
+
+  deleteEvent(id) {
+    if (confirm("Are you sure you want to delete this festival event?")) {
+      templeStore.deleteEvent(id);
+      this.render();
+    }
+  }
+
+  toggleEventPublish(id) {
+    const ev = templeStore.getEventById(id);
+    if (!ev) return;
+    ev.isPublished = !ev.isPublished;
+    templeStore.saveEvent(ev);
+    this.render();
+  }
+
+  closeEventEditorModal() {
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+    }
   }
 
   _bindLoginEvents() {

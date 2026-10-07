@@ -1,0 +1,29 @@
+# Sri Durga Devi Temple — Digital Mandapa: Cache & Header Configuration
+<IfModule mod_headers.c>
+  # HTML and Web Manifest
+  <FilesMatch "\.(html|htm|webmanifest)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Service Worker must NEVER be cached
+  <FilesMatch "^sw\.js$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # JavaScript & JSON Modules (Ensures instant updates across CDNs)
+  <FilesMatch "\.(js|mjs|json)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType application/javascript .js
+  AddType application/javascript .mjs
+</IfModule>

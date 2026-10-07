@@ -2,21 +2,21 @@
  * Sri Durga Devi Temple — Digital Mandapa: Core App Controller & Router
  */
 
-import { renderHeader } from './components/header.js?v=20261007_05';
-import { renderBottomNav } from './components/bottomNav.js?v=20261007_05';
-import { showToast } from './components/toast.js?v=20261007_05';
-import { renderHomeView } from './views/homeView.js?v=20261007_05';
-import { renderPoojasView } from './views/poojasView.js?v=20261007_05';
-import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_05';
-import { renderCalendarView } from './views/calendarView.js?v=20261007_05';
-import { renderPanchangaView } from './views/panchangaView.js?v=20261007_05';
-import { renderBookingView } from './views/bookingView.js?v=20261007_05';
-import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_05';
-import { renderAdminView } from './views/adminView.js?v=20261007_05';
+import { renderHeader } from './components/header.js?v=20261007_07';
+import { renderBottomNav } from './components/bottomNav.js?v=20261007_07';
+import { showToast } from './components/toast.js?v=20261007_07';
+import { renderHomeView } from './views/homeView.js?v=20261007_07';
+import { renderPoojasView } from './views/poojasView.js?v=20261007_07';
+import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_07';
+import { renderCalendarView } from './views/calendarView.js?v=20261007_07';
+import { renderPanchangaView } from './views/panchangaView.js?v=20261007_07';
+import { renderBookingView } from './views/bookingView.js?v=20261007_07';
+import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_07';
+import { renderAdminView } from './views/adminView.js?v=20261007_07';
 
-import { templeStore } from './services/store.js?v=20261007_05';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_05';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_05';
+import { templeStore } from './services/store.js?v=20261007_07';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_07';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_07';
 
 class DigitalMandapaApp {
   constructor() {
@@ -388,6 +388,128 @@ class DigitalMandapaApp {
     }
   }
 
+  // ==================== FESTIVAL & UTSAVA MODALS ====================
+  showFestivalScheduleModal(eventId) {
+    const event = templeStore.getEventById(eventId) || templeStore.getEvents()[0];
+    if (!event) return;
+
+    const html = `
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>📋</span> ${event.kannadaTitle || event.title}
+        </div>
+        <button class="icon-btn" onclick="window.app.closeModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <div style="padding: 8px 12px; background: var(--color-gold-light); border-radius: var(--radius-md); margin-bottom: 12px; font-size: 0.8rem; color: var(--color-primary);">
+          <strong>10 ದಿನಗಳ ಮಹೋತ್ಸವ ಕಾರ್ಯಕ್ರಮ:</strong> ದಿನನಿತ್ಯದ ದೇವಿಯ ವಿಶೇಷ ಅಲಂಕಾರ ಮತ್ತು ಪವಿತ್ರ ಹೋಮಗಳ ವಿವರ.
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${event.dailySchedule.map(s => `
+            <div style="padding: 10px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                <span class="badge badge-gold" style="font-weight: 800; font-size: 0.7rem;">ದಿನ ${s.dayNumber} • ${s.date} (${s.vara.split(' ')[0]})</span>
+                <span style="font-size: 0.75rem; color: var(--color-gold-hover); font-weight: 700;">${s.tithi}</span>
+              </div>
+              <div style="font-weight: 800; color: var(--color-primary); font-size: 0.95rem; margin-bottom: 2px;">
+                🌸 ${s.alankara}
+              </div>
+              <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-saffron); margin-bottom: 2px;">
+                🔥 ಹೋಮ: ${s.homa}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-text-soft);">
+                ಸಂಕಲ್ಪ ಫಲ: ${s.purpose}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between;">
+        <button class="btn btn-secondary btn-sm" onclick="window.app.closeModal()">Close</button>
+        <button class="btn btn-primary btn-sm" onclick="window.app.showFestivalSevasModal('${event.id}')">View Sevas (13) →</button>
+      </div>
+    `;
+    this.showModal(html);
+  }
+
+  showFestivalSevasModal(eventId) {
+    const event = templeStore.getEventById(eventId) || templeStore.getEvents()[0];
+    if (!event) return;
+
+    const html = `
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🪔</span> ${event.kannadaTitle || event.title} — ಸೇವಾ ವಿವರ
+        </div>
+        <button class="icon-btn" onclick="window.app.closeModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <div style="padding: 8px 12px; background: #FFF5EB; border-radius: var(--radius-md); border: 1px solid #FDBA74; margin-bottom: 12px; font-size: 0.8rem; color: var(--color-primary);">
+          <strong>ವಿಶೇಷ ನವರಾತ್ರಿ ಸೇವೆಗಳು:</strong> ಸೇವಾ ಕಾಣಿಕೆಯನ್ನು ದೇವಸ್ಥಾನದ ಕೌಂಟರ್‌ನಲ್ಲಿ ಪಾವತಿಸಿ ರಶೀದಿ ಪಡೆಯಬಹುದು. ಅರ್ಚಕರೊಂದಿಗೆ ವಾಟ್ಸಾಪ್ ಮೂಲಕ ಮುಂಗಡ ಸಂಕಲ್ಪ ವಿನಂತಿಸಿ.
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${event.specialSevas.map(s => `
+            <div style="padding: 10px 12px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <div style="flex: 1;">
+                <div style="font-weight: 800; color: var(--color-primary); font-size: 0.92rem;">
+                  ${s.name}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--color-text-soft);">
+                  ${s.description}
+                </div>
+              </div>
+              <div style="text-align: right; flex-shrink: 0;">
+                <div class="num-tabular" style="font-weight: 800; color: var(--color-primary); font-size: 1.05rem;">
+                  ₹${s.price.toLocaleString('en-IN')}
+                </div>
+                <button class="btn btn-whatsapp" style="padding: 4px 8px; font-size: 0.7rem; margin-top: 4px;" onclick="window.app.requestFestivalSeva('${event.id}', '${s.name.replace(/'/g, "\\'")}', ${s.price})">
+                  Request 💬
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="window.app.closeModal()">Close</button>
+      </div>
+    `;
+    this.showModal(html);
+  }
+
+  showFestivalImageModal(imageSrc, title = 'Event Patrika') {
+    const html = `
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🖼️</span> ${title}
+        </div>
+        <button class="icon-btn" onclick="window.app.closeModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 8px; text-align: center; max-height: 75vh; overflow-y: auto;">
+        <img src="${imageSrc}" alt="${title}" style="max-width: 100%; height: auto; border-radius: var(--radius-sm); box-shadow: 0 4px 14px rgba(0,0,0,0.2);">
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between;">
+        <a href="${imageSrc}" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration: none;">Open Original ↗</a>
+        <button class="btn btn-primary btn-sm" onclick="window.app.closeModal()">Close</button>
+      </div>
+    `;
+    this.showModal(html);
+  }
+
+  requestFestivalSeva(eventId, sevaName, price) {
+    const msg = encodeURIComponent(
+      `ನಮಸ್ಕಾರ / Namaskara Sri Durga Parameshwari Temple Desk 🙏\n\n` +
+      `I would like to offer Special Navaratri Seva:\n` +
+      `🌺 Festival: ಶ್ರೀ ಶರನ್ನವರಾತ್ರಿ ಮಹೋತ್ಸವ - ೨೦೨೬\n` +
+      `🪔 Seva: ${sevaName}\n` +
+      `💰 Kanike: ₹${Number(price).toLocaleString('en-IN')}\n\n` +
+      `Please confirm sankalpa details, day slot, and counter payment procedure. Dhanyavadagalu.`
+    );
+    window.open(`https://wa.me/919845012345?text=${msg}`, '_blank');
+  }
+
   // Devotee Booking Submission
   submitBooking() {
     const sevaId = document.getElementById('form-seva-id')?.value;
@@ -569,9 +691,9 @@ class DigitalMandapaApp {
 
   _registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=20261007_05', { updateViaCache: 'none' })
+      navigator.serviceWorker.register('./sw.js?v=20261007_07', { updateViaCache: 'none' })
         .then((reg) => {
-          console.log('[PWA v5] Service Worker registered & active');
+          console.log('[PWA v7] Service Worker registered & active');
           // Check for worker updates immediately
           reg.update();
         })

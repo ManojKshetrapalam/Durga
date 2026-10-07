@@ -269,6 +269,44 @@ test("Adding an admin block immediately blocks the date in Availability Engine",
   assert.strictEqual(checkAfter.isAvailable, true, "Date is unblocked after deletion");
 });
 
+// --- SUITE 6: FESTIVAL & EVENTS CMS & SHARANNAVARATRI DATA FIDELITY ---
+console.log("\nSuite 6: Festival & Events CMS & Sharannavaratri Mahotsava Fidelity");
+
+test("Authentic Sharannavaratri 2026 event exists with 10 days of Alankaras & 13 special sevas", () => {
+  const events = templeStore.getEvents();
+  assert.ok(events.length >= 1, "At least one CMS event exists");
+  const nav = events.find(e => e.id === "navaratri-utsava-2026");
+  assert.ok(nav, "Sharannavaratri Mahotsava event exists");
+  assert.strictEqual(nav.startDate, "2026-10-11");
+  assert.strictEqual(nav.endDate, "2026-10-20");
+  assert.strictEqual(nav.dailySchedule.length, 10, "Has exactly 10 days of Alankara & Homa schedule");
+  assert.strictEqual(nav.specialSevas.length, 13, "Has exactly 13 special Navaratri sevas");
+  assert.ok(nav.primaryImage.includes("navaratri-invitation.jpg"), "References authentic invitation card");
+  assert.ok(nav.grandFinale.includes("ರಥೋತ್ಸವ"), "Includes Vijayadashami Rathotsava notice");
+});
+
+test("CMS allows creating, saving with image and deleting new events", () => {
+  const newEvent = {
+    id: "deepavali-2026",
+    title: "Deepavali Lakshmi Pooja 2026",
+    kannadaTitle: "ದೀಪಾವಳಿ ಲಕ್ಷ್ಮೀ ಪೂಜೆ - ೨೦೨೬",
+    startDate: "2026-11-08",
+    endDate: "2026-11-10",
+    isPublished: true,
+    primaryImage: "data:image/jpeg;base64,TESTIMAGE",
+    highlights: "Special Ksheera Abhisheka & Sahasra Deepotsava"
+  };
+
+  templeStore.saveEvent(newEvent);
+  const found = templeStore.getEventById("deepavali-2026");
+  assert.ok(found, "Newly created event found in store");
+  assert.strictEqual(found.primaryImage, "data:image/jpeg;base64,TESTIMAGE", "Preserves image base64 data");
+
+  // Clean up
+  templeStore.deleteEvent("deepavali-2026");
+  assert.strictEqual(templeStore.getEventById("deepavali-2026"), undefined, "Event deleted successfully");
+});
+
 console.log("\n============================================================");
 console.log(`TOTAL TESTS: ${passCount + failCount} | PASSED: ${passCount} | FAILED: ${failCount}`);
 console.log("============================================================\n");

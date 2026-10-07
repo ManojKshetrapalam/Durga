@@ -3,8 +3,8 @@
  * Matches Stitch Screen: qr-landing.html
  */
 
-import { PanchangaService } from '../services/panchangaService.js';
-import { TEMPLE_TIMINGS } from '../data/timings.js';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_07';
+import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_07';
 
 export function renderQrLandingView(spotId = 'entrance') {
   const spotNames = {

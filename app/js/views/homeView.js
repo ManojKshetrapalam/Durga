@@ -3,15 +3,18 @@
  * Matches Stitch Screen: home.html
  */
 
-import { PanchangaService } from '../services/panchangaService.js';
-import { TEMPLE_TIMINGS } from '../data/timings.js';
-import { templeStore } from '../services/store.js';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_07';
+import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_07';
+import { templeStore } from '../services/store.js?v=20261007_07';
+import { renderFestivalBanner } from '../components/festivalCard.js?v=20261007_07';
 
 export function renderHomeView() {
   const todayPanchanga = PanchangaService.getPanchanga(new Date());
   const todayDay = new Date().getDay();
   const todaySchedule = TEMPLE_TIMINGS.schedules[todayDay];
   const announcement = templeStore.getAnnouncement();
+  const events = templeStore.getEvents();
+  const featuredEvent = events.find(e => e.isFeatured && e.isPublished) || events[0];
   const sevas = templeStore.getSevas().slice(0, 4); // Top 4 popular sevas
 
   return `
@@ -37,6 +40,9 @@ export function renderHomeView() {
           </button>
         </div>
       </section>
+
+      <!-- Grand Festival & Utsava Banner (From CMS) -->
+      ${renderFestivalBanner(featuredEvent)}
 
       <!-- Active Announcement Broadcast (if published) -->
       ${announcement && announcement.isPublished ? `

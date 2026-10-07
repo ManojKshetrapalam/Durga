@@ -5,7 +5,7 @@
  * Offline shell fallback ensures temple sanctum resilience when connectivity drops.
  */
 
-const CACHE_NAME = 'durga-mandapa-v6';
+const CACHE_NAME = 'durga-mandapa-v7';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -29,6 +29,7 @@ const PRECACHE_ASSETS = [
   './js/components/header.js',
   './js/components/bottomNav.js',
   './js/components/toast.js',
+  './js/components/festivalCard.js',
   './js/views/homeView.js',
   './js/views/poojasView.js',
   './js/views/poojaDetailView.js',
@@ -37,6 +38,8 @@ const PRECACHE_ASSETS = [
   './js/views/bookingView.js',
   './js/views/qrLandingView.js',
   './js/views/adminView.js',
+  './assets/images/navaratri-invitation.jpg',
+  './assets/images/navaratri-schedule.jpg',
   './icons/icon.svg'
 ];
 

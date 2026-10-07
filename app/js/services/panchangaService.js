@@ -16,7 +16,7 @@
  * - Next Upcoming Festivals Engine with relative countdown labels
  */
 
-import * as Astronomy from '../lib/astronomy.js';
+import * as Astronomy from '../lib/astronomy.js?v=20261007_07';
 
 // Temple Coordinates: Bengaluru, Karnataka
 const BENGALURU_OBSERVER = new Astronomy.Observer(12.9716, 77.5946, 920);

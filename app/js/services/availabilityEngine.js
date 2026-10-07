@@ -3,8 +3,8 @@
  * Hierarchy: Admin Block > Temple Event > Seva Rule > Capacity > Available
  */
 
-import { templeStore } from './store.js';
-import { PanchangaService } from './panchangaService.js';
+import { templeStore } from './store.js?v=20261007_07';
+import { PanchangaService } from './panchangaService.js?v=20261007_07';
 
 export class AvailabilityEngine {
   /**
