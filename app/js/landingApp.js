@@ -177,7 +177,16 @@ class TempleLandingController {
 }
 
 // Global instance
-window.landing = new TempleLandingController();
-document.addEventListener('DOMContentLoaded', () => {
+const initLanding = () => {
+  if (!window.landing) {
+    window.landing = new TempleLandingController();
+  }
   window.landing.init();
-});
+};
+
+window.landing = new TempleLandingController();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLanding);
+} else {
+  initLanding();
+}

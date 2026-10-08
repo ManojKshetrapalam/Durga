@@ -255,6 +255,10 @@ class TempleStore {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.SEVAS) || JSON.stringify(SEVAS_DATA));
   }
 
+  getAllSevas() {
+    return this.getSevas();
+  }
+
   getSevaById(id) {
     return this.getSevas().find(s => s.id === id);
   }

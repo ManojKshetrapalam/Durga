@@ -31,9 +31,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Core App Tokens & Admin Styles -->
-  <link rel="stylesheet" href="css/tokens.css?v=20261007_07">
-  <link rel="stylesheet" href="css/app.css?v=20261007_07">
-  <link rel="stylesheet" href="css/admin.css?v=20261007_07">
+  <link rel="stylesheet" href="css/tokens.css?v=20261007_08">
+  <link rel="stylesheet" href="css/app.css?v=20261007_08">
+  <link rel="stylesheet" href="css/admin.css?v=20261007_08">
 </head>
 <body class="admin-body">
   <div id="admin-root">
@@ -44,14 +44,31 @@
       </div>
       <div>
         <h1 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #721C2B; margin-bottom: 4px;">Sri Durga Devi Temple</h1>
-        <p style="font-size: 0.85rem; color: #78716C;">Loading Administrative Desk...</p>
+        <p id="loading-desc" style="font-size: 0.85rem; color: #78716C;">Loading Administrative Desk...</p>
+      </div>
+      <div id="stuck-rescue-btn" style="display: none; margin-top: 12px;">
+        <button onclick="localStorage.removeItem('sdd_admin_session'); window.location.reload();" style="padding: 10px 18px; background: #721C2B; color: #FFF; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+          🔄 Reset Session & Open Login
+        </button>
       </div>
     </div>
   </div>
 
   <div id="toast-container" aria-live="polite"></div>
 
+  <!-- Watchdog fallback: reveals rescue button if browser/cache delays module execution -->
+  <script>
+    setTimeout(function() {
+      var rescue = document.getElementById('stuck-rescue-btn');
+      var desc = document.getElementById('loading-desc');
+      if (rescue && desc) {
+        rescue.style.display = 'block';
+        desc.textContent = 'Taking longer than expected?';
+      }
+    }, 2500);
+  </script>
+
   <!-- Admin Controller Entrypoint -->
-  <script type="module" src="js/adminApp.js?v=20261007_07"></script>
+  <script type="module" src="js/adminApp.js?v=20261007_08"></script>
 </body>
 </html>

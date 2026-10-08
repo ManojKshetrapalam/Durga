@@ -724,7 +724,16 @@ class DigitalMandapaApp {
 }
 
 // Global instance
-window.app = new DigitalMandapaApp();
-document.addEventListener('DOMContentLoaded', () => {
+const initApp = () => {
+  if (!window.app) {
+    window.app = new DigitalMandapaApp();
+  }
   window.app.init();
-});
+};
+
+window.app = new DigitalMandapaApp();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}

@@ -5,20 +5,17 @@
  * Offline shell fallback ensures temple sanctum resilience when connectivity drops.
  */
 
-const CACHE_NAME = 'durga-mandapa-v7';
+const CACHE_NAME = 'durga-mandapa-v8';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
   './app.html',
-  './admin.html',
   './manifest.webmanifest',
   './css/tokens.css',
   './css/app.css',
   './css/landing.css',
-  './css/admin.css',
   './js/lib/astronomy.js',
   './js/app.js',
-  './js/adminApp.js',
   './js/landingApp.js',
   './js/data/sevas.js',
   './js/data/timings.js',
@@ -78,6 +75,11 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
+  // Administrative portal MUST always fetch directly from network without SW interference
+  if (url.pathname.includes('admin')) {
+    return;
+  }
+
   // Network-First for HTML pages, scripts, styles, manifests, and configs
   const isCodeOrDoc = event.request.mode === 'navigate' ||
     url.pathname.endsWith('.html') ||
@@ -100,10 +102,10 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           // Offline fallback
-          return caches.match(event.request).then((cached) => {
+          return caches.match(event.request, { ignoreSearch: true }).then((cached) => {
             if (cached) return cached;
             if (event.request.mode === 'navigate') {
-              return caches.match('./index.html');
+              return caches.match('./index.html', { ignoreSearch: true });
             }
           });
         })

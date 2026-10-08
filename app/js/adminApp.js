@@ -3,10 +3,10 @@
  * Full Desktop & Responsive Webpage Experience for Trustees and Archakas
  */
 
-import { templeStore } from './services/store.js?v=20261007_07';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_07';
-import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_07';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_07';
+import { templeStore } from './services/store.js?v=20261007_08';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_08';
+import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_08';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_08';
 
 class TempleAdminController {
   constructor() {
@@ -100,25 +100,44 @@ class TempleAdminController {
     const root = document.getElementById('admin-root');
     if (!root) return;
 
-    if (!this.isAuthenticated) {
-      root.innerHTML = this._renderLoginScreen();
-      this._bindLoginEvents();
-      return;
-    }
+    try {
+      if (!this.isAuthenticated) {
+        root.innerHTML = this._renderLoginScreen();
+        this._bindLoginEvents();
+        return;
+      }
 
-    root.innerHTML = `
-      <div class="admin-app-layout">
-        ${this._renderSidebar()}
-        <main class="admin-main">
-          ${this._renderTopBar()}
-          <div class="admin-content">
-            ${this._renderActiveContent()}
+      root.innerHTML = `
+        <div class="admin-app-layout">
+          ${this._renderSidebar()}
+          <main class="admin-main">
+            ${this._renderTopBar()}
+            <div class="admin-content">
+              ${this._renderActiveContent()}
+            </div>
+          </main>
+        </div>
+      `;
+
+      this._bindDashboardEvents();
+    } catch (err) {
+      console.error('[Admin Mandapa] Render error:', err);
+      root.innerHTML = `
+        <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif;">
+          <div style="font-size: 3rem;">⚠️</div>
+          <h2 style="color: #721C2B; margin: 0;">Administrative Desk Notice</h2>
+          <p style="color: #666; max-width: 440px; font-size: 0.9rem; line-height: 1.5;">${err.message || 'An issue occurred while loading administrative desk views.'}</p>
+          <div style="display: flex; gap: 12px; margin-top: 8px;">
+            <button onclick="localStorage.removeItem('sdd_admin_session'); window.location.reload();" style="padding: 10px 20px; background: #721C2B; color: #FFF; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+              Reset Session & Re-Login
+            </button>
+            <button onclick="window.location.reload();" style="padding: 10px 20px; background: #C59B27; color: #1C1917; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+              Reload Desk
+            </button>
           </div>
-        </main>
-      </div>
-    `;
-
-    this._bindDashboardEvents();
+        </div>
+      `;
+    }
   }
 
   _renderLoginScreen() {
@@ -286,7 +305,7 @@ class TempleAdminController {
 
   // ==================== TAB 1: OVERVIEW ====================
   _renderOverviewTab() {
-    const sevas = templeStore.getAllSevas();
+    const sevas = templeStore.getSevas();
     const blockedDates = templeStore.getBlockedDates();
     const bookings = templeStore.getBookings();
     const pendingCount = bookings.filter(b => b.bookingStatus === 'NEEDS_ARCHAKA').length;
@@ -487,7 +506,7 @@ class TempleAdminController {
 
   // ==================== TAB 3: SEVAS & PRICING ====================
   _renderSevasTab() {
-    const sevas = templeStore.getAllSevas();
+    const sevas = templeStore.getSevas();
 
     return `
       <div class="admin-table-card">
@@ -1196,7 +1215,16 @@ class TempleAdminController {
 }
 
 // Instantiate and expose globally
-window.admin = new TempleAdminController();
-document.addEventListener('DOMContentLoaded', () => {
+const initAdmin = () => {
+  if (!window.admin) {
+    window.admin = new TempleAdminController();
+  }
   window.admin.init();
-});
+};
+
+window.admin = new TempleAdminController();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdmin);
+} else {
+  initAdmin();
+}
