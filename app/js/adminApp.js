@@ -3,10 +3,10 @@
  * Full Desktop & Responsive Webpage Experience for Trustees and Archakas
  */
 
-import { templeStore } from './services/store.js?v=20261007_08';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_08';
-import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_08';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_08';
+import { templeStore } from './services/store.js?v=20261007_09';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_09';
+import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_09';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_09';
 
 class TempleAdminController {
   constructor() {
@@ -401,11 +401,11 @@ class TempleAdminController {
         <div class="card" style="margin: 0; background: var(--color-surface); border: 1px solid var(--color-border);">
           <div class="card-header-row">
             <h3 class="card-title"><span>☀️</span> Today's Vedic Horizon</h3>
-            <span class="badge badge-gold">${panchanga.ritu}</span>
+            <span class="badge badge-gold">${panchanga.masa} Masa • ${panchanga.paksha}</span>
           </div>
           <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
             <div style="padding: 8px 12px; background: var(--color-canvas); border-radius: var(--radius-md);">
-              <span style="color: var(--color-text-soft); font-size: 0.75rem; font-weight: 700;">TITHI & NAKSHATRA</span>
+              <span style="color: var(--color-text-soft); font-size: 0.75rem; font-weight: 700;">TITHI & NAKSHATRA (${panchanga.paksha})</span>
               <div style="font-weight: 800; color: var(--color-primary);">${panchanga.tithi.name} • ${panchanga.nakshatra.name}</div>
             </div>
             <div style="padding: 8px 12px; background: #FEF3EB; border-radius: var(--radius-md); border: 1px solid #FCD5BD;">

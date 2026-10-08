@@ -2,21 +2,21 @@
  * Sri Durga Devi Temple — Digital Mandapa: Core App Controller & Router
  */
 
-import { renderHeader } from './components/header.js?v=20261007_07';
-import { renderBottomNav } from './components/bottomNav.js?v=20261007_07';
-import { showToast } from './components/toast.js?v=20261007_07';
-import { renderHomeView } from './views/homeView.js?v=20261007_07';
-import { renderPoojasView } from './views/poojasView.js?v=20261007_07';
-import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_07';
-import { renderCalendarView } from './views/calendarView.js?v=20261007_07';
-import { renderPanchangaView } from './views/panchangaView.js?v=20261007_07';
-import { renderBookingView } from './views/bookingView.js?v=20261007_07';
-import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_07';
-import { renderAdminView } from './views/adminView.js?v=20261007_07';
+import { renderHeader } from './components/header.js?v=20261007_09';
+import { renderBottomNav } from './components/bottomNav.js?v=20261007_09';
+import { showToast } from './components/toast.js?v=20261007_09';
+import { renderHomeView } from './views/homeView.js?v=20261007_09';
+import { renderPoojasView } from './views/poojasView.js?v=20261007_09';
+import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_09';
+import { renderCalendarView } from './views/calendarView.js?v=20261007_09';
+import { renderPanchangaView } from './views/panchangaView.js?v=20261007_09';
+import { renderBookingView } from './views/bookingView.js?v=20261007_09';
+import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_09';
+import { renderAdminView } from './views/adminView.js?v=20261007_09';
 
-import { templeStore } from './services/store.js?v=20261007_07';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_07';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_07';
+import { templeStore } from './services/store.js?v=20261007_09';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_09';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_09';
 
 class DigitalMandapaApp {
   constructor() {

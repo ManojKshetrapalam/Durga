@@ -116,6 +116,20 @@ test("Panchanga returns complete 5 limbs for Bengaluru coordinates", () => {
   assert.strictEqual(p.coordinates, "12.97° N, 77.59° E (Bengaluru)");
 });
 
+test("Paksha & Masa Engine: Accurately displays both Masa and Paksha with Kannada equivalents", () => {
+  const p = PanchangaService.getPanchanga(new Date(2026, 9, 6)); // 06 Oct 2026 (Krishna Ekadashi)
+  assert.strictEqual(p.masa, "Bhadrapada");
+  assert.strictEqual(p.paksha, "Krishna Paksha");
+  assert.strictEqual(p.pakshaKannada, "ಕೃಷ್ಣ ಪಕ್ಷ");
+  assert.strictEqual(p.masaPaksha, "Bhadrapada Masa • Krishna Paksha");
+  assert.ok(p.masaPakshaKannada.includes("ಕೃಷ್ಣ ಪಕ್ಷ"));
+
+  // Check Shukla Paksha date (e.g. 15 Oct 2026)
+  const pShukla = PanchangaService.getPanchanga(new Date(2026, 9, 15));
+  assert.strictEqual(pShukla.paksha, "Shukla Paksha");
+  assert.strictEqual(pShukla.pakshaKannada, "ಶುಕ್ಲ ಪಕ್ಷ");
+});
+
 test("Fix Underline 1: 28 Dec 2026 dynamically calculates Hemanta Ritu & Dakshinayana", () => {
   const dec28 = new Date(2026, 11, 28); // 28 Dec 2026
   const p = PanchangaService.getPanchanga(dec28);

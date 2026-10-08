@@ -3,8 +3,8 @@
  * Features dynamic Bengaluru solar positioning, dynamic Ritu / Ayana, and interactive Kaala guidance modals.
  */
 
-import { PanchangaService } from '../services/panchangaService.js?v=20261007_07';
-import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_07';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_09';
+import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_09';
 
 export function renderPanchangaView(currentDate = new Date()) {
   const panchanga = PanchangaService.getPanchanga(currentDate);
@@ -52,6 +52,9 @@ export function renderPanchangaView(currentDate = new Date()) {
             <div style="font-size: 0.72rem; color: var(--color-gold-hover); font-weight: 600;">
               ${panchanga.samvatsara} • ${panchanga.ayana} (${panchanga.ayanaSanskrit})
             </div>
+            <div style="font-size: 0.74rem; color: var(--color-primary); font-weight: 700; margin-top: 2px;">
+              ${panchanga.masa} Masa • ${panchanga.paksha}
+            </div>
           </div>
           <button class="btn btn-secondary btn-sm" onclick="window.app.stepPanchangaDate(1)" aria-label="Next Day">
             Next Day ›
@@ -62,12 +65,12 @@ export function renderPanchangaView(currentDate = new Date()) {
       <!-- Sacred Festival & Vrata Alert (if active on this day) -->
       ${panchanga.hasFestival ? `
         <section class="card" style="background: linear-gradient(135deg, #FFFDF8 0%, #FFF5EB 100%); border: 1.5px solid #F97316; box-shadow: 0 4px 14px rgba(217, 93, 15, 0.12);">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
             <span class="badge" style="background: #EA580C; color: #FFF; font-weight: 800; font-size: 0.72rem; padding: 3px 8px;">
               🎉 SACRED FESTIVAL / VRATA TODAY
             </span>
             <span style="font-size: 0.75rem; color: var(--color-gold-hover); font-weight: 700;">
-              ${panchanga.masa} Masa
+              ${panchanga.masa} Masa • ${panchanga.paksha}
             </span>
           </div>
           ${panchanga.festivals.map(fest => `
@@ -87,14 +90,14 @@ export function renderPanchangaView(currentDate = new Date()) {
           `).join('')}
         </section>
       ` : `
-        <div class="card" style="padding: 10px 14px; background: #FFFDF8; border-left: 3px solid var(--color-gold); display: flex; align-items: center; justify-content: space-between;">
+        <div class="card" style="padding: 10px 14px; background: #FFFDF8; border-left: 3px solid var(--color-gold); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
           <div>
             <div style="font-size: 0.7rem; color: var(--color-gold-hover); font-weight: 700; text-transform: uppercase;">Today's Sanctum Observance</div>
             <div style="font-size: 0.88rem; font-weight: 700; color: var(--color-primary); margin-top: 2px;">
               🪔 Nitya Mahamangalarathi & ${panchanga.tithi.name} Archana
             </div>
           </div>
-          <span class="badge badge-gold" style="font-size: 0.72rem;">${panchanga.masa} Masa</span>
+          <span class="badge badge-gold" style="font-size: 0.72rem;">${panchanga.masa} Masa • ${panchanga.paksha}</span>
         </div>
       `}
 
@@ -114,7 +117,7 @@ export function renderPanchangaView(currentDate = new Date()) {
           <div style="padding: 10px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);">
             <div style="font-size: 0.72rem; color: var(--color-text-soft); font-weight: 700; text-transform: uppercase;">1. Tithi</div>
             <div style="font-weight: 800; color: var(--color-primary); font-size: 1rem;">${panchanga.tithi.name}</div>
-            <div class="num-tabular" style="font-size: 0.72rem; color: var(--color-text-soft);">Paksha: ${panchanga.tithi.isShukla ? 'Shukla (Waxing)' : 'Krishna (Waning)'}</div>
+            <div class="num-tabular" style="font-size: 0.72rem; color: var(--color-text-soft);"><strong>${panchanga.paksha}</strong> (${panchanga.pakshaKannada})</div>
           </div>
 
           <!-- Nakshatra -->
@@ -161,7 +164,7 @@ export function renderPanchangaView(currentDate = new Date()) {
             <h3 class="card-title" style="font-size: 0.95rem;">
               <span>🗓️</span> Upcoming Festivals & Vratas
             </h3>
-            <span style="font-size: 0.72rem; color: var(--color-gold-hover); font-weight: 600;">${panchanga.masa} Masa</span>
+            <span style="font-size: 0.72rem; color: var(--color-gold-hover); font-weight: 600;">${panchanga.masa} Masa • ${panchanga.paksha}</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             ${panchanga.upcomingFestivals.map(uf => `

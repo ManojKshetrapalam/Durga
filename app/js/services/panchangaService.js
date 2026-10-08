@@ -16,7 +16,7 @@
  * - Next Upcoming Festivals Engine with relative countdown labels
  */
 
-import * as Astronomy from '../lib/astronomy.js?v=20261007_07';
+import * as Astronomy from '../lib/astronomy.js?v=20261007_09';
 
 // Temple Coordinates: Bengaluru, Karnataka
 const BENGALURU_OBSERVER = new Astronomy.Observer(12.9716, 77.5946, 920);
@@ -890,6 +890,10 @@ export class PanchangaService {
       rituDescription: rituObj.description,
       masa: masaName,
       masaKannada: masaKannada,
+      paksha: astro.isShukla ? "Shukla Paksha" : "Krishna Paksha",
+      pakshaKannada: astro.isShukla ? "ಶುಕ್ಲ ಪಕ್ಷ" : "ಕೃಷ್ಣ ಪಕ್ಷ",
+      masaPaksha: `${masaName} Masa • ${astro.isShukla ? "Shukla" : "Krishna"} Paksha`,
+      masaPakshaKannada: `${masaKannada} ಮಾಸ • ${astro.isShukla ? "ಶುಕ್ಲ" : "ಕೃಷ್ಣ"} ಪಕ್ಷ`,
       isShukla: astro.isShukla,
       tithi: {
         name: tithiName,

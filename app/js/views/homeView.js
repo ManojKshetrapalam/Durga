@@ -75,12 +75,12 @@ export function renderHomeView() {
 
         <!-- Today's Festival Alert or Next Upcoming Festival Strip -->
         ${todayPanchanga.hasFestival ? `
-          <div style="margin: 8px 0; padding: 6px 12px; background: linear-gradient(135deg, #FFFDF8 0%, #FFF5EB 100%); border: 1px solid #F97316; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between;">
+          <div style="margin: 8px 0; padding: 6px 12px; background: linear-gradient(135deg, #FFFDF8 0%, #FFF5EB 100%); border: 1px solid #F97316; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span style="font-size: 1rem;">🎉</span>
               <strong style="color: var(--color-primary); font-size: 0.82rem;">${todayPanchanga.primaryFestival.name}</strong>
             </div>
-            <span class="badge badge-gold" style="font-size: 0.68rem;">${todayPanchanga.masa} Masa</span>
+            <span class="badge badge-gold" style="font-size: 0.68rem;">${todayPanchanga.masa} Masa • ${todayPanchanga.paksha}</span>
           </div>
         ` : (todayPanchanga.upcomingFestivals && todayPanchanga.upcomingFestivals.length > 0 ? `
           <div style="margin: 8px 0; padding: 6px 12px; background: #FFFDF8; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between;">
@@ -96,6 +96,7 @@ export function renderHomeView() {
           <div style="padding: 10px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);">
             <span style="font-size: 0.72rem; color: var(--color-text-soft); text-transform: uppercase; font-weight: 700;">Tithi</span>
             <div style="font-weight: 700; color: var(--color-text-main); font-size: 0.95rem;">${todayPanchanga.tithi.name}</div>
+            <div style="font-size: 0.72rem; color: var(--color-gold-hover); font-weight: 600;">${todayPanchanga.paksha}</div>
           </div>
           <div style="padding: 10px; background: var(--color-canvas); border-radius: var(--radius-md); border: 1px solid var(--color-border-subtle);">
             <span style="font-size: 0.72rem; color: var(--color-text-soft); text-transform: uppercase; font-weight: 700;">Nakshatra</span>

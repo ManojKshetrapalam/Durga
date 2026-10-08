@@ -3,10 +3,10 @@
  * Powers live Bengaluru Panchanga, audio chant player, seva category filters, and WhatsApp booking triggers
  */
 
-import { SEVAS_DATA } from './data/sevas.js?v=20261007_07';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_07';
-import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_07';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_07';
+import { SEVAS_DATA } from './data/sevas.js?v=20261007_09';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_09';
+import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_09';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_09';
 
 class TempleLandingController {
   constructor() {
@@ -64,7 +64,7 @@ class TempleLandingController {
             <div style="font-size: 0.8rem; color: #FED7AA;">${p.primaryFestival.description}</div>
           </div>
         </div>
-        <span class="badge" style="background: #EA580C; color: #FFF; font-weight: 800; font-size: 0.75rem;">${p.masa} Masa Vrata</span>
+        <span class="badge" style="background: #EA580C; color: #FFF; font-weight: 800; font-size: 0.75rem;">${p.masa} Masa • ${p.paksha}</span>
       </div>
     ` : (p.upcomingFestivals && p.upcomingFestivals.length > 0 ? `
       <div style="grid-column: 1 / -1; background: rgba(255, 253, 248, 0.08); border: 1px solid rgba(197, 155, 39, 0.4); border-radius: var(--radius-lg); padding: 10px 18px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
