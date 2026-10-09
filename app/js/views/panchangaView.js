@@ -3,8 +3,8 @@
  * Features dynamic Bengaluru solar positioning, dynamic Ritu / Ayana, and interactive Kaala guidance modals.
  */
 
-import { PanchangaService } from '../services/panchangaService.js?v=20261007_09';
-import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_09';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_10';
+import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_10';
 
 export function renderPanchangaView(currentDate = new Date()) {
   const panchanga = PanchangaService.getPanchanga(currentDate);
@@ -62,8 +62,11 @@ export function renderPanchangaView(currentDate = new Date()) {
         </div>
       </div>
 
-      <!-- Sacred Festival & Vrata Alert (if active on this day) -->
-      ${panchanga.hasFestival ? `
+      <!-- Responsive Device Grid (Desktop 2-Col / Mobile 1-Col) -->
+      <div class="panchanga-device-grid">
+        <div class="panchanga-col-left">
+          <!-- Sacred Festival & Vrata Alert (if active on this day) -->
+          ${panchanga.hasFestival ? `
         <section class="card" style="background: linear-gradient(135deg, #FFFDF8 0%, #FFF5EB 100%); border: 1.5px solid #F97316; box-shadow: 0 4px 14px rgba(217, 93, 15, 0.12);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
             <span class="badge" style="background: #EA580C; color: #FFF; font-weight: 800; font-size: 0.72rem; padding: 3px 8px;">
@@ -185,9 +188,11 @@ export function renderPanchangaView(currentDate = new Date()) {
           </div>
         </section>
       ` : ''}
+        </div>
 
-      <!-- Important Timings & Kaala Safeguards (Interactive) -->
-      <section class="card">
+        <div class="panchanga-col-right">
+          <!-- Important Timings & Kaala Safeguards (Interactive) -->
+          <section class="card">
         <div class="card-header-row">
           <div>
             <h3 class="card-title">
@@ -376,6 +381,8 @@ export function renderPanchangaView(currentDate = new Date()) {
           Ask Priest on WhatsApp 🙏
         </button>
       </section>
+        </div>
+      </div>
     </div>
   `;
 }

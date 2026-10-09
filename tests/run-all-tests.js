@@ -181,6 +181,17 @@ test("Festival Detection Engine identifies authentic festivals based on Tithi & 
   // Naraka Chaturdashi (Krishna Chaturdashi on Nov 8, 2026)
   const deepavali = PanchangaService.getPanchanga(new Date(2026, 10, 8));
   assert.ok(deepavali.festivals.some(f => f.name.includes("Naraka Chaturdashi")), "Detects Naraka Chaturdashi");
+
+  // Swarna Gowri Vratha (Sept 14, 2026 - Bhadrapada Shukla Tritiya)
+  const gowriDay = PanchangaService.getPanchanga(new Date(2026, 8, 14)); // Month 8 = September
+  assert.strictEqual(gowriDay.masa, "Bhadrapada", "Sept 14, 2026 is Bhadrapada Masa");
+  assert.strictEqual(gowriDay.paksha, "Shukla Paksha", "Sept 14, 2026 is Shukla Paksha");
+  assert.ok(gowriDay.festivals.some(f => f.name.includes("Swarna Gowri Vratha")), "Detects Swarna Gowri Vratha on Sept 14, 2026");
+
+  // Ganesha Chaturthi (Sept 15, 2026 - Bhadrapada Shukla Chaturthi)
+  const ganeshaDay = PanchangaService.getPanchanga(new Date(2026, 8, 15));
+  assert.strictEqual(ganeshaDay.masa, "Bhadrapada", "Sept 15, 2026 is Bhadrapada Masa");
+  assert.ok(ganeshaDay.festivals.some(f => f.name.includes("Ganesha Chaturthi")), "Detects Ganesha Chaturthi on Sept 15, 2026");
 });
 
 test("Dynamic 11 Vedic Karanas: Advances across days and cycles through half-tithis", () => {

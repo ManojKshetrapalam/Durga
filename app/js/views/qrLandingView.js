@@ -147,7 +147,7 @@ export function renderQrLandingView(spotId = 'entrance') {
         </ul>
       </section>
 
-      <!-- Add to Home Screen PWA On-Ramp -->
+      <!-- Add to Home Screen On-Ramp -->
       <section class="pwa-banner">
         <div style="display: flex; align-items: flex-start; gap: 10px;">
           <span style="font-size: 1.4rem;">📲</span>
@@ -156,12 +156,12 @@ export function renderQrLandingView(spotId = 'entrance') {
               Keep Sri Durga Devi Temple in your pocket
             </h4>
             <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 2px;">
-              Install this Progressive App for instant offline daily Panchanga, festival alerts, and fast seva counter access without app store downloads.
+              Add this app to your phone for instant offline daily Panchanga, festival alerts, and fast seva counter access without app store downloads.
             </p>
           </div>
         </div>
         <button id="btn-install-pwa-qr" class="btn btn-primary" style="margin-top: 6px;" onclick="window.app.promptPwaInstall()">
-          Install Digital Mandapa App 📲
+          Add to Phone / Install App 📲
         </button>
       </section>
 

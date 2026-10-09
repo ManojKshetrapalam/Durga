@@ -3,10 +3,10 @@
  * Powers live Bengaluru Panchanga, audio chant player, seva category filters, and WhatsApp booking triggers
  */
 
-import { SEVAS_DATA } from './data/sevas.js?v=20261007_09';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_09';
-import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_09';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_09';
+import { SEVAS_DATA } from './data/sevas.js?v=20261007_10';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_10';
+import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_10';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_10';
 
 class TempleLandingController {
   constructor() {
@@ -147,7 +147,7 @@ class TempleLandingController {
         </div>
         <div style="display: flex; gap: 8px; margin-top: 14px;">
           <a href="app.html#booking" onclick="sessionStorage.setItem('sdd_preselect_seva', '${s.id}')" class="btn btn-primary btn-sm" style="flex: 1; text-align: center; text-decoration: none;">
-            Book on PWA 📱
+            Book Online 🪔
           </a>
           <button onclick="window.landing.bookSevaWhatsApp('${s.id}')" class="btn btn-whatsapp btn-sm" style="display: flex; align-items: center; justify-content: center; gap: 4px;" title="Book via WhatsApp">
             💬 WhatsApp

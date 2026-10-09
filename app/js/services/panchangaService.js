@@ -16,7 +16,7 @@
  * - Next Upcoming Festivals Engine with relative countdown labels
  */
 
-import * as Astronomy from '../lib/astronomy.js?v=20261007_09';
+import * as Astronomy from '../lib/astronomy.js?v=20261007_10';
 
 // Temple Coordinates: Bengaluru, Karnataka
 const BENGALURU_OBSERVER = new Astronomy.Observer(12.9716, 77.5946, 920);
@@ -249,8 +249,13 @@ export class PanchangaService {
     // Ritu: 6 seasons mapped directly to Sun's sidereal sign
     const rituIndex = Math.floor(suryaRashiIndex / 2); // 0 to 5
 
-    // Masa: In South Indian Amanta / Drik calendar, month aligns with Sun sign
-    const masaIndex = suryaRashiIndex;
+    // Lunisolar Amanta Masa: Month begins at New Moon (Amavasya) and is named after
+    // the Solar Sankranti (ingress) occurring within that lunar month.
+    // At elongation E, Sun has advanced ~E * 0.08085° since the preceding Amavasya.
+    const sunAtAmavasya = norm360(sunSidereal - (elongation * 0.08085));
+    const sunSignAtAmavasya = Math.floor(sunAtAmavasya / 30); // 0=Mesha, 4=Simha, 5=Kanya...
+    // In Amanta system, month gets the name of the ingress sign: (sunSignAtAmavasya + 1) % 12
+    const masaIndex = (sunSignAtAmavasya + 1) % 12;
 
     return {
       jd,
@@ -467,15 +472,23 @@ export class PanchangaService {
             isMajor: true,
             description: "Supreme day of unending prosperity, golden donations, and special Mahalakshmi Archana."
           });
+        } else if (masaName === "Bhadrapada") {
+          festivals.push({
+            name: "Swarna Gowri Vratha (Gowri Habba)",
+            kannada: "ಸ್ವರ್ಣ ಗೌರಿ ವ್ರತ (ತದಿಗೆ ಗೌರಿ ಹಬ್ಬ)",
+            badge: "🌺 Swarna Gowri Vratha",
+            isMajor: true,
+            description: "Sacred invocation of Goddess Sri Gowri Devi (divine mother) with Bagina samarpanam, sacred sutra vratha, and Mangala Gowri Pooja."
+          });
         }
       } else if (pakshaTithiNum === 4) {
         if (masaName === "Bhadrapada") {
           festivals.push({
             name: "Ganesha Chaturthi (Vinayaka Chavithi)",
-            kannada: "ಶ್ರೀ ಗಣೇಶ ಚತುರ್ಥಿ",
+            kannada: "ಶ್ರೀ ಗಣೇಶ ಚತುರ್ಥಿ (ಗಣೇಶ ಹಬ್ಬ)",
             badge: "🐘 Ganesha Chaturthi",
             isMajor: true,
-            description: "Grand appearance of Vighnaharta Sri Ganesha with Modaka naivedya and special Ganapathi Homa."
+            description: "Grand appearance of Vighnaharta Sri Ganesha with Modaka naivedya and special Ganapathi Homa at the temple."
           });
         }
       } else if (pakshaTithiNum === 7 && masaName === "Magha") {

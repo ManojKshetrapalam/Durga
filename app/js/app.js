@@ -2,21 +2,21 @@
  * Sri Durga Devi Temple — Digital Mandapa: Core App Controller & Router
  */
 
-import { renderHeader } from './components/header.js?v=20261007_09';
-import { renderBottomNav } from './components/bottomNav.js?v=20261007_09';
-import { showToast } from './components/toast.js?v=20261007_09';
-import { renderHomeView } from './views/homeView.js?v=20261007_09';
-import { renderPoojasView } from './views/poojasView.js?v=20261007_09';
-import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_09';
-import { renderCalendarView } from './views/calendarView.js?v=20261007_09';
-import { renderPanchangaView } from './views/panchangaView.js?v=20261007_09';
-import { renderBookingView } from './views/bookingView.js?v=20261007_09';
-import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_09';
-import { renderAdminView } from './views/adminView.js?v=20261007_09';
+import { renderHeader } from './components/header.js?v=20261007_10';
+import { renderBottomNav } from './components/bottomNav.js?v=20261007_10';
+import { showToast } from './components/toast.js?v=20261007_10';
+import { renderHomeView } from './views/homeView.js?v=20261007_10';
+import { renderPoojasView } from './views/poojasView.js?v=20261007_10';
+import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_10';
+import { renderCalendarView } from './views/calendarView.js?v=20261007_10';
+import { renderPanchangaView } from './views/panchangaView.js?v=20261007_10';
+import { renderBookingView } from './views/bookingView.js?v=20261007_10';
+import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_10';
+import { renderAdminView } from './views/adminView.js?v=20261007_10';
 
-import { templeStore } from './services/store.js?v=20261007_09';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_09';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_09';
+import { templeStore } from './services/store.js?v=20261007_10';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_10';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_10';
 
 class DigitalMandapaApp {
   constructor() {
@@ -35,6 +35,14 @@ class DigitalMandapaApp {
   }
 
   init() {
+    // Detect installed standalone mobile PWA vs browser viewport
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://');
+    if (isStandalone) {
+      document.body.classList.add('is-pwa-standalone');
+    }
+
     // Check URL parameters (e.g. ?spot=entrance or hash navigation)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('spot')) {
@@ -621,7 +629,7 @@ class DigitalMandapaApp {
 
   promptEditAnnouncement() {
     const current = templeStore.getAnnouncement();
-    const newMsg = prompt("Enter announcement text for devotee PWA:", current.message || "");
+    const newMsg = prompt("Enter announcement text for Devotee App:", current.message || "");
     if (newMsg !== null) {
       templeStore.updateAnnouncement({
         ...current,
@@ -667,7 +675,7 @@ class DigitalMandapaApp {
       });
     } else {
       // Guide iOS or desktop users
-      alert("To Install Sri Durga Devi Temple PWA:\n\n1. On iPhone/Safari: Tap 'Share' [↑] and select 'Add to Home Screen' [+].\n2. On Android/Chrome: Tap menu (⋮) and select 'Install app' or 'Add to Home Screen'.");
+      alert("To Install Sri Durga Devi Temple App:\n\n1. On iPhone/Safari: Tap 'Share' [↑] and select 'Add to Home Screen' [+].\n2. On Android/Chrome: Tap menu (⋮) and select 'Install app' or 'Add to Home Screen'.");
     }
   }
 

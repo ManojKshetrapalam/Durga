@@ -41,7 +41,10 @@ export function renderCalendarView(selectedDateStr = '2026-10-15', selectedSevaI
         </p>
       </div>
 
-      <!-- Seva Selector Dropdown -->
+      <!-- Responsive Device Grid (Desktop 2-Col / Mobile 1-Col) -->
+      <div class="calendar-device-grid">
+        <div class="calendar-col-left">
+          <!-- Seva Selector Dropdown -->
       <div class="card" style="padding: 12px; margin-top: 10px;">
         <label class="form-label" for="cal-seva-select" style="font-size: 0.8rem;">Filter Availability for Seva:</label>
         <select 
@@ -123,9 +126,11 @@ export function renderCalendarView(selectedDateStr = '2026-10-15', selectedSevaI
           </span>
         </div>
       </div>
+        </div>
 
-      <!-- Selected Date Detail & Resolution Card -->
-      <section class="card ${check.isAvailable ? 'card-gold-accent' : ''}" style="${!check.isAvailable ? 'border-color: #FCA5A5; background: #FFFBFB;' : ''}">
+        <div class="calendar-col-right">
+          <!-- Selected Date Detail & Resolution Card -->
+          <section class="card ${check.isAvailable ? 'card-gold-accent' : ''}" style="${!check.isAvailable ? 'border-color: #FCA5A5; background: #FFFBFB;' : ''}">
         <div class="card-header-row">
           <span class="badge ${check.isAvailable ? 'badge-live' : 'badge-blocked'}">
             ${check.badgeText}
@@ -179,6 +184,8 @@ export function renderCalendarView(selectedDateStr = '2026-10-15', selectedSevaI
           </button>
         `}
       </section>
+        </div>
+      </div>
     </div>
   `;
 }

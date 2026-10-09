@@ -69,8 +69,8 @@ export function renderPoojasView(selectedCategory = 'all', searchQuery = '') {
         Showing ${sevas.length} Sevas
       </div>
 
-      <!-- Sevas Cards List -->
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <!-- Sevas Cards List (Desktop 2-Col Grid / Mobile 1-Col) -->
+      <div class="poojas-cards-list">
         ${sevas.length === 0 ? `
           <div class="card" style="text-align: center; padding: 24px;">
             <p style="color: var(--color-text-muted);">No sevas found matching your search.</p>

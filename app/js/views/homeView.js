@@ -61,8 +61,10 @@ export function renderHomeView() {
         </div>
       ` : ''}
 
-      <!-- Today at Temple: Panchanga Strip -->
-      <section class="card">
+      <!-- Quick Daily Insights Grid (Desktop 2-Col / Mobile 1-Col) -->
+      <div class="home-quick-grid">
+        <!-- Today at Temple: Panchanga Strip -->
+        <section class="card">
         <div class="card-header-row">
           <h3 class="card-title">
             <span>☀️</span> Today's Vedic Panchanga
@@ -138,6 +140,7 @@ export function renderHomeView() {
           ` : ''}
         </div>
       </section>
+      </div>
 
       <!-- Popular Poojas & Homas Grid -->
       <section>
@@ -150,7 +153,7 @@ export function renderHomeView() {
           </button>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="home-sevas-grid">
           ${sevas.map(s => `
             <div class="card" style="padding: 12px; cursor: pointer;" onclick="window.app.viewPooja('${s.id}')">
               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -177,39 +180,42 @@ export function renderHomeView() {
         </div>
       </section>
 
-      <!-- Devotee WhatsApp Desk Helper -->
-      <section class="card" style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border-color: #BBF7D0;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-          <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--color-whatsapp); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
-            💬
+      <!-- Devotee Support & Temple Location (Desktop 2-Col / Mobile 1-Col) -->
+      <div class="home-desk-grid">
+        <!-- Devotee WhatsApp Desk Helper -->
+        <section class="card" style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border-color: #BBF7D0;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--color-whatsapp); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              💬
+            </div>
+            <div>
+              <h4 style="font-family: var(--font-serif); font-size: 1.05rem; color: #166534; font-weight: 700;">
+                Ask Temple Desk on WhatsApp
+              </h4>
+              <p style="font-size: 0.8rem; color: #15803D;">
+                Hereditary Archakas & Temple office available for Sankalpa questions.
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 style="font-family: var(--font-serif); font-size: 1.05rem; color: #166534; font-weight: 700;">
-              Ask Temple Desk on WhatsApp
-            </h4>
-            <p style="font-size: 0.8rem; color: #15803D;">
-              Hereditary Archakas & Temple office available for Sankalpa questions.
-            </p>
-          </div>
-        </div>
-        <button class="btn btn-whatsapp" onclick="window.app.openWhatsAppGeneral()">
-          Chat with Temple Office 🙏
-        </button>
-      </section>
+          <button class="btn btn-whatsapp" onclick="window.app.openWhatsAppGeneral()">
+            Chat with Temple Office 🙏
+          </button>
+        </section>
 
-      <!-- Physical Temple Location Card -->
-      <section class="card">
-        <h4 style="font-family: var(--font-serif); font-size: 1rem; color: var(--color-primary); margin-bottom: 4px;">
-          📍 Sri Durga Parameshwari Temple
-        </h4>
-        <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 10px;">
-          Chandra Layout 1st Phase, Bengaluru - 560072<br>
-          Phone: <a href="tel:08023394447" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">080-23394447</a>
-        </p>
-        <button class="btn btn-secondary btn-sm" onclick="window.app.navigate('qr')">
-          View On-Premises QR Desk 📲
-        </button>
-      </section>
+        <!-- Physical Temple Location Card -->
+        <section class="card">
+          <h4 style="font-family: var(--font-serif); font-size: 1rem; color: var(--color-primary); margin-bottom: 4px;">
+            📍 Sri Durga Parameshwari Temple
+          </h4>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 10px;">
+            Chandra Layout 1st Phase, Bengaluru - 560072<br>
+            Phone: <a href="tel:08023394447" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">080-23394447</a>
+          </p>
+          <button class="btn btn-secondary btn-sm" onclick="window.app.navigate('qr')">
+            View On-Premises QR Desk 📲
+          </button>
+        </section>
+      </div>
     </div>
   `;
 }

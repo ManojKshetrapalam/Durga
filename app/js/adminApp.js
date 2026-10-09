@@ -3,10 +3,10 @@
  * Full Desktop & Responsive Webpage Experience for Trustees and Archakas
  */
 
-import { templeStore } from './services/store.js?v=20261007_09';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_09';
-import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_09';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_09';
+import { templeStore } from './services/store.js?v=20261007_10';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_10';
+import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_10';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_10';
 
 class TempleAdminController {
   constructor() {
@@ -272,8 +272,8 @@ class TempleAdminController {
           <a href="index.html" class="btn btn-secondary btn-sm" target="_blank" title="Preview Public Landing Page">
             🌐 Landing Page
           </a>
-          <a href="app.html" class="btn btn-secondary btn-sm" target="_blank" title="Preview Mobile Devotee PWA">
-            📱 Devotee PWA
+          <a href="app.html" class="btn btn-secondary btn-sm" target="_blank" title="Preview Devotee App">
+            📱 Devotee App
           </a>
         </div>
       </header>
@@ -437,7 +437,7 @@ class TempleAdminController {
           <span>🛡️</span> Create Sanctum Festival Override / Block Date
         </h3>
         <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-bottom: 16px;">
-          Admin supremacy rule: Any blocked date automatically overrides astrological availability across the devotee PWA.
+          Admin supremacy rule: Any blocked date automatically overrides astrological availability across the devotee app.
         </p>
 
         <form onsubmit="event.preventDefault(); window.admin.submitBlockRule();">
@@ -637,7 +637,7 @@ class TempleAdminController {
       <div class="card" style="max-width: 720px; background: var(--color-surface); border: 1px solid var(--color-border);">
         <h3 class="card-title"><span>📢</span> Devotee Notice Board & Live Broadcast</h3>
         <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-bottom: 20px;">
-          This banner appears prominently at the top of the Devotee Mobile PWA and Web Landing Page.
+          This banner appears prominently at the top of the Devotee App and Web Landing Page.
         </p>
 
         <form onsubmit="event.preventDefault(); window.admin.updateAnnouncement();">

@@ -732,3 +732,161 @@ textarea.form-control {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* =========================================================================
+   Device Grids & Mobile Fallback Layout
+   ========================================================================= */
+.panchanga-device-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.panchanga-col-left, .panchanga-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.calendar-device-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.calendar-col-left, .calendar-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.poojas-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.home-quick-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.home-sevas-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.home-desk-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Standalone PWA adjustments: hide desktop bars and lock to mobile frame */
+body.is-pwa-standalone .desktop-only-bar {
+  display: none !important;
+}
+
+/* =========================================================================
+   Device View Adaptation: Responsive Desktop & Tablet Experience
+   Active ONLY when the user is NOT using the installed mobile PWA
+   ========================================================================= */
+@media (min-width: 769px) {
+  body:not(.is-pwa-standalone) {
+    background-color: #F4EFE6;
+    background-image: radial-gradient(#EADFCD 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  body:not(.is-pwa-standalone) #app-shell {
+    max-width: 1080px;
+    margin: 20px auto;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 16px 48px rgba(114, 28, 43, 0.12);
+    border: 1px solid var(--color-border);
+    min-height: calc(100vh - 40px);
+  }
+
+  body:not(.is-pwa-standalone) .top-header {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 16px 28px;
+  }
+
+  body:not(.is-pwa-standalone) #main-content {
+    padding: 24px 32px 100px;
+  }
+
+  body:not(.is-pwa-standalone) .bottom-nav {
+    max-width: 1080px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 32px;
+    height: 68px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+  }
+
+  body:not(.is-pwa-standalone) .nav-item {
+    font-size: 0.82rem;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  body:not(.is-pwa-standalone) .nav-item svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Panchanga 2-Column Responsive Dashboard */
+  body:not(.is-pwa-standalone) .panchanga-device-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-top: 14px;
+  }
+
+  body:not(.is-pwa-standalone) .panchanga-col-left,
+  body:not(.is-pwa-standalone) .panchanga-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Calendar 2-Column Layout */
+  body:not(.is-pwa-standalone) .calendar-device-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-top: 14px;
+  }
+
+  body:not(.is-pwa-standalone) .calendar-col-left,
+  body:not(.is-pwa-standalone) .calendar-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Seva Offerings 2-Column Card Grid */
+  body:not(.is-pwa-standalone) .poojas-cards-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* Home Dashboard Grids */
+  body:not(.is-pwa-standalone) .home-quick-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  body:not(.is-pwa-standalone) .home-sevas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  body:not(.is-pwa-standalone) .home-desk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
