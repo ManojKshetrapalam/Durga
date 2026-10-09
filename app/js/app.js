@@ -13,7 +13,7 @@ import { renderPanchangaView } from './views/panchangaView.js?v=20261007_11';
 import { renderBookingView } from './views/bookingView.js?v=20261007_11';
 import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_11';
 import { renderAdminView } from './views/adminView.js?v=20261007_11';
-import { renderPanchangaMonthModal } from './views/panchangaMonthModal.js?v=20261007_11';
+import { renderPanchangaMonthModal } from './views/panchangaMonthModal.js?v=20261007_12';
 
 import { templeStore } from './services/store.js?v=20261007_11';
 import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
@@ -270,7 +270,7 @@ class DigitalMandapaApp {
       selectedDateStr = new Date().toISOString().split('T')[0];
     }
     const html = renderPanchangaMonthModal(this.calendarModalYear, this.calendarModalMonth, selectedDateStr);
-    this.showModal(html);
+    this.showModal(html, 'modal-dialog-calendar');
   }
 
   selectPanchangaDate(dateStr) {
@@ -437,7 +437,7 @@ class DigitalMandapaApp {
     }
   }
 
-  showModal(html) {
+  showModal(html, dialogClass = '') {
     let overlay = document.getElementById('app-modal-overlay');
     if (!overlay) {
       overlay = document.createElement('div');
@@ -445,7 +445,8 @@ class DigitalMandapaApp {
       overlay.className = 'modal-overlay';
       document.body.appendChild(overlay);
     }
-    overlay.innerHTML = `<div class="modal-dialog">${html}</div>`;
+    overlay.className = `modal-overlay ${dialogClass ? 'modal-overlay-' + dialogClass : ''}`.trim();
+    overlay.innerHTML = `<div class="modal-dialog ${dialogClass}">${html}</div>`;
     overlay.style.display = 'flex';
     overlay.onclick = (e) => {
       if (e.target === overlay) this.closeModal();
@@ -763,9 +764,9 @@ class DigitalMandapaApp {
 
   _registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=20261007_11', { updateViaCache: 'none' })
+      navigator.serviceWorker.register('./sw.js?v=20261007_12', { updateViaCache: 'none' })
         .then((reg) => {
-          console.log('[PWA v11] Service Worker registered & active');
+          console.log('[PWA v12] Service Worker registered & active');
           // Check for worker updates immediately
           reg.update();
         })

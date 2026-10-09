@@ -933,75 +933,122 @@ body.is-pwa-standalone .desktop-only-bar {
 }
 
 /* =========================================================================
-   Panchanga Monthly View Calendar Modal & Grid
+   Panchanga Monthly View Calendar Modal & Grid (Fully Responsive)
+   Desktop: Expansive 920px canvas, 7 spacious columns, full badges, zero horizontal scroll
+   Mobile: 100% width, compact grid, zero horizontal overflow, indicator dots
    ========================================================================= */
-.modal-dialog-calendar {
+
+/* Overlay override for calendar modal */
+.modal-overlay.modal-overlay-modal-dialog-calendar {
+  padding: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Calendar Modal Container (Overrides default .modal-dialog max-width 440px) */
+.modal-dialog.modal-dialog-calendar {
   width: 95vw;
-  max-width: 780px;
+  max-width: 920px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
-.modal-dialog-calendar .modal-header {
-  padding: 12px 18px;
+.modal-dialog.modal-dialog-calendar .modal-header {
+  padding: 12px 20px;
   background: var(--color-canvas);
   border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.modal-dialog-calendar .modal-body {
-  padding: 14px 18px;
+.modal-dialog.modal-dialog-calendar .modal-body {
+  padding: 16px 20px;
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
+  box-sizing: border-box;
+  background: var(--color-surface);
 }
 
-/* Month navigation header inside modal */
+/* Month Navigation Header Bar */
 .month-modal-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   margin-bottom: 12px;
   background: var(--color-canvas);
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.month-nav-left,
+.month-nav-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.month-nav-btn {
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .month-modal-title {
   text-align: center;
   flex: 1;
-  min-width: 180px;
+  min-width: 0;
 }
 
 .month-modal-title h3 {
   font-family: var(--font-serif);
-  font-size: 1.18rem;
+  font-size: 1.25rem;
   color: var(--color-primary);
   font-weight: 700;
   margin: 0;
+  line-height: 1.2;
 }
 
 .month-modal-subtitle {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   color: var(--color-gold-hover);
   font-weight: 600;
   margin-top: 2px;
+  line-height: 1.2;
 }
 
-/* Month Highlights Strip */
+.month-modal-samvatsara {
+  font-size: 0.72rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* Sacred Festivals of Month Strip */
 .month-highlights-strip {
   margin-bottom: 12px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   background: #FFFDF8;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .month-highlights-title {
@@ -1009,6 +1056,7 @@ body.is-pwa-standalone .desktop-only-bar {
   font-weight: 700;
   color: var(--color-primary);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -1020,12 +1068,15 @@ body.is-pwa-standalone .desktop-only-bar {
   gap: 6px;
   overflow-x: auto;
   padding-bottom: 4px;
+  max-width: 100%;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
 .month-fest-chip {
   flex-shrink: 0;
   font-size: 0.7rem;
-  padding: 3px 8px;
+  padding: 3px 9px;
   background: #FFF7ED;
   border: 1px solid #FED7AA;
   border-radius: var(--radius-pill);
@@ -1033,6 +1084,7 @@ body.is-pwa-standalone .desktop-only-bar {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .month-fest-chip:hover {
@@ -1043,52 +1095,61 @@ body.is-pwa-standalone .desktop-only-bar {
 /* 7-column Calendar Weekdays */
 .month-cal-weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
   text-align: center;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  padding: 6px 0;
+  padding: 7px 0;
   background: var(--color-canvas);
   border-radius: var(--radius-sm);
   margin-bottom: 6px;
   border: 1px solid var(--color-border-subtle);
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* 7-column Calendar Grid */
 .month-cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Day cell in month calendar */
+/* Calendar Day Cell */
 .month-cal-day {
-  min-height: 64px;
-  padding: 5px 4px;
+  min-height: 80px;
+  padding: 5px 6px;
   background: #FFFDF8;
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 2px;
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
   text-align: left;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .month-cal-day:hover {
   background: #FFF8EE;
   border-color: var(--color-gold);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(197, 155, 39, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(197, 155, 39, 0.2);
 }
 
 .month-cal-day:active {
   transform: scale(0.98);
 }
 
-/* Current selected date */
+/* Selected Date */
 .month-cal-day.is-selected {
   background: #721C2B !important;
   color: #FFF !important;
@@ -1113,6 +1174,7 @@ body.is-pwa-standalone .desktop-only-bar {
   background: #FFF9F5;
 }
 
+/* Festival day highlight */
 .month-cal-day.is-festival:not(.is-selected) {
   background: #FFFBF2;
   border-color: #FDBA74;
@@ -1126,51 +1188,54 @@ body.is-pwa-standalone .desktop-only-bar {
 }
 
 .month-cal-day .day-num {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: var(--color-primary);
 }
 
 .month-cal-day .day-moon-icon {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
+  line-height: 1;
 }
 
 .month-cal-day .day-tithi {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--color-text-main);
   line-height: 1.15;
-  margin-top: 2px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .month-cal-day .day-nakshatra {
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   color: var(--color-text-soft);
+  line-height: 1.15;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.month-cal-day .day-badges-row {
+/* Desktop Badges Row */
+.day-badges-desktop {
   margin-top: 2px;
   display: flex;
+  flex-direction: column;
   gap: 2px;
-  flex-wrap: wrap;
 }
 
 .month-badge {
-  font-size: 0.58rem;
-  font-weight: 800;
-  padding: 1px 3px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 4px;
   border-radius: 3px;
-  line-height: 1.1;
+  line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  display: block;
 }
 
 .month-badge-pournami {
@@ -1191,40 +1256,198 @@ body.is-pwa-standalone .desktop-only-bar {
 .month-badge-festival {
   background: #FFEDD5;
   color: #9A3412;
-  font-weight: 800;
+}
+
+/* Mobile Indicator Dots Row */
+.day-indicators-mobile {
+  display: none;
+}
+
+.indicator-icon {
+  display: inline-block;
+  line-height: 1;
 }
 
 /* Empty day placeholder */
 .month-cal-empty {
-  min-height: 64px;
+  min-height: 80px;
   background: transparent;
   border: 1px dashed rgba(234, 223, 205, 0.4);
   border-radius: var(--radius-sm);
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-/* Mobile responsive adjustments */
-@media (max-width: 600px) {
-  .modal-dialog-calendar {
-    max-height: 94vh;
+/* Responsive bottom legend */
+.month-cal-legend {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 10px;
+  margin-top: 14px;
+  font-size: 0.74rem;
+  color: var(--color-text-soft);
+}
+
+/* Desktop default toggles */
+.weekday-desktop { display: inline; }
+.weekday-mobile { display: none; }
+.nav-btn-desktop { display: inline; }
+.nav-btn-mobile { display: none; }
+.subtitle-desktop { display: inline; }
+.subtitle-mobile { display: none; }
+.tithi-desktop { display: inline; }
+.tithi-mobile { display: none; }
+
+/* =========================================================================
+   Mobile Viewport Responsiveness (< 768px)
+   ========================================================================= */
+@media (max-width: 767px) {
+  .modal-overlay.modal-overlay-modal-dialog-calendar {
+    padding: 6px !important;
+    align-items: center;
   }
-  .modal-dialog-calendar .modal-body {
-    padding: 10px 10px;
+
+  .modal-dialog.modal-dialog-calendar {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 95vh;
+    border-radius: var(--radius-md);
+    margin: 0;
   }
+
+  .modal-dialog.modal-dialog-calendar .modal-header {
+    padding: 10px 14px;
+  }
+
+  .modal-dialog.modal-dialog-calendar .modal-body {
+    padding: 8px 6px;
+    overflow-x: hidden;
+  }
+
+  .month-modal-nav {
+    padding: 6px 8px;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .month-nav-left, .month-nav-right {
+    gap: 3px;
+  }
+
+  .month-nav-btn {
+    padding: 4px 7px !important;
+    font-size: 0.72rem !important;
+    min-height: 30px;
+  }
+
+  .month-modal-title h3 {
+    font-size: 1.02rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .month-modal-subtitle {
+    font-size: 0.67rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+
+  .month-modal-samvatsara {
+    display: none; /* Hide to prevent vertical sprawl on mobile */
+  }
+
+  /* Switch desktop/mobile text toggles */
+  .weekday-desktop { display: none; }
+  .weekday-mobile { display: inline; }
+  .nav-btn-desktop { display: none; }
+  .nav-btn-mobile { display: inline; }
+  .subtitle-desktop { display: none; }
+  .subtitle-mobile { display: inline; }
+  .tithi-desktop { display: none; }
+  .tithi-mobile { display: inline; }
+
+  .month-cal-weekdays {
+    gap: 2px;
+    padding: 5px 0;
+    font-size: 0.67rem;
+    margin-bottom: 4px;
+  }
+
+  .month-cal-grid {
+    gap: 2px;
+  }
+
   .month-cal-day {
-    min-height: 54px;
+    min-height: 52px;
+    max-height: 60px;
     padding: 3px 2px;
+    border-radius: 4px;
+    justify-content: space-between;
   }
+
   .month-cal-day .day-num {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
+
+  .month-cal-day .day-moon-icon {
+    font-size: 0.66rem;
+  }
+
   .month-cal-day .day-tithi {
-    font-size: 0.58rem;
+    font-size: 0.6rem;
+    line-height: 1.1;
+    text-align: center;
   }
+
   .month-cal-day .day-nakshatra {
     display: none;
   }
-  .month-badge {
-    font-size: 0.52rem;
-    padding: 1px 2px;
+
+  .day-badges-desktop {
+    display: none;
+  }
+
+  .day-indicators-mobile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.62rem;
+    line-height: 1;
+    min-height: 12px;
+  }
+
+  .month-cal-empty {
+    min-height: 52px;
+    max-height: 60px;
+    border-radius: 4px;
+  }
+
+  .month-highlights-strip {
+    margin-bottom: 8px;
+    padding: 6px 8px;
+  }
+
+  .month-highlights-title {
+    font-size: 0.68rem;
+    margin-bottom: 4px;
+  }
+
+  .month-fest-chip {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+  }
+
+  .month-cal-legend {
+    font-size: 0.66rem !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+    padding-top: 8px !important;
   }
 }

@@ -848,6 +848,7 @@ export class PanchangaService {
         dayOfWeek: d.getDay(),
         tithiName: p.tithi.name,
         tithiIndex: p.tithi.index,
+        tithiNumber: p.tithi.number,
         tithiSanskrit: p.tithi.sanskrit,
         paksha: p.paksha,
         pakshaShort: p.paksha.split(' ')[0],
