@@ -7,6 +7,7 @@ import { SEVAS_DATA } from './data/sevas.js?v=20261007_11';
 import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
 import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_11';
 import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
+import { templeStore } from './services/store.js?v=20261007_11';
 
 class TempleLandingController {
   constructor() {
@@ -19,6 +20,8 @@ class TempleLandingController {
     this._initAudioPlayer();
     this._renderLivePanchangaStrip();
     this._renderSevasGrid();
+    this._renderGalleryGrid();
+    this._updateContactLinks();
   }
 
   // Audio Chant Player
@@ -169,10 +172,70 @@ class TempleLandingController {
     this._renderSevasGrid();
   }
 
+  // Dynamic Temple Gallery
+  _renderGalleryGrid() {
+    const galleryEl = document.getElementById('landing-gallery-grid');
+    if (!galleryEl) return;
+    const items = templeStore.getGallery();
+    if (!items || items.length === 0) return;
+
+    galleryEl.innerHTML = items.map(item => `
+      <div class="gallery-item">
+        <img src="${item.url}" alt="${item.title}" loading="lazy" onerror="this.src='icons/icon.svg'">
+        <div class="gallery-caption">
+          <strong>${item.title}</strong>
+          ${item.kannadaTitle ? ` • <span>${item.kannadaTitle}</span>` : ''}
+          ${item.caption ? `<div style="font-size: 0.75rem; opacity: 0.9; margin-top: 2px;">${item.caption}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Synchronize Contact and WhatsApp Links with CMS Store
+  _updateContactLinks() {
+    const config = templeStore.getContactConfig();
+    if (!config) return;
+
+    const waPhone = config.whatsappPhone || '919845012345';
+    const waDisplay = config.whatsappDisplay || '+91 98450 12345';
+    const officePhone = config.officePhone || '080-23394447';
+    const address = config.address || 'Sri Durga Parameshwari Temple, Chandra Layout 1st Phase, Bengaluru, Karnataka - 560 072';
+
+    const waLinkEl = document.getElementById('landing-wa-phone-link');
+    if (waLinkEl) {
+      waLinkEl.href = `https://wa.me/${waPhone}`;
+      waLinkEl.textContent = waDisplay;
+    }
+
+    const officeLinkEl = document.getElementById('landing-office-phone-link');
+    if (officeLinkEl) {
+      officeLinkEl.href = `tel:${officePhone.replace(/\D/g, '')}`;
+      officeLinkEl.textContent = officePhone;
+    }
+
+    const addrEl = document.getElementById('landing-address-text');
+    if (addrEl) {
+      addrEl.textContent = address;
+    }
+
+    // Update all general wa.me buttons across the page
+    document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
+      try {
+        const url = new URL(link.href);
+        const textParam = url.searchParams.get('text') || '';
+        link.href = `https://wa.me/${waPhone}${textParam ? `?text=${encodeURIComponent(textParam)}` : ''}`;
+      } catch (e) {
+        // Fallback simple replace
+        link.href = link.href.replace(/wa\.me\/\d+/, `wa.me/${waPhone}`);
+      }
+    });
+  }
+
   bookSevaWhatsApp(sevaId) {
     const seva = SEVAS_DATA.find(s => s.id === sevaId) || SEVAS_DATA[0];
+    const phone = WhatsAppService.getWhatsAppPhone();
     const text = `Namaskara Sri Durga Parameshwari Temple 🙏\nI would like to enquire and request availability for:\n• Seva: ${seva.name} (${seva.kannadaName})\n• Contribution: ₹${seva.kanike}\n• Temple: Chandra Layout, Bengaluru\n\nPlease let me know available dates and sankalpa guidelines.`;
-    window.open(`https://wa.me/919845012345?text=${encodeURIComponent(text)}`, '_blank');
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
   }
 }
 

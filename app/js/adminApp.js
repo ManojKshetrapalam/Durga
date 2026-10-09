@@ -3,17 +3,19 @@
  * Full Desktop & Responsive Webpage Experience for Trustees and Archakas
  */
 
-import { templeStore } from './services/store.js?v=20261007_11';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
-import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_11';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
+import { templeStore } from './services/store.js?v=20261007_12';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_12';
+import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_12';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_12';
+import { showToast } from './components/toast.js?v=20261007_12';
 
 class TempleAdminController {
   constructor() {
     this.isAuthenticated = false;
     this.currentAdminUser = null;
-    this.currentTab = 'overview'; // 'overview', 'calendar', 'sevas', 'bookings', 'broadcast'
+    this.currentTab = 'overview'; // 'overview', 'calendar', 'sevas', 'bookings', 'events', 'priests', 'gallery', 'broadcast', 'settings'
     this.selectedDate = new Date().toISOString().split('T')[0];
+    this.galleryFilter = 'all';
   }
 
   init() {
@@ -232,8 +234,17 @@ class TempleAdminController {
           <button class="sidebar-nav-item ${this.currentTab === 'events' ? 'active' : ''}" onclick="window.admin.switchTab('events')">
             <span>🎪</span> Festival & Events CMS
           </button>
+          <button class="sidebar-nav-item ${this.currentTab === 'priests' ? 'active' : ''}" onclick="window.admin.switchTab('priests')">
+            <span>🧘</span> Archakas & Priests
+          </button>
+          <button class="sidebar-nav-item ${this.currentTab === 'gallery' ? 'active' : ''}" onclick="window.admin.switchTab('gallery')">
+            <span>🖼️</span> Photo Gallery CMS
+          </button>
           <button class="sidebar-nav-item ${this.currentTab === 'broadcast' ? 'active' : ''}" onclick="window.admin.switchTab('broadcast')">
-            <span>📢</span> Devotee Notice Board
+            <span>📢</span> Notices & Special Alerts
+          </button>
+          <button class="sidebar-nav-item ${this.currentTab === 'settings' ? 'active' : ''}" onclick="window.admin.switchTab('settings')">
+            <span>⚙️</span> WhatsApp & Settings
           </button>
         </nav>
 
@@ -285,8 +296,12 @@ class TempleAdminController {
       case 'overview': return '📊 Real-Time Operations Desk';
       case 'calendar': return '📅 Date Availability & Sanctum Overrides';
       case 'sevas': return '🪔 21 Authentic Sevas & Pricing Manager';
-      case 'bookings': return '📱 WhatsApp Booking Requests & Archaka Queue';
-      case 'broadcast': return '📢 Devotee Notice Board & Announcements';
+      case 'bookings': return '📱 WhatsApp Booking Requests & Priest Assignment';
+      case 'events': return '🎪 Festival & Events CMS';
+      case 'priests': return '🧘 Archakas & Priests Management';
+      case 'gallery': return '🖼️ Temple Darshan & Prakaara Gallery CMS';
+      case 'broadcast': return '📢 Devotee Announcements & Special Alerts';
+      case 'settings': return '⚙️ Temple WhatsApp & Contact Settings';
       default: return 'Administrative Desk';
     }
   }
@@ -298,7 +313,10 @@ class TempleAdminController {
       case 'sevas': return this._renderSevasTab();
       case 'bookings': return this._renderBookingsTab();
       case 'events': return this._renderEventsTab();
+      case 'priests': return this._renderPriestsTab();
+      case 'gallery': return this._renderGalleryTab();
       case 'broadcast': return this._renderBroadcastTab();
+      case 'settings': return this._renderSettingsTab();
       default: return this._renderOverviewTab();
     }
   }
@@ -308,16 +326,19 @@ class TempleAdminController {
     const sevas = templeStore.getSevas();
     const blockedDates = templeStore.getBlockedDates();
     const bookings = templeStore.getBookings();
+    const priests = templeStore.getPriests();
+    const gallery = templeStore.getGallery();
+    const activePriestsCount = priests.filter(p => p.status === 'ACTIVE').length;
     const pendingCount = bookings.filter(b => b.bookingStatus === 'NEEDS_ARCHAKA').length;
     const panchanga = PanchangaService.getPanchanga(new Date());
 
     return `
       <!-- Metrics Row -->
-      <div class="metrics-grid">
+      <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="metric-card">
           <div class="metric-info">
             <h4>Temple Status</h4>
-            <div class="metric-num" style="color: var(--color-success); font-size: 1.5rem;">OPEN 🟢</div>
+            <div class="metric-num" style="color: var(--color-success); font-size: 1.45rem;">OPEN 🟢</div>
             <div class="metric-sub">${panchanga.formattedDate}</div>
           </div>
           <div class="metric-icon">🏛️</div>
@@ -325,11 +346,11 @@ class TempleAdminController {
 
         <div class="metric-card">
           <div class="metric-info">
-            <h4>Active Sevas</h4>
-            <div class="metric-num">${sevas.length}</div>
-            <div class="metric-sub">₹10 Kumkuma Archana to ₹1,501 Durga Homa</div>
+            <h4>Active Archakas</h4>
+            <div class="metric-num">${priests.length}</div>
+            <div class="metric-sub" style="color: var(--color-success); font-weight: 700;">${activePriestsCount} on active duty</div>
           </div>
-          <div class="metric-icon">🪔</div>
+          <div class="metric-icon">🧘</div>
         </div>
 
         <div class="metric-card">
@@ -345,12 +366,52 @@ class TempleAdminController {
 
         <div class="metric-card">
           <div class="metric-info">
+            <h4>Active Sevas</h4>
+            <div class="metric-num">${sevas.length}</div>
+            <div class="metric-sub">₹10 Kumkuma to ₹1,501 Homa</div>
+          </div>
+          <div class="metric-icon">🪔</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Gallery Photos</h4>
+            <div class="metric-num">${gallery.length}</div>
+            <div class="metric-sub">Darshan & Prakaara Photos</div>
+          </div>
+          <div class="metric-icon">🖼️</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
             <h4>Date Overrides</h4>
             <div class="metric-num">${blockedDates.length}</div>
-            <div class="metric-sub">Admin blocks take instant precedence</div>
+            <div class="metric-sub">Admin blocks in effect</div>
           </div>
           <div class="metric-icon">🛡️</div>
         </div>
+      </div>
+
+      <!-- Quick Action Shortcuts Strip -->
+      <div style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; background: #FFFDF8; padding: 14px 18px; border-radius: var(--radius-lg); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); align-items: center;">
+        <span style="font-weight: 700; font-size: 0.85rem; color: var(--color-primary); margin-right: 6px;">
+          ⚡ Quick Actions:
+        </span>
+        <button class="btn btn-primary btn-sm" onclick="window.admin.openPriestEditor()">
+          ➕ Add Archaka / Priest
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="window.admin.openGalleryEditor()">
+          🖼️ Add Gallery Photo
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="window.admin.openNotificationEditor()">
+          📢 Post Devotee Alert
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="window.admin.switchTab('settings')">
+          ⚙️ Update WhatsApp Number
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="window.admin.switchTab('calendar')">
+          📅 Block Temple Date
+        </button>
       </div>
 
       <!-- Quick Action Grid -->
@@ -562,6 +623,7 @@ class TempleAdminController {
   // ==================== TAB 4: WHATSAPP BOOKING QUEUE ====================
   _renderBookingsTab() {
     const bookings = templeStore.getBookings();
+    const priests = templeStore.getPriests();
 
     return `
       <div class="admin-table-card">
@@ -600,9 +662,11 @@ class TempleAdminController {
                   <td>
                     <select class="form-input" style="padding: 6px; font-size: 0.8rem;" onchange="window.admin.updateArchakaAssignment('${b.tokenId}', this.value)">
                       <option value="">-- Unassigned --</option>
-                      <option value="Pandit Narayana Bhat" ${b.assignedArchaka === 'Pandit Narayana Bhat' ? 'selected' : ''}>Pandit Narayana Bhat</option>
-                      <option value="Pandit Subrahmanya Somayaji" ${b.assignedArchaka === 'Pandit Subrahmanya Somayaji' ? 'selected' : ''}>Pandit Subrahmanya Somayaji</option>
-                      <option value="Pandit Venkatesh Dixit" ${b.assignedArchaka === 'Pandit Venkatesh Dixit' ? 'selected' : ''}>Pandit Venkatesh Dixit</option>
+                      ${priests.map(p => `
+                        <option value="${p.name}" ${b.assignedArchaka === p.name ? 'selected' : ''}>
+                          ${p.name} (${p.designation})
+                        </option>
+                      `).join('')}
                     </select>
                   </td>
                   <td>
@@ -625,37 +689,6 @@ class TempleAdminController {
             </tbody>
           </table>
         </div>
-      </div>
-    `;
-  }
-
-  // ==================== TAB 5: BROADCAST NOTICE ====================
-  _renderBroadcastTab() {
-    const ann = templeStore.getAnnouncement();
-
-    return `
-      <div class="card" style="max-width: 720px; background: var(--color-surface); border: 1px solid var(--color-border);">
-        <h3 class="card-title"><span>📢</span> Devotee Notice Board & Live Broadcast</h3>
-        <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-bottom: 20px;">
-          This banner appears prominently at the top of the Devotee App and Web Landing Page.
-        </p>
-
-        <form onsubmit="event.preventDefault(); window.admin.updateAnnouncement();">
-          <div class="form-group">
-            <label class="form-label">Broadcast Announcement Text</label>
-            <textarea id="broadcast-input-msg" class="form-input" rows="4" required>${ann.message || ''}</textarea>
-          </div>
-
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 20px;">
-            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-              <input type="checkbox" id="broadcast-input-publish" ${ann.isPublished ? 'checked' : ''} style="width: 18px; height: 18px;">
-              <span style="font-weight: 700; color: var(--color-primary);">Publish Banner Live 🟢</span>
-            </label>
-            <button type="submit" class="btn btn-primary">
-              💾 Save & Broadcast
-            </button>
-          </div>
-        </form>
       </div>
     `;
   }
@@ -750,6 +783,414 @@ class TempleAdminController {
     `;
   }
 
+  // ==================== TAB 6: PRIESTS & ARCHAKAS ====================
+  _renderPriestsTab() {
+    const priests = templeStore.getPriests();
+    const activeCount = priests.filter(p => p.status === 'ACTIVE').length;
+
+    return `
+      <div class="admin-table-card">
+        <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3><span>🧘</span> Sanctum Archakas & Priests (${priests.length})</h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-top: 2px;">
+              Manage temple priests, assign daily sevas, sankalpas, homas, and display official credentials.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <span class="badge badge-gold">${activeCount} On Active Duty</span>
+            <button class="btn btn-primary btn-sm" onclick="window.admin.openPriestEditor()">
+              ➕ Add New Archaka
+            </button>
+          </div>
+        </div>
+
+        <div style="padding: 20px;">
+          <div class="priests-grid">
+            ${priests.map(p => {
+              const initials = p.name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+              return `
+                <div class="priest-card">
+                  <div class="priest-header">
+                    ${p.photo ? `
+                      <img src="${p.photo}" alt="${p.name}" class="priest-avatar" onerror="this.outerHTML='<div class=\\'priest-avatar\\'>${initials}</div>'">
+                    ` : `
+                      <div class="priest-avatar">${initials}</div>
+                    `}
+                    <div style="flex: 1; min-width: 0;">
+                      <h4 class="priest-name">${p.name}</h4>
+                      ${p.kannadaName ? `<div class="priest-kannada">${p.kannadaName}</div>` : ''}
+                      <span class="priest-role-tag">${p.designation}</span>
+                    </div>
+                  </div>
+
+                  <div class="priest-details">
+                    <div class="priest-meta-row">
+                      <span>Experience</span>
+                      <strong>${p.experience}</strong>
+                    </div>
+                    <div class="priest-meta-row">
+                      <span>Phone / WA</span>
+                      <a href="https://wa.me/${p.phone.replace(/\\D/g, '')}" target="_blank" style="color: #15803D; text-decoration: none; font-weight: 700;">
+                        ${p.phone} 💬
+                      </a>
+                    </div>
+                    <div class="priest-meta-row">
+                      <span>Duty Status</span>
+                      <span class="badge ${p.status === 'ACTIVE' ? 'badge-live' : 'badge-maroon'}">
+                        ${p.status === 'ACTIVE' ? 'Active 🟢' : 'On Leave ⚪'}
+                      </span>
+                    </div>
+                    <div class="priest-meta-row" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+                      <span>Vedic Specializations</span>
+                      <div class="priest-specs">
+                        ${(p.specializations || []).map(s => `<span class="spec-chip">🪔 ${s}</span>`).join('')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="priest-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="window.admin.openPriestEditor('${p.id}')">
+                      ✏️ Edit
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="window.admin.togglePriestStatus('${p.id}')">
+                      ${p.status === 'ACTIVE' ? 'Mark On Leave' : 'Mark Active'}
+                    </button>
+                    ${priests.length > 1 ? `
+                      <button class="btn btn-secondary btn-sm" style="color: #DC2626;" onclick="window.admin.deletePriest('${p.id}')">
+                        🗑️ Remove
+                      </button>
+                    ` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== TAB 7: PHOTO GALLERY CMS ====================
+  _renderGalleryTab() {
+    const allGallery = templeStore.getGallery();
+    const filter = this.galleryFilter || 'all';
+    const photos = filter === 'all' 
+      ? allGallery 
+      : allGallery.filter(item => item.category === filter);
+
+    const categories = [
+      { id: 'all', label: 'All Photos' },
+      { id: 'garbha_gudi', label: 'Garbha Gudi / Deity' },
+      { id: 'architecture', label: 'Architecture & Gopuram' },
+      { id: 'deepotsava', label: 'Deepotsava & Lights' },
+      { id: 'alankara', label: 'Alankara & Flowers' },
+      { id: 'utsava', label: 'Rathotsava & Utsav' }
+    ];
+
+    return `
+      <div class="admin-table-card">
+        <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3><span>🖼️</span> Temple Darshan & Prakaara Gallery CMS (${allGallery.length})</h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-top: 2px;">
+              Upload sacred photographs, darshan glimpses, and festival celebrations for devotee landing page and app.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary btn-sm" onclick="window.admin.openGalleryEditor()">
+              ➕ Add Gallery Photo
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div style="padding: 14px 20px 0; display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--color-border-subtle);">
+          ${categories.map(cat => `
+            <button 
+              class="btn btn-sm ${filter === cat.id ? 'btn-primary' : 'btn-secondary'}" 
+              style="border-radius: 20px; font-size: 0.8rem;" 
+              onclick="window.admin.filterGalleryCategory('${cat.id}')">
+              ${cat.label}
+            </button>
+          `).join('')}
+        </div>
+
+        <div style="padding: 20px;">
+          <div class="admin-gallery-grid">
+            ${photos.map(item => `
+              <div class="admin-gallery-card">
+                <div class="admin-gallery-thumb-wrap">
+                  <img src="${item.url}" alt="${item.title}" class="admin-gallery-thumb" onerror="this.src='icons/icon.svg'">
+                  <span class="admin-gallery-cat-badge">${(item.category || 'darshan').toUpperCase()}</span>
+                </div>
+                <div class="admin-gallery-body">
+                  <h4 class="admin-gallery-title">${item.title}</h4>
+                  ${item.kannadaTitle ? `<div style="font-size: 0.78rem; color: var(--color-gold-hover); margin-bottom: 4px;">${item.kannadaTitle}</div>` : ''}
+                  <p class="admin-gallery-caption">${item.caption || ''}</p>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.75rem; color: var(--color-text-soft);">
+                    <span>📅 ${item.dateAdded || 'Temple Archive'}</span>
+                    <span>Order: #${item.order || 1}</span>
+                  </div>
+                  <div class="admin-gallery-actions">
+                    <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="window.admin.openGalleryEditor('${item.id}')">
+                      ✏️ Edit
+                    </button>
+                    <button class="btn btn-secondary btn-sm" style="color: #DC2626;" onclick="window.admin.deleteGalleryItem('${item.id}')">
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== TAB 8: NOTICES & SPECIAL ALERTS ====================
+  _renderBroadcastTab() {
+    const ann = templeStore.getAnnouncement();
+    const notifications = templeStore.getSpecialNotifications();
+
+    return `
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Card 1: Top Devotee Notice Banner -->
+        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); margin: 0;">
+          <div class="card-header-row">
+            <h3 class="card-title"><span>📢</span> Devotee Top Notice Board & Marquee</h3>
+            <span class="badge ${ann.isPublished ? 'badge-live' : 'badge-maroon'}">
+              ${ann.isPublished ? 'Live on App & Web 🟢' : 'Notice Hidden ⚪'}
+            </span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-bottom: 16px;">
+            This high-priority banner appears prominently at the very top of the Devotee App and Web Landing Page.
+          </p>
+
+          <form onsubmit="event.preventDefault(); window.admin.updateAnnouncement();">
+            <div class="form-group">
+              <label class="form-label">Broadcast Announcement Text</label>
+              <textarea id="broadcast-input-msg" class="form-input" rows="3" required>${ann.message || ''}</textarea>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="broadcast-input-publish" ${ann.isPublished ? 'checked' : ''} style="width: 18px; height: 18px;">
+                <span style="font-weight: 700; color: var(--color-primary);">Publish Banner Live 🟢</span>
+              </label>
+              <button type="submit" class="btn btn-primary">
+                💾 Save & Broadcast Banner
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Card 2: Special Devotee In-App Alerts & Push Streams -->
+        <div class="admin-table-card" style="margin: 0;">
+          <div class="table-header-bar" style="flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h3><span>🔔</span> Special In-App Notifications & Event Alerts (${notifications.length})</h3>
+              <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-top: 2px;">
+                Broadcast time-sensitive notices (Navaratri timings, Friday Durga Homa slots, Solar Eclipse alerts) with interactive action buttons.
+              </p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.admin.openNotificationEditor()">
+              ➕ Create Special Alert
+            </button>
+          </div>
+
+          <div style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+            ${notifications.map(n => `
+              <div class="notif-card ${n.type || 'general'}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                  <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                      <span class="badge ${n.type === 'urgent' ? 'badge-maroon' : (n.type === 'auspicious' ? 'badge-gold' : 'badge-saffron')}">
+                        ${(n.type || 'GENERAL').toUpperCase()}
+                      </span>
+                      <strong style="color: var(--color-primary); font-size: 1.05rem;">${n.title}</strong>
+                      ${n.kannadaTitle ? `<span style="font-size: 0.85rem; color: var(--color-gold-hover);">(${n.kannadaTitle})</span>` : ''}
+                    </div>
+                    <p style="font-size: 0.88rem; color: var(--color-text-main); margin-bottom: 8px; line-height: 1.45;">
+                      ${n.message}
+                    </p>
+                    ${n.actionText ? `
+                      <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: var(--color-primary); background: rgba(114,28,43,0.06); padding: 4px 10px; border-radius: var(--radius-sm);">
+                        🔗 CTA: ${n.actionText} → <span style="color: var(--color-text-soft);">${n.actionUrl || ''}</span>
+                      </div>
+                    ` : ''}
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <span class="badge ${n.isActive ? 'badge-live' : 'badge-maroon'}">
+                      ${n.isActive ? 'Active Devotee Alert 🟢' : 'Muted / Draft ⚪'}
+                    </span>
+                    <div style="display: flex; gap: 6px;">
+                      <button class="btn btn-secondary btn-sm" onclick="window.admin.openNotificationEditor('${n.id}')">
+                        ✏️ Edit
+                      </button>
+                      <button class="btn btn-secondary btn-sm" onclick="window.admin.toggleNotificationStatus('${n.id}')">
+                        ${n.isActive ? 'Mute' : 'Activate'}
+                      </button>
+                      <button class="btn btn-secondary btn-sm" style="color: #DC2626;" onclick="window.admin.deleteNotification('${n.id}')">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== TAB 9: SETTINGS & WHATSAPP ====================
+  _renderSettingsTab() {
+    const config = templeStore.getContactConfig();
+
+    return `
+      <div style="max-width: 860px; display: flex; flex-direction: column; gap: 24px;">
+        <!-- WhatsApp Configuration Card -->
+        <div class="settings-card">
+          <h3 class="settings-section-title">
+            <span>💬</span> Official Temple WhatsApp Number & Configuration
+          </h3>
+          <p class="settings-help">
+            All devotee seva bookings, counter receipts, inquiry deep-links, and alternative date suggestions connect to this WhatsApp account.
+          </p>
+
+          <form onsubmit="event.preventDefault(); window.admin.saveContactSettings();">
+            <div class="grid-form-row">
+              <div class="form-group">
+                <label class="form-label" for="setting-wa-phone">
+                  WhatsApp Mobile Number (with country code, no spaces)
+                </label>
+                <input 
+                  type="text" 
+                  id="setting-wa-phone" 
+                  class="form-input" 
+                  value="${config.whatsappPhone || '919845012345'}" 
+                  placeholder="e.g. 919845012345" 
+                  required
+                >
+                <span class="settings-help">Format: 91 followed by 10 digits (e.g. 919845012345)</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="setting-wa-display">
+                  Devotee Display Format
+                </label>
+                <input 
+                  type="text" 
+                  id="setting-wa-display" 
+                  class="form-input" 
+                  value="${config.whatsappDisplay || '+91 98450 12345'}" 
+                  placeholder="e.g. +91 98450 12345" 
+                  required
+                >
+                <span class="settings-help">Shown on website headers, contact cards, and devotee app</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="setting-wa-greeting">
+                Default WhatsApp Greeting / Intro Header
+              </label>
+              <input 
+                type="text" 
+                id="setting-wa-greeting" 
+                class="form-input" 
+                value="${config.whatsappGreeting || 'Namaskara Sri Durga Parameshwari Temple Desk 🙏'}" 
+                required
+              >
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px; padding: 12px; background: rgba(21, 128, 61, 0.08); border-radius: var(--radius-md); border: 1px solid rgba(21, 128, 61, 0.2);">
+              <span style="font-size: 1.3rem;">📲</span>
+              <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 0.88rem; color: #15803D;">Test WhatsApp Integration Link</div>
+                <div style="font-size: 0.78rem; color: var(--color-text-soft);">Opens WhatsApp Web or mobile app targeting this phone number</div>
+              </div>
+              <button type="button" class="btn btn-whatsapp btn-sm" onclick="window.admin.testWhatsApp()">
+                💬 Test wa.me Link ↗
+              </button>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--color-border-subtle); margin: 24px 0;">
+
+            <!-- Temple Office & Financials -->
+            <h3 class="settings-section-title" style="margin-top: 0;">
+              <span>🏛️</span> Temple Office & Sanctum Information
+            </h3>
+
+            <div class="grid-form-row">
+              <div class="form-group">
+                <label class="form-label" for="setting-office-phone">Temple Landline Office Phone</label>
+                <input 
+                  type="text" 
+                  id="setting-office-phone" 
+                  class="form-input" 
+                  value="${config.officePhone || '080-23394447'}" 
+                  required
+                >
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="setting-email">Official Temple Email</label>
+                <input 
+                  type="email" 
+                  id="setting-email" 
+                  class="form-input" 
+                  value="${config.email || 'info@sridurgatemple.org'}" 
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="setting-address">Official Temple Sanctum Address</label>
+              <textarea id="setting-address" class="form-input" rows="2" required>${config.address || 'Sri Durga Parameshwari Temple, Chandra Layout 1st Phase, Bengaluru - 560 072'}</textarea>
+            </div>
+
+            <div class="grid-form-row">
+              <div class="form-group">
+                <label class="form-label" for="setting-upi">Physical Counter Temple UPI VPA / ID</label>
+                <input 
+                  type="text" 
+                  id="setting-upi" 
+                  class="form-input" 
+                  value="${config.upiId || 'sridurgatemple@sbi'}" 
+                  required
+                >
+                <span class="settings-help">Official temple account for offline devotee sevas</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="setting-trust-reg">Trust Registration / Authority</label>
+                <input 
+                  type="text" 
+                  id="setting-trust-reg" 
+                  class="form-input" 
+                  value="${config.trustRegistration || 'Registered Hindu Religious & Charitable Institutions Trust'}" 
+                  required
+                >
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+              <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-weight: 700;">
+                💾 Save All Temple Settings
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
   // ==================== INTERACTIVE ACTIONS ====================
   toggleLoginMethod(method) {
     const pinForm = document.getElementById('login-pin-form');
@@ -826,8 +1267,8 @@ class TempleAdminController {
   }
 
   quickAssignPriest(tokenId) {
-    const archakas = ["Pandit Narayana Bhat", "Pandit Subrahmanya Somayaji", "Pandit Venkatesh Dixit"];
-    const chosen = archakas[0];
+    const activePriests = templeStore.getPriests().filter(p => p.status === 'ACTIVE');
+    const chosen = activePriests.length > 0 ? activePriests[0].name : "Pandit Narayana Bhat";
     templeStore.updateBookingStatus(tokenId, 'CONFIRMED', chosen);
     this.render();
   }
@@ -1186,6 +1627,517 @@ class TempleAdminController {
       overlay.style.display = 'none';
       overlay.innerHTML = '';
     }
+  }
+
+  // ==================== PRIESTS CMS CONTROLLERS ====================
+  openPriestEditor(priestId = null) {
+    const isEdit = !!priestId;
+    const priest = isEdit 
+      ? (templeStore.getPriestById(priestId) || {})
+      : {
+        id: 'archaka-' + Date.now(),
+        name: '',
+        kannadaName: '',
+        designation: 'Archaka',
+        photo: '',
+        phone: '919845012345',
+        experience: '10+ Years',
+        specializations: ['Pooja', 'Archana'],
+        status: 'ACTIVE'
+      };
+
+    this.editingPriest = { ...priest };
+
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (!overlay) return;
+
+    overlay.innerHTML = `
+      <div class="admin-modal-card" style="max-width: 620px;">
+        <div class="admin-modal-header">
+          <h3 style="font-family: var(--font-serif); color: var(--color-primary); margin: 0;">
+            ${isEdit ? '✏️ Edit Archaka / Priest Details' : '➕ Register New Archaka / Priest'}
+          </h3>
+          <button class="btn btn-secondary btn-sm" onclick="window.admin.closePriestModal()" style="border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+
+        <form onsubmit="event.preventDefault(); window.admin.savePriestFromForm();" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Archaka Name (English)</label>
+              <input type="text" id="priest-input-name" class="form-input" value="${priest.name || ''}" placeholder="e.g. Pandit Narayana Bhat" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Archaka Name (Kannada)</label>
+              <input type="text" id="priest-input-kannada" class="form-input" value="${priest.kannadaName || ''}" placeholder="e.g. ಪಂಡಿತ್ ನಾರಾಯಣ ಭಟ್">
+            </div>
+          </div>
+
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Designation / Role</label>
+              <input type="text" id="priest-input-role" class="form-input" value="${priest.designation || 'Archaka'}" placeholder="e.g. Chief Pradhana Archaka, Veda Brahma" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Experience</label>
+              <input type="text" id="priest-input-exp" class="form-input" value="${priest.experience || '15+ Years'}" placeholder="e.g. 25+ Years in Rigveda & Durga Homa" required>
+            </div>
+          </div>
+
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Contact / WhatsApp Number</label>
+              <input type="text" id="priest-input-phone" class="form-input" value="${priest.phone || ''}" placeholder="e.g. 919845012345" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duty Status</label>
+              <select id="priest-input-status" class="form-input">
+                <option value="ACTIVE" ${priest.status === 'ACTIVE' ? 'selected' : ''}>Active on Duty 🟢</option>
+                <option value="ON_LEAVE" ${priest.status === 'ON_LEAVE' ? 'selected' : ''}>On Leave / Inactive ⚪</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Specializations (comma separated)</label>
+            <input type="text" id="priest-input-specs" class="form-input" value="${(priest.specializations || []).join(', ')}" placeholder="e.g. Maha Chandi Homa, Durga Deepa Pooja, Alankara" required>
+          </div>
+
+          <!-- Photo Upload & URL -->
+          <div class="form-group">
+            <label class="form-label">Archaka Photo (Upload File or Image URL)</label>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 6px;">
+              <input type="file" id="priest-file-upload" accept="image/*" class="form-input" style="padding: 6px;" onchange="window.admin.handlePriestImageUpload(event)">
+              <span style="font-size: 0.8rem; color: var(--color-text-soft);">OR</span>
+              <input type="text" id="priest-input-photo-url" class="form-input" value="${priest.photo || ''}" placeholder="Image URL (e.g. assets/images/priest1.jpg)" oninput="window.admin.updatePriestPhotoPreview(this.value)">
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px; margin-top: 8px;">
+              <div style="width: 64px; height: 64px; border-radius: 50%; overflow: hidden; border: 2px solid var(--color-gold); background: #FAF7F2; display: flex; align-items: center; justify-content: center;">
+                <img id="priest-photo-preview" src="${priest.photo || 'icons/icon.svg'}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='icons/icon.svg'">
+              </div>
+              <span style="font-size: 0.78rem; color: var(--color-text-soft);">Image preview updates immediately on file select.</span>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px; border-top:1.5px solid var(--color-border-subtle); padding-top:14px;">
+            <button type="button" class="btn btn-secondary" onclick="window.admin.closePriestModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">💾 Save Archaka</button>
+          </div>
+        </form>
+      </div>
+    `;
+    overlay.style.display = 'flex';
+  }
+
+  handlePriestImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      if (!this.editingPriest) this.editingPriest = {};
+      this.editingPriest.photo = dataUrl;
+      const preview = document.getElementById('priest-photo-preview');
+      if (preview) preview.src = dataUrl;
+      const urlInput = document.getElementById('priest-input-photo-url');
+      if (urlInput) urlInput.value = `[Uploaded: ${file.name}]`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  updatePriestPhotoPreview(url) {
+    if (!this.editingPriest) this.editingPriest = {};
+    this.editingPriest.photo = url;
+    const preview = document.getElementById('priest-photo-preview');
+    if (preview) preview.src = url || 'icons/icon.svg';
+  }
+
+  savePriestFromForm() {
+    const name = document.getElementById('priest-input-name').value.trim();
+    const kannadaName = document.getElementById('priest-input-kannada').value.trim();
+    const designation = document.getElementById('priest-input-role').value.trim();
+    const experience = document.getElementById('priest-input-exp').value.trim();
+    const phone = document.getElementById('priest-input-phone').value.trim();
+    const status = document.getElementById('priest-input-status').value;
+    const specsRaw = document.getElementById('priest-input-specs').value.trim();
+    const specializations = specsRaw ? specsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const photoUrl = document.getElementById('priest-input-photo-url').value.trim();
+
+    if (!this.editingPriest) this.editingPriest = {};
+
+    const updated = {
+      ...this.editingPriest,
+      name,
+      kannadaName,
+      designation,
+      experience,
+      phone,
+      status,
+      specializations,
+      photo: this.editingPriest.photo || (photoUrl.startsWith('[Uploaded') ? '' : photoUrl) || ''
+    };
+
+    templeStore.savePriest(updated);
+    alert(`Success: Archaka "${name}" saved!`);
+    this.closePriestModal();
+    this.render();
+  }
+
+  deletePriest(id) {
+    const priest = templeStore.getPriestById(id);
+    if (!priest) return;
+    if (confirm(`Are you sure you want to remove ${priest.name} from the active priests list?`)) {
+      templeStore.deletePriest(id);
+      this.render();
+    }
+  }
+
+  togglePriestStatus(id) {
+    templeStore.togglePriestStatus(id);
+    this.render();
+  }
+
+  closePriestModal() {
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+    }
+    this.editingPriest = null;
+  }
+
+  // ==================== GALLERY CMS CONTROLLERS ====================
+  openGalleryEditor(photoId = null) {
+    const isEdit = !!photoId;
+    const item = isEdit 
+      ? (templeStore.getGalleryItemById(photoId) || {})
+      : {
+        id: 'gal-' + Date.now(),
+        title: '',
+        kannadaTitle: '',
+        category: 'garbha_gudi',
+        url: '',
+        caption: '',
+        order: 1,
+        dateAdded: new Date().toISOString().split('T')[0]
+      };
+
+    this.editingGalleryItem = { ...item };
+
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (!overlay) return;
+
+    overlay.innerHTML = `
+      <div class="admin-modal-card" style="max-width: 600px;">
+        <div class="admin-modal-header">
+          <h3 style="font-family: var(--font-serif); color: var(--color-primary); margin: 0;">
+            ${isEdit ? '✏️ Edit Temple Gallery Photo' : '➕ Add Photo to Temple Gallery'}
+          </h3>
+          <button class="btn btn-secondary btn-sm" onclick="window.admin.closeGalleryModal()" style="border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+
+        <form onsubmit="event.preventDefault(); window.admin.saveGalleryItemFromForm();" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Photo Title (English)</label>
+              <input type="text" id="gal-input-title" class="form-input" value="${item.title || ''}" placeholder="e.g. Grand Deepotsava Evening" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Photo Title (Kannada)</label>
+              <input type="text" id="gal-input-kannada" class="form-input" value="${item.kannadaTitle || ''}" placeholder="e.g. ಭವ್ಯ ದೀಪೋತ್ಸವ">
+            </div>
+          </div>
+
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="gal-input-category" class="form-input">
+                <option value="garbha_gudi" ${item.category === 'garbha_gudi' ? 'selected' : ''}>Garbha Gudi / Sanctum</option>
+                <option value="architecture" ${item.category === 'architecture' ? 'selected' : ''}>Architecture & Raja Gopuram</option>
+                <option value="deepotsava" ${item.category === 'deepotsava' ? 'selected' : ''}>Deepotsava & Lights</option>
+                <option value="alankara" ${item.category === 'alankara' ? 'selected' : ''}>Alankara & Flowers</option>
+                <option value="utsava" ${item.category === 'utsava' ? 'selected' : ''}>Rathotsava & Utsav</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Display Order</label>
+              <input type="number" id="gal-input-order" class="form-input" value="${item.order || 1}" min="1">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Caption / Significance</label>
+            <textarea id="gal-input-caption" class="form-input" rows="2" placeholder="e.g. Sanctum sanctorum illuminated with thousands of sacred ghee lamps during Karthika Masa">${item.caption || ''}</textarea>
+          </div>
+
+          <!-- Photo Upload & URL -->
+          <div class="form-group">
+            <label class="form-label">Photo Image (Upload File or URL)</label>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 6px;">
+              <input type="file" id="gal-file-upload" accept="image/*" class="form-input" style="padding: 6px;" onchange="window.admin.handleGalleryImageUpload(event)">
+              <span style="font-size: 0.8rem; color: var(--color-text-soft);">OR</span>
+              <input type="text" id="gal-input-url" class="form-input" value="${item.url || ''}" placeholder="Image URL (e.g. assets/images/2.jpg)" oninput="window.admin.updateGalleryPreview(this.value)">
+            </div>
+            <div style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--color-gold); background: #FAF7F2; margin-top: 8px; display: flex; align-items: center; justify-content: center;">
+              <img id="gal-photo-preview" src="${item.url || 'icons/icon.svg'}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='icons/icon.svg'">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px; border-top:1.5px solid var(--color-border-subtle); padding-top:14px;">
+            <button type="button" class="btn btn-secondary" onclick="window.admin.closeGalleryModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">💾 Save Gallery Photo</button>
+          </div>
+        </form>
+      </div>
+    `;
+    overlay.style.display = 'flex';
+  }
+
+  handleGalleryImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      if (!this.editingGalleryItem) this.editingGalleryItem = {};
+      this.editingGalleryItem.url = dataUrl;
+      const preview = document.getElementById('gal-photo-preview');
+      if (preview) preview.src = dataUrl;
+      const urlInput = document.getElementById('gal-input-url');
+      if (urlInput) urlInput.value = `[Uploaded: ${file.name}]`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  updateGalleryPreview(url) {
+    if (!this.editingGalleryItem) this.editingGalleryItem = {};
+    this.editingGalleryItem.url = url;
+    const preview = document.getElementById('gal-photo-preview');
+    if (preview) preview.src = url || 'icons/icon.svg';
+  }
+
+  saveGalleryItemFromForm() {
+    const title = document.getElementById('gal-input-title').value.trim();
+    const kannadaTitle = document.getElementById('gal-input-kannada').value.trim();
+    const category = document.getElementById('gal-input-category').value;
+    const order = Number(document.getElementById('gal-input-order').value) || 1;
+    const caption = document.getElementById('gal-input-caption').value.trim();
+    const urlInput = document.getElementById('gal-input-url').value.trim();
+
+    if (!this.editingGalleryItem) this.editingGalleryItem = {};
+
+    const updated = {
+      ...this.editingGalleryItem,
+      title,
+      kannadaTitle,
+      category,
+      order,
+      caption,
+      url: this.editingGalleryItem.url || (urlInput.startsWith('[Uploaded') ? '' : urlInput) || 'assets/images/1.jpg',
+      dateAdded: this.editingGalleryItem.dateAdded || new Date().toISOString().split('T')[0]
+    };
+
+    templeStore.saveGalleryItem(updated);
+    alert(`Success: Gallery photo "${title}" saved!`);
+    this.closeGalleryModal();
+    this.render();
+  }
+
+  deleteGalleryItem(id) {
+    const item = templeStore.getGalleryItemById(id);
+    if (!item) return;
+    if (confirm(`Are you sure you want to delete "${item.title}" from the gallery?`)) {
+      templeStore.deleteGalleryItem(id);
+      this.render();
+    }
+  }
+
+  filterGalleryCategory(cat) {
+    this.galleryFilter = cat;
+    this.render();
+  }
+
+  closeGalleryModal() {
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+    }
+    this.editingGalleryItem = null;
+  }
+
+  // ==================== SPECIAL NOTIFICATIONS CMS CONTROLLERS ====================
+  openNotificationEditor(notifId = null) {
+    const isEdit = !!notifId;
+    const notif = isEdit 
+      ? (templeStore.getSpecialNotificationById(notifId) || {})
+      : {
+        id: 'notif-' + Date.now(),
+        title: '',
+        kannadaTitle: '',
+        message: '',
+        type: 'auspicious',
+        actionText: '',
+        actionUrl: '',
+        isActive: true,
+        priority: 1
+      };
+
+    this.editingNotification = { ...notif };
+
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (!overlay) return;
+
+    overlay.innerHTML = `
+      <div class="admin-modal-card" style="max-width: 600px;">
+        <div class="admin-modal-header">
+          <h3 style="font-family: var(--font-serif); color: var(--color-primary); margin: 0;">
+            ${isEdit ? '✏️ Edit Devotee Special Alert' : '➕ Create Special Devotee Alert'}
+          </h3>
+          <button class="btn btn-secondary btn-sm" onclick="window.admin.closeNotificationModal()" style="border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+
+        <form onsubmit="event.preventDefault(); window.admin.saveNotificationFromForm();" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Alert Title (English)</label>
+              <input type="text" id="notif-input-title" class="form-input" value="${notif.title || ''}" placeholder="e.g. Navaratri Extended Darshan Hours" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Alert Title (Kannada)</label>
+              <input type="text" id="notif-input-kannada" class="form-input" value="${notif.kannadaTitle || ''}" placeholder="e.g. ನವರಾತ್ರಿ ವಿಶೇಷ ದರ್ಶನ ಸಮಯ">
+            </div>
+          </div>
+
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Alert Priority / Type</label>
+              <select id="notif-input-type" class="form-input">
+                <option value="auspicious" ${notif.type === 'auspicious' ? 'selected' : ''}>🌟 Auspicious Festival / Celebration</option>
+                <option value="urgent" ${notif.type === 'urgent' ? 'selected' : ''}>⚠️ Urgent / Sanctum Closure Notice</option>
+                <option value="seva" ${notif.type === 'seva' ? 'selected' : ''}>🪔 Seva / Booking Availability</option>
+                <option value="general" ${notif.type === 'general' ? 'selected' : ''}>📢 General Devotee Notice</option>
+              </select>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end; padding-bottom: 6px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: var(--color-primary);">
+                <input type="checkbox" id="notif-input-active" ${notif.isActive ? 'checked' : ''} style="width: 18px; height: 18px;">
+                Broadcast Live to Devotees 🟢
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Notice Message Text</label>
+            <textarea id="notif-input-message" class="form-input" rows="3" required placeholder="Detailed message displayed on devotee home screen and alerts">${notif.message || ''}</textarea>
+          </div>
+
+          <div class="grid-form-row">
+            <div class="form-group">
+              <label class="form-label">Action Button Text (Optional)</label>
+              <input type="text" id="notif-input-cta-text" class="form-input" value="${notif.actionText || ''}" placeholder="e.g. View Alankara Schedule, Book Homa">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Action URL / Screen (Optional)</label>
+              <input type="text" id="notif-input-cta-url" class="form-input" value="${notif.actionUrl || ''}" placeholder="e.g. #events, #poojas, tel:080-23394447">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px; border-top:1.5px solid var(--color-border-subtle); padding-top:14px;">
+            <button type="button" class="btn btn-secondary" onclick="window.admin.closeNotificationModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">💾 Save & Publish Alert</button>
+          </div>
+        </form>
+      </div>
+    `;
+    overlay.style.display = 'flex';
+  }
+
+  saveNotificationFromForm() {
+    const title = document.getElementById('notif-input-title').value.trim();
+    const kannadaTitle = document.getElementById('notif-input-kannada').value.trim();
+    const type = document.getElementById('notif-input-type').value;
+    const isActive = document.getElementById('notif-input-active').checked;
+    const message = document.getElementById('notif-input-message').value.trim();
+    const actionText = document.getElementById('notif-input-cta-text').value.trim();
+    const actionUrl = document.getElementById('notif-input-cta-url').value.trim();
+
+    if (!this.editingNotification) this.editingNotification = {};
+
+    const updated = {
+      ...this.editingNotification,
+      title,
+      kannadaTitle,
+      type,
+      isActive,
+      message,
+      actionText,
+      actionUrl,
+      updatedAt: new Date().toISOString()
+    };
+
+    templeStore.saveSpecialNotification(updated);
+    alert(`Success: Devotee alert "${title}" saved and broadcast!`);
+    this.closeNotificationModal();
+    this.render();
+  }
+
+  deleteNotification(id) {
+    if (confirm("Are you sure you want to delete this special notification?")) {
+      templeStore.deleteSpecialNotification(id);
+      this.render();
+    }
+  }
+
+  toggleNotificationStatus(id) {
+    templeStore.toggleNotificationStatus(id);
+    this.render();
+  }
+
+  closeNotificationModal() {
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+    }
+    this.editingNotification = null;
+  }
+
+  // ==================== SETTINGS CONTROLLERS ====================
+  saveContactSettings() {
+    const waPhone = document.getElementById('setting-wa-phone').value.trim().replace(/\D/g, '');
+    const waDisplay = document.getElementById('setting-wa-display').value.trim();
+    const waGreeting = document.getElementById('setting-wa-greeting').value.trim();
+    const officePhone = document.getElementById('setting-office-phone').value.trim();
+    const email = document.getElementById('setting-email').value.trim();
+    const address = document.getElementById('setting-address').value.trim();
+    const upiId = document.getElementById('setting-upi').value.trim();
+    const trustReg = document.getElementById('setting-trust-reg').value.trim();
+
+    if (!waPhone || waPhone.length < 10) {
+      alert("Please enter a valid WhatsApp mobile number (at least 10 digits).");
+      return;
+    }
+
+    templeStore.updateContactConfig({
+      whatsappPhone: waPhone,
+      whatsappDisplay: waDisplay,
+      whatsappGreeting: waGreeting,
+      officePhone: officePhone,
+      email: email,
+      address: address,
+      upiId: upiId,
+      trustRegistration: trustReg
+    });
+
+    alert("✅ Temple WhatsApp and contact details successfully saved and updated across all devotee portals!");
+    this.render();
+  }
+
+  testWhatsApp() {
+    const phoneInput = document.getElementById('setting-wa-phone');
+    const phone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '919845012345';
+    const text = encodeURIComponent("Namaskara Sri Durga Devi Temple Desk 🙏 This is a test message from the Admin Portal.");
+    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   }
 
   _bindLoginEvents() {

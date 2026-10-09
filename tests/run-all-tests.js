@@ -355,6 +355,119 @@ test("CMS allows creating, saving with image and deleting new events", () => {
   assert.strictEqual(templeStore.getEventById("deepavali-2026"), undefined, "Event deleted successfully");
 });
 
+// --- SUITE 7: COMPLETE TEMPLE CMS (WHATSAPP, PRIESTS, GALLERY, NOTIFICATIONS) ---
+console.log("\nSuite 7: Complete Temple CMS (WhatsApp, Archakas, Gallery, Notifications)");
+
+test("CMS Contact Config updates temple WhatsApp number and dynamically affects WhatsAppService", () => {
+  const origConfig = templeStore.getContactConfig();
+  assert.strictEqual(origConfig.whatsappPhone, "919845012345");
+  assert.strictEqual(WhatsAppService.getWhatsAppPhone(), "919845012345");
+
+  // Admin updates WhatsApp number
+  templeStore.updateContactConfig({
+    whatsappPhone: "919888877777",
+    whatsappDisplay: "+91 98888 77777"
+  });
+
+  assert.strictEqual(templeStore.getContactConfig().whatsappPhone, "919888877777");
+  assert.strictEqual(WhatsAppService.getWhatsAppPhone(), "919888877777", "WhatsAppService dynamically reads updated number");
+
+  // Deep links must now target new number
+  const inquiryUrl = WhatsAppService.generateSevaInquiryUrl({ name: "Durga Homa", kanike: 1501 });
+  assert.ok(inquiryUrl.includes("wa.me/919888877777"), "Inquiry URL uses updated WhatsApp number");
+
+  // Restore original
+  templeStore.updateContactConfig({
+    whatsappPhone: "919845012345",
+    whatsappDisplay: "+91 98450 12345"
+  });
+  assert.strictEqual(WhatsAppService.getWhatsAppPhone(), "919845012345");
+});
+
+test("CMS Priests & Archakas allows adding, toggling status, and removing priests", () => {
+  const initialPriests = templeStore.getPriests();
+  assert.ok(initialPriests.length >= 4, "Default authentic archakas seeded");
+
+  const newPriest = {
+    id: "archaka-test-1",
+    name: "Pandit Srinivas Somayaji",
+    kannadaName: "ಪಂಡಿತ್ ಶ್ರೀನಿವಾಸ ಸೋಮಯಾಜಿ",
+    designation: "Sahayaka Archaka",
+    phone: "919845099999",
+    experience: "12+ Years",
+    specializations: ["Durga Homa", "Navagraha Shanti"],
+    status: "ACTIVE"
+  };
+
+  templeStore.savePriest(newPriest);
+  const fetched = templeStore.getPriestById("archaka-test-1");
+  assert.ok(fetched, "Priest saved in store");
+  assert.strictEqual(fetched.name, "Pandit Srinivas Somayaji");
+  assert.strictEqual(fetched.status, "ACTIVE");
+
+  // Toggle status to ON_LEAVE
+  templeStore.togglePriestStatus("archaka-test-1");
+  assert.strictEqual(templeStore.getPriestById("archaka-test-1").status, "ON_LEAVE");
+
+  // Delete priest
+  templeStore.deletePriest("archaka-test-1");
+  assert.strictEqual(templeStore.getPriestById("archaka-test-1"), undefined, "Priest deleted");
+});
+
+test("CMS Photo Gallery allows adding, ordering, and removing photos", () => {
+  const gallery = templeStore.getGallery();
+  assert.ok(gallery.length >= 5, "Default gallery photos seeded");
+
+  const newPhoto = {
+    id: "gal-test-1",
+    title: "Maha Rathotsava Chariot",
+    kannadaTitle: "ಮಹಾ ರಥೋತ್ಸವ",
+    category: "utsava",
+    url: "assets/images/rathotsava.jpg",
+    caption: "Grand chariot procession along Chandra Layout main road",
+    order: 10
+  };
+
+  templeStore.saveGalleryItem(newPhoto);
+  const fetched = templeStore.getGalleryItemById("gal-test-1");
+  assert.ok(fetched, "Gallery photo saved");
+  assert.strictEqual(fetched.category, "utsava");
+
+  // Delete photo
+  templeStore.deleteGalleryItem("gal-test-1");
+  assert.strictEqual(templeStore.getGalleryItemById("gal-test-1"), undefined, "Gallery photo removed");
+});
+
+test("CMS Special Notifications allows broadcasting alerts with action CTAs and toggling visibility", () => {
+  const notifs = templeStore.getSpecialNotifications();
+  assert.ok(notifs.length >= 3, "Default special notifications seeded");
+
+  const newAlert = {
+    id: "notif-test-1",
+    title: "Surya Grahana Sanctum Closure",
+    kannadaTitle: "ಸೂರ್ಯಗ್ರಹಣ ಪ್ರಯುಕ್ತ ದೇವಾಲಯ ಮುಚ್ಚುವಿಕೆ",
+    message: "Sanctum will remain closed from 2:00 PM to 7:00 PM during solar eclipse.",
+    type: "urgent",
+    actionText: "Check Re-opening Time",
+    actionUrl: "#timings",
+    isActive: true
+  };
+
+  templeStore.saveSpecialNotification(newAlert);
+  const fetched = templeStore.getSpecialNotificationById("notif-test-1");
+  assert.ok(fetched, "Alert created");
+  assert.strictEqual(fetched.type, "urgent");
+  assert.strictEqual(fetched.isActive, true);
+
+  // Toggle active status
+  templeStore.toggleNotificationStatus("notif-test-1");
+  assert.strictEqual(templeStore.getSpecialNotificationById("notif-test-1").isActive, false);
+
+  // Delete alert
+  templeStore.deleteSpecialNotification("notif-test-1");
+  assert.strictEqual(templeStore.getSpecialNotificationById("notif-test-1"), undefined, "Alert deleted");
+});
+
 console.log("\n============================================================");
 console.log(`TOTAL TESTS: ${passCount + failCount} | PASSED: ${passCount} | FAILED: ${failCount}`);
 console.log("============================================================\n");

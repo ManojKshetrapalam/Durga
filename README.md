@@ -20,6 +20,12 @@ Sri Durga Devi Temple Digital Mandapa bridges centuries of temple sacred traditi
   - Dynamically calculates 11 Karanas (7 Chara cycling & 4 Sthira), 6 Ritus, 60 Jovian Samvatsaras, 12 Masas, Solar Horizon (Sunrise, Sunset, Midday Solar Noon), and Hindu/temple festivals across any future/past year.
   - Interactive Monthly View Calendar Modal (`panchangaMonthModal.js`): Devotees can tap any date in the Panchanga date stepper to inspect the complete monthly calendar with Tithi, Paksha, Nakshatra, moon phases, and sacred festivals/vratas (Ekadashi, Pournami, Amavasya, Sankashti, etc.), selecting any day to immediately load its complete Vedic Panchanga view.
   - Upgraded Service Worker cache strategy to Network-First (`durga-mandapa-v11`) to ensure immediate live updates without stale browser caching.
+- **Complete Temple CMS Suite (`adminApp.js`, `store.js`, `tokens.css`):** ✅ FULLY IMPLEMENTED
+  - **WhatsApp & Contact Settings:** Admin can configure and update the temple WhatsApp phone number, display formatting, and default greeting. All booking deep-links, alternative inquiry links, and public buttons immediately use the updated number.
+  - **Archakas & Priests Management:** Add, edit, toggle duty status (Active/On Leave), and remove temple Archakas, with image upload, designation, Vedic linage, experience, and specialization tags. Dynamic priest assignment in the booking desk.
+  - **Darshan & Prakaara Photo Gallery CMS:** Add, edit, re-order, and delete photos with instant file upload preview or image URLs. Dynamic category filtering (Garbha Gudi, Architecture, Deepotsava, Alankara, Utsava) immediately reflected on the public landing page.
+  - **Devotee Notices & Special Alerts CMS:** Multi-tier broadcasting featuring top notice board marquee plus priority-tagged (Urgent, Auspicious, Seva, General) in-app cards with interactive CTA action buttons for devotee app and web.
+  - **Festival & Events CMS:** Create, publish, and schedule grand temple celebrations with 10-day Alankara schedules, Homas, and poster invitations.
 
 ---
 
@@ -91,14 +97,17 @@ Durga/
 
 | Concern / Feature | Primary Location | Related Locations |
 |---|---|---|
-| **Design Tokens & Theme** | `.stitch/DESIGN.md` | `app/src/styles/tokens.css`, `docs/design-system.md` |
-| **Seva Catalog & Kanike Rates** | `app/src/data/sevas.js` | `app/src/components/pooja/`, `app/src/components/admin/` |
-| **Temple Darshan & Aarti Timings**| `app/src/data/timings.js` | `app/src/components/home/`, `app/src/utils/panchangaCalc.js` |
-| **Panchanga & Kaala Timings** | `app/src/utils/panchangaCalc.js` | `app/src/components/panchanga/`, `docs/database.md` |
-| **Date Availability & Blocking** | `app/src/utils/availability.js` | `app/src/components/calendar/`, `docs/availability-engine.md` |
-| **WhatsApp Messages & Token Gen** | `app/src/utils/whatsappLink.js` | `app/src/components/booking/`, `docs/whatsapp.md` |
-| **Admin Controls (Blocks & Sevas)**| `app/src/components/admin/` | `app/src/data/mockAdminStore.js`, `docs/admin-panel.md` |
-| **PWA Offline & Install Prompt** | `app/sw.js`, `manifest.webmanifest`| `app/src/components/common/PwaBanner.jsx`, `docs/pwa.md` |
+| **Design Tokens & Theme** | `app/css/tokens.css` | `app/css/admin.css`, `.stitch/DESIGN.md` |
+| **Seva Catalog & Kanike Rates** | `app/js/data/sevas.js` | `app/js/adminApp.js`, `app/js/services/store.js` |
+| **Temple Darshan & Aarti Timings**| `app/js/data/timings.js` | `app/js/views/homeView.js`, `app/index.html` |
+| **Panchanga & Kaala Timings** | `app/js/services/panchangaService.js` | `app/js/views/panchangaView.js`, `app/js/components/panchangaMonthModal.js` |
+| **Date Availability & Blocking** | `app/js/services/availabilityEngine.js` | `app/js/adminApp.js`, `app/js/views/calendarView.js` |
+| **WhatsApp Settings & Integration**| `app/js/services/whatsappService.js` | `app/js/adminApp.js`, `app/js/services/store.js` |
+| **Archakas & Priests CMS** | `app/js/adminApp.js` | `app/js/services/store.js`, `app/css/admin.css` |
+| **Darshan & Photo Gallery CMS** | `app/js/adminApp.js` | `app/js/landingApp.js`, `app/index.html`, `app/js/services/store.js` |
+| **Notices & Devotee Alerts CMS** | `app/js/adminApp.js` | `app/js/views/homeView.js`, `app/js/services/store.js` |
+| **Festival & Events CMS** | `app/js/adminApp.js` | `app/js/components/festivalCard.js`, `app/js/views/homeView.js` |
+| **PWA Offline & App Shell** | `app/sw.js`, `app/manifest.json` | `app/js/app.js`, `app/app.html` |
 
 ---
 

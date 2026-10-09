@@ -11,7 +11,11 @@ const STORAGE_KEYS = {
   BOOKINGS: 'sdd_devotee_bookings_v1',
   ANNOUNCEMENTS: 'sdd_announcements_v1',
   EVENTS: 'sdd_events_cms_v1',
-  PREFERENCES: 'sdd_preferences_v1'
+  PREFERENCES: 'sdd_preferences_v1',
+  CONTACT_CONFIG: 'sdd_contact_config_v1',
+  PRIESTS: 'sdd_priests_v1',
+  GALLERY: 'sdd_gallery_v1',
+  NOTIFICATIONS: 'sdd_special_notifications_v1'
 };
 
 // Initial Seed Data
@@ -35,6 +39,168 @@ const DEFAULT_ANNOUNCEMENT = {
   isPublished: true,
   priority: "HIGH"
 };
+
+export const DEFAULT_CONTACT_CONFIG = {
+  whatsappPhone: "919845012345",
+  whatsappNumber: "919845012345",
+  whatsappDisplay: "+91 98450 12345",
+  whatsappNumberDisplay: "+91 98450 12345",
+  officePhone: "080-23394447",
+  alternatePhone: "080-23394447",
+  emergencyContact: "+91 94480 54321",
+  email: "sridurgadevi.blr@gmail.com",
+  address: "Sri Durga Parameshwari Temple, Chandra Layout 1st Phase, Bengaluru - 560 072",
+  upiId: "sridurgatemple@sbi",
+  trustRegistration: "Registered Hindu Religious & Charitable Institutions Trust",
+  whatsappGreeting: "Namaskara Sri Durga Parameshwari Temple Desk 🙏"
+};
+
+export const DEFAULT_PRIESTS = [
+  {
+    id: "priest-1",
+    name: "Sri K. Raghavendra Okuda",
+    kannadaName: "ಶ್ರೀ ಕೆ. ರಾಘವೇಂದ್ರ ಒಕುಡ",
+    role: "Chief Pradhana Archaka",
+    kannadaRole: "ಪ್ರಧಾನ ಅರ್ಚಕರು",
+    phone: "+91 98450 12345",
+    experience: "28 Years of Temple Seva",
+    specialization: ["Durga Homa", "Chandi Parayana", "Maha Alankara", "Brahma Kalashotsava"],
+    status: "ACTIVE",
+    joinedYear: 1998,
+    bio: "Hereditary chief priest presiding over all daily abhishekams, Friday Durga Homa, and Sharannavaratri Alankara utsavas."
+  },
+  {
+    id: "priest-2",
+    name: "Pandit Narayana Bhat",
+    kannadaName: "ಪಂಡಿತ್ ನಾರಾಯಣ ಭಟ್",
+    role: "Senior Homa Archaka",
+    kannadaRole: "ಹೋಮ ಅರ್ಚಕರು",
+    phone: "+91 98451 67890",
+    experience: "20 Years in Agamic Rites",
+    specialization: ["Durga Homa", "Navagraha Shanti", "Mrityunjaya Homa", "Ganapathi Homa"],
+    status: "ACTIVE",
+    joinedYear: 2006,
+    bio: "Expert in Rigvedic and Shukla Yajurvedic homas, responsible for Yagashala maintenance and individual family homa sankalpas."
+  },
+  {
+    id: "priest-3",
+    name: "Sri Venugopal Sharma",
+    kannadaName: "ಶ್ರೀ ವೇಣುಗೋಪಾಲ್ ಶರ್ಮಾ",
+    role: "Vedamurthy & Alankara Archaka",
+    kannadaRole: "ಅಲಂಕಾರ ಅರ್ಚಕರು",
+    phone: "+91 98452 34567",
+    experience: "15 Years of Veda Adhyayana",
+    specialization: ["Swarna Alankara", "Kumkuma Archana", "Tuesday Deepotsava", "Sahasranama Archana"],
+    status: "ACTIVE",
+    joinedYear: 2011,
+    bio: "Master of traditional deity alankara with gold ornaments, silks, and flowers. Conducts Tuesday evening Rahukala deepotsava."
+  },
+  {
+    id: "priest-4",
+    name: "Sri Subrahmanya Shastri",
+    kannadaName: "ಶ್ರೀ ಸುಬ್ರಹ್ಮಣ್ಯ ಶಾಸ್ತ್ರಿ",
+    role: "Sahayaka Archaka & Parayanika",
+    kannadaRole: "ಸಹಾಯಕ ಅರ್ಚಕರು",
+    phone: "+91 98453 89012",
+    experience: "10 Years of Temple Service",
+    specialization: ["Devi Mahatmyam Parayana", "Panchamrutha Abhisheka", "Vahana Pooja", "Archana Counter"],
+    status: "ACTIVE",
+    joinedYear: 2016,
+    bio: "Specializes in Devi Mahatmyam recitation, vehicle poojas at North gate, and archana counter services."
+  }
+];
+
+export const DEFAULT_GALLERY = [
+  {
+    id: "gal-1",
+    title: "Towering Raja Gopuram • Front Prakaara",
+    kannadaTitle: "ಭವ್ಯ ರಾಜಗೋಪುರ • ಮುಂಭಾಗದ ಪ್ರಾಕಾರ",
+    category: "architecture",
+    image: "assets/images/1.jpg",
+    date: "2026-09-15",
+    caption: "Main entrance of Sri Durga Devi Temple showing the majestic multi-tiered Raja Gopuram.",
+    isFeatured: true
+  },
+  {
+    id: "gal-2",
+    title: "Grand Deepotsava • Illuminated Prakaara",
+    kannadaTitle: "ಭವ್ಯ ದೀಪೋತ್ಸವ • ಜ್ಯೋತಿರ್ಮಯ ಪ್ರಾಕಾರ",
+    category: "festival",
+    image: "assets/images/2.jpg",
+    date: "2026-09-22",
+    caption: "Thousands of sacred clay and brass lamps illuminating the temple prakaara during special Deepotsava.",
+    isFeatured: true
+  },
+  {
+    id: "gal-3",
+    title: "Divine Idol with Sacred Gold & Kumkuma Alankara",
+    kannadaTitle: "ಶ್ರೀ ದುರ್ಗಾ ಪರಮೇಶ್ವರಿ ಸ್ವರ್ಣಾಲಂಕಾರ",
+    category: "alankara",
+    image: "assets/images/3.jpg",
+    date: "2026-10-01",
+    caption: "Devi in majestic golden crown and red silk saree adorned for Friday special pooja.",
+    isFeatured: true
+  },
+  {
+    id: "gal-4",
+    title: "Garbha Gudi Sanctum Sanctorum",
+    kannadaTitle: "ಪವಿತ್ರ ಗರ್ಭಗುಡಿ ಸನ್ನಿಧಿ",
+    category: "sanctum",
+    image: "assets/images/4.jpg",
+    date: "2026-10-02",
+    caption: "Sacred sanctum sanctorum where continuous ghee lamps (Nanda Deepa) remain lit.",
+    isFeatured: true
+  },
+  {
+    id: "gal-5",
+    title: "Deepastambha Sacred Ghee Lamps",
+    kannadaTitle: "ದೀಪಸ್ತಂಭ ಹಾಗೂ ಮಂಗಳಾರತಿ ದೀಪಗಳು",
+    category: "festival",
+    image: "assets/images/5.jpg",
+    date: "2026-10-05",
+    caption: "Sacred Deepastambha offering peace and prosperity to visiting devotees.",
+    isFeatured: true
+  }
+];
+
+export const DEFAULT_SPECIAL_NOTIFICATIONS = [
+  {
+    id: "notif-1",
+    title: "Navaratri Extended Darshan Timings",
+    kannadaTitle: "ನವರಾತ್ರಿ ವಿಸ್ತೃತ ದರ್ಶನ ಸಮಯ",
+    priority: "AUSPICIOUS",
+    message: "During Sharannavaratri (11–20 Oct 2026), temple sanctum will remain open till 9:30 PM daily with continuous camphor mangalarathi and prasadam.",
+    schedule: "11 Oct – 20 Oct 2026",
+    actionLink: "#events",
+    actionText: "View Navaratri Schedule 🎪",
+    isActive: true,
+    createdAt: "2026-10-01T08:00:00Z"
+  },
+  {
+    id: "notif-2",
+    title: "Friday Durga Homa Slot Booking Advisory",
+    kannadaTitle: "ಶುಕ್ರವಾರ ದುರ್ಗಾ ಹೋಮ ಮುಂಗಡ ಬುಕಿಂಗ್",
+    priority: "SEVA",
+    message: "Friday Durga Homa is limited to 12 devotee families per session. Please reserve your sankalpa token in advance via WhatsApp desk.",
+    schedule: "Every Friday 10:00 AM",
+    actionLink: "#calendar",
+    actionText: "Check Date Availability 🗓️",
+    isActive: true,
+    createdAt: "2026-10-03T10:00:00Z"
+  },
+  {
+    id: "notif-3",
+    title: "Chandra Grahanam Temple Closure Notice",
+    kannadaTitle: "ಚಂದ್ರ ಗ್ರಹಣ ದೇವಸ್ಥಾನ ಮುಚ್ಚುವ ಸಮಯ",
+    priority: "URGENT",
+    message: "Sanctum gates will close 3 hours prior to lunar eclipse for purification and reopen after Shanti Abhisheka.",
+    schedule: "Upcoming Eclipse Schedule",
+    actionLink: "#panchanga",
+    actionText: "Check Vedic Panchanga 📅",
+    isActive: false,
+    createdAt: "2026-09-28T12:00:00Z"
+  }
+];
 
 export const DEFAULT_EVENTS = [
   {
@@ -342,6 +508,162 @@ class TempleStore {
     const prefs = this.getPreferences();
     prefs[key] = value;
     localStorage.setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify(prefs));
+  }
+
+  // ==================== TEMPLE CONTACT & WHATSAPP CONFIG ====================
+  getContactConfig() {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTACT_CONFIG) || JSON.stringify(DEFAULT_CONTACT_CONFIG));
+    const phone = raw.whatsappPhone || raw.whatsappNumber || DEFAULT_CONTACT_CONFIG.whatsappPhone;
+    const display = raw.whatsappDisplay || raw.whatsappNumberDisplay || DEFAULT_CONTACT_CONFIG.whatsappDisplay;
+    const office = raw.officePhone || raw.alternatePhone || DEFAULT_CONTACT_CONFIG.officePhone;
+    return {
+      ...DEFAULT_CONTACT_CONFIG,
+      ...raw,
+      whatsappPhone: phone,
+      whatsappNumber: phone,
+      whatsappDisplay: display,
+      whatsappNumberDisplay: display,
+      officePhone: office,
+      alternatePhone: office
+    };
+  }
+
+  updateContactConfig(updates) {
+    const current = this.getContactConfig();
+    const phone = updates.whatsappPhone || updates.whatsappNumber || current.whatsappPhone;
+    const display = updates.whatsappDisplay || updates.whatsappNumberDisplay || current.whatsappDisplay;
+    const office = updates.officePhone || updates.alternatePhone || current.officePhone;
+    const updated = {
+      ...current,
+      ...updates,
+      whatsappPhone: phone,
+      whatsappNumber: phone,
+      whatsappDisplay: display,
+      whatsappNumberDisplay: display,
+      officePhone: office,
+      alternatePhone: office,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(STORAGE_KEYS.CONTACT_CONFIG, JSON.stringify(updated));
+    return updated;
+  }
+
+  // ==================== PRIESTS (ARCHAKAS) MANAGEMENT ====================
+  getPriests() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRIESTS) || JSON.stringify(DEFAULT_PRIESTS));
+  }
+
+  getPriestById(id) {
+    return this.getPriests().find(p => p.id === id);
+  }
+
+  savePriest(priestData) {
+    const priests = this.getPriests();
+    const existingIndex = priests.findIndex(p => p.id === priestData.id);
+    if (existingIndex >= 0) {
+      priests[existingIndex] = { ...priests[existingIndex], ...priestData, updatedAt: new Date().toISOString() };
+    } else {
+      if (!priestData.id) {
+        priestData.id = 'priest-' + Date.now();
+      }
+      priestData.createdAt = new Date().toISOString();
+      priests.push(priestData);
+    }
+    localStorage.setItem(STORAGE_KEYS.PRIESTS, JSON.stringify(priests));
+    return priests;
+  }
+
+  deletePriest(id) {
+    let priests = this.getPriests();
+    priests = priests.filter(p => p.id !== id);
+    localStorage.setItem(STORAGE_KEYS.PRIESTS, JSON.stringify(priests));
+    return priests;
+  }
+
+  togglePriestStatus(id) {
+    const priests = this.getPriests();
+    const priest = priests.find(p => p.id === id);
+    if (priest) {
+      priest.status = priest.status === 'ACTIVE' ? 'ON_LEAVE' : 'ACTIVE';
+      priest.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEYS.PRIESTS, JSON.stringify(priests));
+    }
+    return priests;
+  }
+
+  // ==================== TEMPLE PHOTO GALLERY CMS ====================
+  getGallery() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.GALLERY) || JSON.stringify(DEFAULT_GALLERY));
+  }
+
+  getGalleryItemById(id) {
+    return this.getGallery().find(g => g.id === id);
+  }
+
+  saveGalleryItem(itemData) {
+    const gallery = this.getGallery();
+    const existingIndex = gallery.findIndex(g => g.id === itemData.id);
+    if (existingIndex >= 0) {
+      gallery[existingIndex] = { ...gallery[existingIndex], ...itemData, updatedAt: new Date().toISOString() };
+    } else {
+      if (!itemData.id) {
+        itemData.id = 'gal-' + Date.now();
+      }
+      itemData.createdAt = new Date().toISOString();
+      gallery.unshift(itemData);
+    }
+    localStorage.setItem(STORAGE_KEYS.GALLERY, JSON.stringify(gallery));
+    return gallery;
+  }
+
+  deleteGalleryItem(id) {
+    let gallery = this.getGallery();
+    gallery = gallery.filter(g => g.id !== id);
+    localStorage.setItem(STORAGE_KEYS.GALLERY, JSON.stringify(gallery));
+    return gallery;
+  }
+
+  // ==================== SPECIAL NOTIFICATIONS & ALERTS ====================
+  getSpecialNotifications() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || JSON.stringify(DEFAULT_SPECIAL_NOTIFICATIONS));
+  }
+
+  getSpecialNotificationById(id) {
+    return this.getSpecialNotifications().find(n => n.id === id);
+  }
+
+  saveSpecialNotification(notifData) {
+    const notifications = this.getSpecialNotifications();
+    const existingIndex = notifications.findIndex(n => n.id === notifData.id);
+    if (existingIndex >= 0) {
+      notifications[existingIndex] = { ...notifications[existingIndex], ...notifData, updatedAt: new Date().toISOString() };
+    } else {
+      if (!notifData.id) {
+        notifData.id = 'notif-' + Date.now();
+      }
+      notifData.createdAt = new Date().toISOString();
+      notifications.unshift(notifData);
+    }
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
+    return notifications;
+  }
+
+  deleteSpecialNotification(id) {
+    let notifications = this.getSpecialNotifications();
+    notifications = notifications.filter(n => n.id !== id);
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
+    return notifications;
+  }
+
+  toggleNotificationStatus(id) {
+    const notifications = this.getSpecialNotifications();
+    const notif = notifications.find(n => n.id === id);
+    if (notif) {
+      notif.isActive = !notif.isActive;
+      notif.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
+    }
+    return notifications;
   }
 }
 

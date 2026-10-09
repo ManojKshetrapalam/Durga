@@ -1,11 +1,30 @@
 /**
  * Sri Durga Devi Temple — WhatsApp Deep-Link & Token Generator
- * Chandra Layout Temple Desk: +91 98450 12345 / 080-23394447
+ * Dynamically calibrated with Temple Store CMS configuration.
+ * Chandra Layout Temple Desk: Configurable via CMS (Default: +91 98450 12345 / 080-23394447)
  */
 
-const TEMPLE_PHONE = "919845012345";
+import { templeStore } from './store.js';
 
 export class WhatsAppService {
+  /**
+   * Retrieves active WhatsApp contact number from Temple Store CMS configuration
+   */
+  static getWhatsAppPhone() {
+    try {
+      const cfg = templeStore.getContactConfig();
+      const raw = cfg ? (cfg.whatsappPhone || cfg.whatsappNumber) : null;
+      if (raw) {
+        // Strip spaces, dashes, plus signs for clean WhatsApp URI
+        const clean = raw.replace(/[^0-9]/g, '');
+        if (clean.length >= 10) return clean;
+      }
+    } catch (e) {
+      // Fallback
+    }
+    return "919845012345";
+  }
+
   /**
    * Generates a unique devotee booking token
    * Format: SDD-YYYY-MMDD-XXX
@@ -23,6 +42,7 @@ export class WhatsAppService {
    * Builds pre-formatted booking dispatch message and deep-link
    */
   static createBookingLink(booking) {
+    const phone = this.getWhatsAppPhone();
     const lines = [
       "Namaskara Sri Durga Devi Temple 🙏",
       "",
@@ -46,7 +66,7 @@ export class WhatsAppService {
     const messageText = lines.join("\n");
     return {
       messageText,
-      url: `https://wa.me/${TEMPLE_PHONE}?text=${encodeURIComponent(messageText)}`
+      url: `https://wa.me/${phone}?text=${encodeURIComponent(messageText)}`
     };
   }
 
@@ -54,6 +74,7 @@ export class WhatsAppService {
    * Builds general query URL for a blocked date or alternative date inquiry
    */
   static createAlternativeInquiryLink(requestedDate, blockReason, sevaName) {
+    const phone = this.getWhatsAppPhone();
     const text = [
       "Namaskara Sri Durga Devi Temple 🙏",
       "",
@@ -63,13 +84,14 @@ export class WhatsAppService {
       "Please guide regarding Archaka schedule."
     ].join("\n");
 
-    return `https://wa.me/${TEMPLE_PHONE}?text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
   }
 
   /**
    * Builds on-premises counter query URL
    */
   static createCounterInquiryLink(spotName = "Temple Entrance") {
+    const phone = this.getWhatsAppPhone();
     const text = [
       "Namaskara Sri Durga Devi Temple 🙏",
       "",
@@ -78,6 +100,31 @@ export class WhatsAppService {
       "Please advise if Archakas are available for Sankalpa."
     ].join("\n");
 
-    return `https://wa.me/${TEMPLE_PHONE}?text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+  }
+
+  /**
+   * Builds general direct temple WhatsApp chat link
+   */
+  static createDirectChatLink(customText = "Namaskara Sri Durga Devi Temple 🙏") {
+    const phone = this.getWhatsAppPhone();
+    return `https://wa.me/${phone}?text=${encodeURIComponent(customText)}`;
+  }
+
+  /**
+   * Builds seva inquiry URL for landing page or devotee catalog
+   */
+  static generateSevaInquiryUrl(seva) {
+    const phone = this.getWhatsAppPhone();
+    const text = [
+      "Namaskara Sri Durga Parameshwari Temple 🙏",
+      "I would like to enquire and request availability for:",
+      `• Seva: ${seva.name}${seva.kannadaName ? ` (${seva.kannadaName})` : ''}`,
+      `• Contribution: ₹${seva.kanike}`,
+      "• Temple: Chandra Layout, Bengaluru",
+      "",
+      "Please let me know available dates and sankalpa guidelines."
+    ].join("\n");
+    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
   }
 }

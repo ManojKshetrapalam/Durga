@@ -13,6 +13,7 @@ export function renderHomeView() {
   const todayDay = new Date().getDay();
   const todaySchedule = TEMPLE_TIMINGS.schedules[todayDay];
   const announcement = templeStore.getAnnouncement();
+  const specialNotifs = (templeStore.getSpecialNotifications() || []).filter(n => n.isActive);
   const events = templeStore.getEvents();
   const featuredEvent = events.find(e => e.isFeatured && e.isPublished) || events[0];
   const sevas = templeStore.getSevas().slice(0, 4); // Top 4 popular sevas
@@ -60,6 +61,30 @@ export function renderHomeView() {
           </div>
         </div>
       ` : ''}
+
+      <!-- Special Devotee Alerts Stream from CMS -->
+      ${specialNotifs.map(n => `
+        <div class="card" style="margin-bottom: 12px; border-left: 4px solid ${n.type === 'urgent' ? '#DC2626' : (n.type === 'auspicious' ? 'var(--color-gold)' : 'var(--color-primary)')}; background: #FFFDF8;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 240px;">
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                <span class="badge ${n.type === 'urgent' ? 'badge-maroon' : 'badge-gold'}" style="font-size: 0.68rem;">
+                  ${(n.type || 'ALERT').toUpperCase()}
+                </span>
+                <strong style="color: var(--color-primary); font-size: 0.95rem;">${n.title}</strong>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--color-text-main); margin-bottom: 6px; line-height: 1.4;">
+                ${n.message}
+              </p>
+              ${n.actionText ? `
+                <a href="${n.actionUrl || '#'}" style="display: inline-block; font-size: 0.8rem; font-weight: 700; color: var(--color-primary); text-decoration: none;">
+                  ${n.actionText} →
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('')}
 
       <!-- Quick Daily Insights Grid (Desktop 2-Col / Mobile 1-Col) -->
       <div class="home-quick-grid">
