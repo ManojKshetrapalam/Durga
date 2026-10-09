@@ -15,10 +15,11 @@ Sri Durga Devi Temple Digital Mandapa bridges centuries of temple sacred traditi
 ## 2. Current Status
 - **Phase 0–6 (Discovery, UX & Stitch Loop Screen System):** ✅ COMPLETE
 - **Phases 7–18 (Production PWA Implementation & Verification):** ✅ COMPLETE
-- **Surendra Jat Panchang Engine & Cache v6:** ✅ IMPLEMENTED
+- **Surendra Jat Panchang Engine & Interactive Monthly Calendar (Cache v11):** ✅ IMPLEMENTED
   - Integrated Surendra Jat Panchang ephemeris algorithm powered by `astronomy-engine` for exact Bengaluru coordinates.
   - Dynamically calculates 11 Karanas (7 Chara cycling & 4 Sthira), 6 Ritus, 60 Jovian Samvatsaras, 12 Masas, Solar Horizon (Sunrise, Sunset, Midday Solar Noon), and Hindu/temple festivals across any future/past year.
-  - Upgraded Service Worker cache strategy to Network-First (`durga-mandapa-v6`) to ensure immediate live updates without stale browser caching.
+  - Interactive Monthly View Calendar Modal (`panchangaMonthModal.js`): Devotees can tap any date in the Panchanga date stepper to inspect the complete monthly calendar with Tithi, Paksha, Nakshatra, moon phases, and sacred festivals/vratas (Ekadashi, Pournami, Amavasya, Sankashti, etc.), selecting any day to immediately load its complete Vedic Panchanga view.
+  - Upgraded Service Worker cache strategy to Network-First (`durga-mandapa-v11`) to ensure immediate live updates without stale browser caching.
 
 ---
 
