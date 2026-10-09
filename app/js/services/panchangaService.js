@@ -16,7 +16,7 @@
  * - Next Upcoming Festivals Engine with relative countdown labels
  */
 
-import * as Astronomy from '../lib/astronomy.js?v=20261007_10';
+import * as Astronomy from '../lib/astronomy.js?v=20261007_11';
 
 // Temple Coordinates: Bengaluru, Karnataka
 const BENGALURU_OBSERVER = new Astronomy.Observer(12.9716, 77.5946, 920);
@@ -397,13 +397,15 @@ export class PanchangaService {
     if (suryaRashiIndex >= 9 || suryaRashiIndex <= 2) {
       return {
         name: "Uttarayana",
-        sanskrit: "उत्तरायण",
+        sanskrit: "ಉತ್ತರಾಯಣ",
+        kannada: "ಉತ್ತರಾಯಣ",
         description: "Sun's northward celestial journey; period of enlightenment, devas and sacred muhurthas."
       };
     } else {
       return {
         name: "Dakshinayana",
-        sanskrit: "दक्षिणಾಯನ",
+        sanskrit: "ದಕ್ಷಿಣಾಯನ",
+        kannada: "ದಕ್ಷಿಣಾಯನ",
         description: "Sun's southward celestial journey; period of festivals, vrathas and divine Devi worship."
       };
     }
@@ -794,6 +796,110 @@ export class PanchangaService {
   }
 
   /**
+   * Generates month days with full Vedic Panchanga information for interactive calendar grids
+   * Cached by year-month for sub-millisecond retrieval.
+   * @param {number} year 
+   * @param {number} month (0-11)
+   */
+  static getMonthDays(year, month) {
+    if (!this._monthCache) this._monthCache = new Map();
+    const cacheKey = `${year}-${month}`;
+    if (this._monthCache.has(cacheKey)) {
+      return this._monthCache.get(cacheKey);
+    }
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfWeek = new Date(year, month, 1).getDay();
+    const days = [];
+    const festivalsInMonth = [];
+
+    for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+      const d = new Date(year, month, dayNum, 12, 0, 0);
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+      const p = this.getPanchanga(d);
+      const isPournami = p.tithi.name.includes('Pournami') || p.tithi.name.includes('Purnima');
+      const isAmavasya = p.tithi.name.includes('Amavasya');
+      const isEkadashi = p.tithi.name.includes('Ekadashi');
+      const isSankashti = p.tithi.name.includes('Chaturthi') && !p.tithi.isShukla;
+      const isVinayaka = p.tithi.name.includes('Chaturthi') && p.tithi.isShukla;
+      const isTuesdayDeepa = d.getDay() === 2;
+      const isFridayHoma = d.getDay() === 5;
+
+      if (p.hasFestival) {
+        p.festivals.forEach(fest => {
+          if (!festivalsInMonth.some(f => f.name === fest.name)) {
+            festivalsInMonth.push({
+              name: fest.name,
+              kannada: fest.kannada,
+              badge: fest.badge || fest.name,
+              dayNum,
+              dateStr: p.date,
+              formattedDate: p.formattedDate,
+              isMajor: fest.isMajor
+            });
+          }
+        });
+      }
+
+      days.push({
+        dayNum,
+        dateStr: p.date,
+        formattedDate: p.formattedDate,
+        dayOfWeek: d.getDay(),
+        tithiName: p.tithi.name,
+        tithiIndex: p.tithi.index,
+        tithiSanskrit: p.tithi.sanskrit,
+        paksha: p.paksha,
+        pakshaShort: p.paksha.split(' ')[0],
+        nakshatra: p.nakshatra.name,
+        yoga: p.yoga,
+        karana: p.karanaDetails ? p.karanaDetails.current : p.karana.split(' ')[0],
+        festivals: p.festivals,
+        hasFestival: p.hasFestival,
+        primaryFestival: p.primaryFestival ? p.primaryFestival.name : null,
+        isMajorFestival: p.festivals.some(f => f.isMajor),
+        isPournami,
+        isAmavasya,
+        isEkadashi,
+        isSankashti,
+        isVinayaka,
+        isTuesdayDeepa,
+        isFridayHoma,
+        sunrise: p.sunrise,
+        sunset: p.sunset,
+        rahuKala: p.rahuKala
+      });
+    }
+
+    // Mid-month sample for summary
+    const midDate = new Date(year, month, Math.min(15, daysInMonth));
+    const pMid = this.getPanchanga(midDate);
+    const monthName = midDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+
+    const result = {
+      year,
+      month,
+      monthName,
+      daysInMonth,
+      firstDayOfWeek,
+      days,
+      festivalsInMonth,
+      summary: {
+        samvatsara: pMid.samvatsara,
+        masa: pMid.masa,
+        masaKannada: pMid.masaKannada,
+        ritu: pMid.ritu,
+        rituKannada: pMid.rituKannada,
+        ayana: pMid.ayana,
+        ayanaKannada: pMid.ayanaKannada || pMid.ayanaSanskrit
+      }
+    };
+
+    this._monthCache.set(cacheKey, result);
+    return result;
+  }
+
+  /**
    * Generates complete Vedic astronomical details for a given Date
    * Calibrated for Bengaluru, Karnataka using Astronomy Engine.
    * @param {Date|string} dateInput 
@@ -889,12 +995,18 @@ export class PanchangaService {
       }
     }
 
+    const yStr = d.getFullYear();
+    const mStr = String(d.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(d.getDate()).padStart(2, '0');
+    const localDateStr = `${yStr}-${mStr}-${dayStr}`;
+
     return {
-      date: d.toISOString().split('T')[0],
+      date: localDateStr,
       formattedDate: d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }),
       samvatsara: samvatsaraName,
       ayana: ayanaObj.name,
       ayanaSanskrit: ayanaObj.sanskrit,
+      ayanaKannada: ayanaObj.kannada,
       ayanaDescription: ayanaObj.description,
       ritu: rituObj.name,
       rituKannada: rituObj.kannada,

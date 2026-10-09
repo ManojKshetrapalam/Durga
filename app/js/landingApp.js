@@ -3,10 +3,10 @@
  * Powers live Bengaluru Panchanga, audio chant player, seva category filters, and WhatsApp booking triggers
  */
 
-import { SEVAS_DATA } from './data/sevas.js?v=20261007_10';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_10';
-import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_10';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_10';
+import { SEVAS_DATA } from './data/sevas.js?v=20261007_11';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
+import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_11';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
 
 class TempleLandingController {
   constructor() {

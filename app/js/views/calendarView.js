@@ -3,10 +3,10 @@
  * Matches Stitch Screen: calendar-availability.html
  */
 
-import { templeStore } from '../services/store.js?v=20261007_07';
-import { AvailabilityEngine } from '../services/availabilityEngine.js?v=20261007_07';
-import { PanchangaService } from '../services/panchangaService.js?v=20261007_07';
-import { WhatsAppService } from '../services/whatsappService.js?v=20261007_07';
+import { templeStore } from '../services/store.js?v=20261007_11';
+import { AvailabilityEngine } from '../services/availabilityEngine.js?v=20261007_11';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_11';
+import { WhatsAppService } from '../services/whatsappService.js?v=20261007_11';
 
 export function renderCalendarView(selectedDateStr = '2026-10-15', selectedSevaId = 'durga-homa') {
   const sevas = templeStore.getSevas();

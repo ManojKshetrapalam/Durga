@@ -238,6 +238,29 @@ test("Upcoming Festivals Engine: Returns next scheduled festivals with relative 
   assert.ok(upcoming[0].relativeLabel.includes("days") || upcoming[0].relativeLabel.includes("Tomorrow"), "Has relative label");
 });
 
+test("Monthly View Calendar Engine: Generates full 30 days of November 2026 with Tithi, Paksha, and Festivals", () => {
+  const novData = PanchangaService.getMonthDays(2026, 10); // Nov 2026 (month 10)
+  assert.strictEqual(novData.daysInMonth, 30, "November has 30 days");
+  assert.strictEqual(novData.firstDayOfWeek, 0, "1 Nov 2026 is Sunday (day 0)");
+  assert.strictEqual(novData.days.length, 30, "Returns exactly 30 day objects");
+
+  // Day 16 (Monday, 16 Nov 2026 - from user's screenshot)
+  const day16 = novData.days[15];
+  assert.strictEqual(day16.dayNum, 16);
+  assert.strictEqual(day16.tithiName, "Shukla Saptami");
+  assert.strictEqual(day16.pakshaShort, "Shukla");
+  assert.strictEqual(day16.dateStr, "2026-11-16");
+
+  // Day 24 (Kartika Pournami)
+  const day24 = novData.days[23];
+  assert.strictEqual(day24.isPournami, true, "Nov 24 is Pournami");
+
+  // Month summary
+  assert.strictEqual(novData.summary.masa, "Kartika", "November is Kartika Masa");
+  assert.strictEqual(novData.summary.ayana, "Dakshinayana", "November is Dakshinayana");
+  assert.ok(novData.festivalsInMonth.length > 0, "Finds festivals in November");
+});
+
 // --- SUITE 4: WHATSAPP DEEP-LINK & TOKEN GENERATOR ---
 console.log("\nSuite 4: WhatsApp Deep-Link & Token Generator");
 

@@ -5,7 +5,7 @@
  * Offline shell fallback ensures temple sanctum resilience when connectivity drops.
  */
 
-const CACHE_NAME = 'durga-mandapa-v10';
+const CACHE_NAME = 'durga-mandapa-v11';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -32,6 +32,7 @@ const PRECACHE_ASSETS = [
   './js/views/poojaDetailView.js',
   './js/views/calendarView.js',
   './js/views/panchangaView.js',
+  './js/views/panchangaMonthModal.js',
   './js/views/bookingView.js',
   './js/views/qrLandingView.js',
   './js/views/adminView.js',
@@ -44,9 +45,9 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW v5] Precaching app shell assets');
+      console.log('[SW v11] Precaching app shell assets');
       return cache.addAll(PRECACHE_ASSETS).catch(err => {
-        console.warn('[SW v5] Some assets failed to precache during install:', err);
+        console.warn('[SW v11] Some assets failed to precache during install:', err);
       });
     })
   );

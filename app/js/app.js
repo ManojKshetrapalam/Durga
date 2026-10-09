@@ -2,21 +2,22 @@
  * Sri Durga Devi Temple — Digital Mandapa: Core App Controller & Router
  */
 
-import { renderHeader } from './components/header.js?v=20261007_10';
-import { renderBottomNav } from './components/bottomNav.js?v=20261007_10';
-import { showToast } from './components/toast.js?v=20261007_10';
-import { renderHomeView } from './views/homeView.js?v=20261007_10';
-import { renderPoojasView } from './views/poojasView.js?v=20261007_10';
-import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_10';
-import { renderCalendarView } from './views/calendarView.js?v=20261007_10';
-import { renderPanchangaView } from './views/panchangaView.js?v=20261007_10';
-import { renderBookingView } from './views/bookingView.js?v=20261007_10';
-import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_10';
-import { renderAdminView } from './views/adminView.js?v=20261007_10';
+import { renderHeader } from './components/header.js?v=20261007_11';
+import { renderBottomNav } from './components/bottomNav.js?v=20261007_11';
+import { showToast } from './components/toast.js?v=20261007_11';
+import { renderHomeView } from './views/homeView.js?v=20261007_11';
+import { renderPoojasView } from './views/poojasView.js?v=20261007_11';
+import { renderPoojaDetailView } from './views/poojaDetailView.js?v=20261007_11';
+import { renderCalendarView } from './views/calendarView.js?v=20261007_11';
+import { renderPanchangaView } from './views/panchangaView.js?v=20261007_11';
+import { renderBookingView } from './views/bookingView.js?v=20261007_11';
+import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_11';
+import { renderAdminView } from './views/adminView.js?v=20261007_11';
+import { renderPanchangaMonthModal } from './views/panchangaMonthModal.js?v=20261007_11';
 
-import { templeStore } from './services/store.js?v=20261007_10';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_10';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_10';
+import { templeStore } from './services/store.js?v=20261007_11';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
 
 class DigitalMandapaApp {
   constructor() {
@@ -32,6 +33,8 @@ class DigitalMandapaApp {
     };
 
     this.deferredPrompt = null;
+    this.calendarModalYear = 2026;
+    this.calendarModalMonth = 9; // Oct
   }
 
   init() {
@@ -228,6 +231,67 @@ class DigitalMandapaApp {
       this.viewState.panchangaDate = cur;
     }
     this.render();
+  }
+
+  // ==================== PANCHANGA MONTH CALENDAR ====================
+  openPanchangaMonthModal(targetDate = null) {
+    const base = targetDate ? new Date(targetDate) : (this.viewState.panchangaDate || new Date());
+    this.calendarModalYear = base.getFullYear();
+    this.calendarModalMonth = base.getMonth();
+    this._renderMonthModalContent();
+  }
+
+  navPanchangaMonth(delta) {
+    if (delta === 'today') {
+      const today = new Date();
+      this.calendarModalYear = today.getFullYear();
+      this.calendarModalMonth = today.getMonth();
+    } else {
+      this.calendarModalMonth += delta;
+      if (this.calendarModalMonth < 0) {
+        this.calendarModalMonth = 11;
+        this.calendarModalYear -= 1;
+      } else if (this.calendarModalMonth > 11) {
+        this.calendarModalMonth = 0;
+        this.calendarModalYear += 1;
+      }
+    }
+    this._renderMonthModalContent();
+  }
+
+  _renderMonthModalContent() {
+    let selectedDateStr;
+    if (this.viewState.panchangaDate instanceof Date) {
+      const y = this.viewState.panchangaDate.getFullYear();
+      const m = String(this.viewState.panchangaDate.getMonth() + 1).padStart(2, '0');
+      const d = String(this.viewState.panchangaDate.getDate()).padStart(2, '0');
+      selectedDateStr = `${y}-${m}-${d}`;
+    } else {
+      selectedDateStr = new Date().toISOString().split('T')[0];
+    }
+    const html = renderPanchangaMonthModal(this.calendarModalYear, this.calendarModalMonth, selectedDateStr);
+    this.showModal(html);
+  }
+
+  selectPanchangaDate(dateStr) {
+    this.closeModal();
+    const parts = dateStr.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    this.viewState.panchangaDate = new Date(year, month, day);
+
+    if (this.currentView !== 'panchanga') {
+      this.navigate('panchanga');
+    } else {
+      this.render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const d = this.viewState.panchangaDate.toLocaleDateString('en-IN', { 
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' 
+    });
+    showToast(`Loaded Panchanga for ${d} 🙏`, 'success');
   }
 
   showRituGuidance() {
@@ -699,9 +763,9 @@ class DigitalMandapaApp {
 
   _registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=20261007_07', { updateViaCache: 'none' })
+      navigator.serviceWorker.register('./sw.js?v=20261007_11', { updateViaCache: 'none' })
         .then((reg) => {
-          console.log('[PWA v7] Service Worker registered & active');
+          console.log('[PWA v11] Service Worker registered & active');
           // Check for worker updates immediately
           reg.update();
         })

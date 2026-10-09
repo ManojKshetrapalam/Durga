@@ -890,3 +890,341 @@ body.is-pwa-standalone .desktop-only-bar {
     gap: 16px;
   }
 }
+
+/* =========================================================================
+   Date Stepper Interactive Trigger Styles
+   ========================================================================= */
+.date-stepper-center-btn {
+  text-align: center;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  border: 1px dashed transparent;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.date-stepper-center-btn:hover {
+  background: var(--color-gold-light);
+  border-color: var(--color-gold);
+  transform: translateY(-1px);
+}
+
+.date-stepper-center-btn:active {
+  transform: scale(0.98);
+}
+
+.calendar-tap-icon {
+  font-size: 0.82rem;
+  color: var(--color-gold-hover);
+}
+
+.tap-hint-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  background: var(--color-gold-light);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  margin-top: 3px;
+  border: 1px solid var(--color-border-gold);
+  letter-spacing: 0.2px;
+}
+
+/* =========================================================================
+   Panchanga Monthly View Calendar Modal & Grid
+   ========================================================================= */
+.modal-dialog-calendar {
+  width: 95vw;
+  max-width: 780px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modal-dialog-calendar .modal-header {
+  padding: 12px 18px;
+  background: var(--color-canvas);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-dialog-calendar .modal-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Month navigation header inside modal */
+.month-modal-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  background: var(--color-canvas);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.month-modal-title {
+  text-align: center;
+  flex: 1;
+  min-width: 180px;
+}
+
+.month-modal-title h3 {
+  font-family: var(--font-serif);
+  font-size: 1.18rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  margin: 0;
+}
+
+.month-modal-subtitle {
+  font-size: 0.74rem;
+  color: var(--color-gold-hover);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Month Highlights Strip */
+.month-highlights-strip {
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #FFFDF8;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.month-highlights-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.month-highlights-list {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.month-fest-chip {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  background: #FFF7ED;
+  border: 1px solid #FED7AA;
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.month-fest-chip:hover {
+  background: #FFEDD5;
+  border-color: #FB923C;
+}
+
+/* 7-column Calendar Weekdays */
+.month-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 0;
+  background: var(--color-canvas);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  border: 1px solid var(--color-border-subtle);
+}
+
+.month-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+/* Day cell in month calendar */
+.month-cal-day {
+  min-height: 64px;
+  padding: 5px 4px;
+  background: #FFFDF8;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  text-align: left;
+}
+
+.month-cal-day:hover {
+  background: #FFF8EE;
+  border-color: var(--color-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(197, 155, 39, 0.18);
+}
+
+.month-cal-day:active {
+  transform: scale(0.98);
+}
+
+/* Current selected date */
+.month-cal-day.is-selected {
+  background: #721C2B !important;
+  color: #FFF !important;
+  border-color: #C59B27 !important;
+  box-shadow: 0 4px 12px rgba(114, 28, 43, 0.35) !important;
+}
+
+.month-cal-day.is-selected .day-num,
+.month-cal-day.is-selected .day-tithi,
+.month-cal-day.is-selected .day-nakshatra {
+  color: #FFF !important;
+}
+
+.month-cal-day.is-selected .month-badge {
+  background: #C59B27 !important;
+  color: #1C1917 !important;
+}
+
+/* Today highlight */
+.month-cal-day.is-today:not(.is-selected) {
+  border: 2px solid var(--color-saffron);
+  background: #FFF9F5;
+}
+
+.month-cal-day.is-festival:not(.is-selected) {
+  background: #FFFBF2;
+  border-color: #FDBA74;
+}
+
+.month-cal-day .day-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.month-cal-day .day-num {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.month-cal-day .day-moon-icon {
+  font-size: 0.72rem;
+}
+
+.month-cal-day .day-tithi {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1.15;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.month-cal-day .day-nakshatra {
+  font-size: 0.6rem;
+  color: var(--color-text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.month-cal-day .day-badges-row {
+  margin-top: 2px;
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.month-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 3px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.month-badge-pournami {
+  background: #FEF08A;
+  color: #854D0E;
+}
+
+.month-badge-amavasya {
+  background: #1C1917;
+  color: #FFFDF8;
+}
+
+.month-badge-ekadashi {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.month-badge-festival {
+  background: #FFEDD5;
+  color: #9A3412;
+  font-weight: 800;
+}
+
+/* Empty day placeholder */
+.month-cal-empty {
+  min-height: 64px;
+  background: transparent;
+  border: 1px dashed rgba(234, 223, 205, 0.4);
+  border-radius: var(--radius-sm);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .modal-dialog-calendar {
+    max-height: 94vh;
+  }
+  .modal-dialog-calendar .modal-body {
+    padding: 10px 10px;
+  }
+  .month-cal-day {
+    min-height: 54px;
+    padding: 3px 2px;
+  }
+  .month-cal-day .day-num {
+    font-size: 0.78rem;
+  }
+  .month-cal-day .day-tithi {
+    font-size: 0.58rem;
+  }
+  .month-cal-day .day-nakshatra {
+    display: none;
+  }
+  .month-badge {
+    font-size: 0.52rem;
+    padding: 1px 2px;
+  }
+}

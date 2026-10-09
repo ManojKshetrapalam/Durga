@@ -3,9 +3,9 @@
  * Matches Stitch Screen: booking-request.html
  */
 
-import { templeStore } from '../services/store.js?v=20261007_07';
-import { WhatsAppService } from '../services/whatsappService.js?v=20261007_07';
-import { PanchangaService } from '../services/panchangaService.js?v=20261007_07';
+import { templeStore } from '../services/store.js?v=20261007_11';
+import { WhatsAppService } from '../services/whatsappService.js?v=20261007_11';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_11';
 
 export function renderBookingView(sevaId = 'durga-homa', selectedDateStr = '2026-10-24') {
   const seva = templeStore.getSevaById(sevaId) || templeStore.getSevas()[0];

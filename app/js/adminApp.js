@@ -3,10 +3,10 @@
  * Full Desktop & Responsive Webpage Experience for Trustees and Archakas
  */
 
-import { templeStore } from './services/store.js?v=20261007_10';
-import { PanchangaService } from './services/panchangaService.js?v=20261007_10';
-import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_10';
-import { WhatsAppService } from './services/whatsappService.js?v=20261007_10';
+import { templeStore } from './services/store.js?v=20261007_11';
+import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
+import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_11';
+import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
 
 class TempleAdminController {
   constructor() {

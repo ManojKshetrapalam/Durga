@@ -3,8 +3,8 @@
  * Features dynamic Bengaluru solar positioning, dynamic Ritu / Ayana, and interactive Kaala guidance modals.
  */
 
-import { PanchangaService } from '../services/panchangaService.js?v=20261007_10';
-import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_10';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_11';
+import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_11';
 
 export function renderPanchangaView(currentDate = new Date()) {
   const panchanga = PanchangaService.getPanchanga(currentDate);
@@ -41,24 +41,42 @@ export function renderPanchangaView(currentDate = new Date()) {
 
       <!-- Date Stepper Controller -->
       <div class="card" style="padding: 10px 14px; margin-top: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <button class="btn btn-secondary btn-sm" onclick="window.app.stepPanchangaDate(-1)" aria-label="Previous Day">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" onclick="window.app.stepPanchangaDate(-1)" aria-label="Previous Day" title="Previous Day">
             ‹ Prev Day
           </button>
-          <div style="text-align: center;">
-            <div class="num-tabular" style="font-weight: 700; color: var(--color-primary); font-size: 0.95rem;">
-              ${panchanga.formattedDate}
+          
+          <!-- Clickable Date Center: Opens Monthly View Calendar -->
+          <div onclick="window.app.openPanchangaMonthModal()" 
+               class="date-stepper-center-btn"
+               title="Click to open full monthly calendar with all details"
+               role="button"
+               tabindex="0">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span class="num-tabular" style="font-weight: 700; color: var(--color-primary); font-size: 0.98rem;">
+                ${panchanga.formattedDate}
+              </span>
+              <span class="calendar-tap-icon" aria-hidden="true">📅▾</span>
             </div>
             <div style="font-size: 0.72rem; color: var(--color-gold-hover); font-weight: 600;">
-              ${panchanga.samvatsara} • ${panchanga.ayana} (${panchanga.ayanaSanskrit})
+              ${panchanga.samvatsara} • ${panchanga.ayana} (${panchanga.ayanaKannada || panchanga.ayanaSanskrit})
             </div>
-            <div style="font-size: 0.74rem; color: var(--color-primary); font-weight: 700; margin-top: 2px;">
+            <div style="font-size: 0.75rem; color: var(--color-primary); font-weight: 700; margin-top: 2px;">
               ${panchanga.masa} Masa • ${panchanga.paksha}
             </div>
+            <span class="tap-hint-pill">
+              🗓️ Tap date for Month View
+            </span>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="window.app.stepPanchangaDate(1)" aria-label="Next Day">
-            Next Day ›
-          </button>
+
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="btn btn-secondary btn-sm" onclick="window.app.stepPanchangaDate(1)" aria-label="Next Day" title="Next Day">
+              Next Day ›
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="window.app.openPanchangaMonthModal()" title="Open Monthly Calendar" aria-label="Month View" style="padding: 4px 8px; font-size: 0.82rem; font-weight: 700; color: var(--color-primary);">
+              📅
+            </button>
+          </div>
         </div>
       </div>
 

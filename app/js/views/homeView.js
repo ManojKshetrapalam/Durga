@@ -3,10 +3,10 @@
  * Matches Stitch Screen: home.html
  */
 
-import { PanchangaService } from '../services/panchangaService.js?v=20261007_07';
-import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_07';
-import { templeStore } from '../services/store.js?v=20261007_07';
-import { renderFestivalBanner } from '../components/festivalCard.js?v=20261007_07';
+import { PanchangaService } from '../services/panchangaService.js?v=20261007_11';
+import { TEMPLE_TIMINGS } from '../data/timings.js?v=20261007_11';
+import { templeStore } from '../services/store.js?v=20261007_11';
+import { renderFestivalBanner } from '../components/festivalCard.js?v=20261007_11';
 
 export function renderHomeView() {
   const todayPanchanga = PanchangaService.getPanchanga(new Date());
