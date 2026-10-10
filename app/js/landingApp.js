@@ -234,9 +234,14 @@ class TempleLandingController {
     }
   }
 
-  // Devotee viewer live feed (ambient sanctum darshan stream with live IST timecode)
+  // Devotee viewer live feed (ambient sanctum darshan stream with live camera frame and live IST timecode)
   _initViewerLiveFeed(video, selectedLocation) {
     if (!video) return;
+    if (this._viewerFeedCleanup) {
+      this._viewerFeedCleanup();
+      this._viewerFeedCleanup = null;
+    }
+
     try {
       let canvas = document.getElementById('landingLiveFeedCanvas');
       if (!canvas) {
@@ -248,9 +253,61 @@ class TempleLandingController {
         document.body.appendChild(canvas);
       }
       const ctx = canvas.getContext('2d');
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = './assets/images/navaratri-invitation.jpg';
+      const fallbackImg = new Image();
+      fallbackImg.crossOrigin = 'anonymous';
+      fallbackImg.src = './assets/images/navaratri-invitation.jpg';
+
+      const cameraImg = new Image();
+      cameraImg.crossOrigin = 'anonymous';
+      let hasCameraFrame = false;
+      let lastCameraFrameTime = 0;
+      let isFetchingRemoteFrame = false;
+
+      // Check if frame is already cached in memory
+      const initialFrame = streamingService.getLatestBroadcastFrame();
+      if (initialFrame) {
+        cameraImg.src = initialFrame;
+        hasCameraFrame = true;
+        lastCameraFrameTime = Date.now();
+      }
+
+      // 1. Listen for local broadcast channel frame sync (cross-tab on same machine)
+      const unsub = streamingService.subscribe((msg) => {
+        if (msg.type === 'LIVE_CAMERA_FRAME' && msg.payload) {
+          if (msg.payload.frame) {
+            cameraImg.src = msg.payload.frame;
+            hasCameraFrame = true;
+            lastCameraFrameTime = Date.now();
+          } else {
+            hasCameraFrame = false;
+          }
+        }
+      });
+
+      // 2. Poll server frame relay for remote devices (mobile / different browsers)
+      const pollRemoteFrame = async () => {
+        if (Date.now() - lastCameraFrameTime < 800) return; // Skip if local BroadcastChannel active
+        if (isFetchingRemoteFrame) return;
+        isFetchingRemoteFrame = true;
+        try {
+          const url = streamingService.getApiUrl('api/live-frame.php?json=1');
+          const res = await fetch(url, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.success && data.frame) {
+              cameraImg.src = data.frame;
+              hasCameraFrame = true;
+              lastCameraFrameTime = Date.now();
+            }
+          }
+        } catch (_) {
+        } finally {
+          isFetchingRemoteFrame = false;
+        }
+      };
+
+      const pollInterval = setInterval(pollRemoteFrame, 350);
+      pollRemoteFrame();
 
       let animId = null;
       let phase = 0;
@@ -258,25 +315,39 @@ class TempleLandingController {
       const render = () => {
         if (!document.getElementById('landingLiveVideo')) {
           if (animId) cancelAnimationFrame(animId);
+          clearInterval(pollInterval);
+          if (unsub) unsub();
           return;
         }
         phase += 0.08;
 
-        if (img.complete && img.naturalWidth > 0) {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // 1. Draw video background: broadcaster webcam frame if active, else sanctum poster
+        if (hasCameraFrame && cameraImg.complete && cameraImg.naturalWidth > 0) {
+          const hRatio = canvas.width / cameraImg.naturalWidth;
+          const vRatio = canvas.height / cameraImg.naturalHeight;
+          const ratio = Math.max(hRatio, vRatio);
+          const centerShiftX = (canvas.width - cameraImg.naturalWidth * ratio) / 2;
+          const centerShiftY = (canvas.height - cameraImg.naturalHeight * ratio) / 2;
+          ctx.drawImage(
+            cameraImg,
+            0, 0, cameraImg.naturalWidth, cameraImg.naturalHeight,
+            centerShiftX, centerShiftY, cameraImg.naturalWidth * ratio, cameraImg.naturalHeight * ratio
+          );
+        } else if (fallbackImg.complete && fallbackImg.naturalWidth > 0) {
+          ctx.drawImage(fallbackImg, 0, 0, canvas.width, canvas.height);
         } else {
           ctx.fillStyle = '#1C1917';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // Golden Sanctum Vignette
+        // 2. Golden Sanctum Vignette
         const vig = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 200, canvas.width / 2, canvas.height / 2, canvas.width / 1.3);
-        vig.addColorStop(0, 'rgba(0,0,0,0.1)');
-        vig.addColorStop(1, 'rgba(0,0,0,0.7)');
+        vig.addColorStop(0, 'rgba(0,0,0,0.05)');
+        vig.addColorStop(1, 'rgba(0,0,0,0.65)');
         ctx.fillStyle = vig;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Sanctum Diya Flame Flicker
+        // 3. Sanctum Diya Flame Flicker
         const flicker = Math.sin(phase) * 5 + Math.cos(phase * 2.1) * 3;
         const diya = ctx.createRadialGradient(canvas.width / 2, canvas.height - 110, 10, canvas.width / 2, canvas.height - 110, 190 + flicker);
         diya.addColorStop(0, 'rgba(255, 200, 50, 0.4)');
@@ -285,15 +356,15 @@ class TempleLandingController {
         ctx.fillStyle = diya;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Top Banner
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+        // 4. Top Banner
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.fillRect(0, 0, canvas.width, 60);
 
         ctx.font = 'bold 22px Cinzel, Georgia, serif';
         ctx.fillStyle = '#FFFDF8';
         ctx.fillText('SRI DURGA PARAMESHWARI TEMPLE • SANCTUM LIVE DARSHAN', 30, 38);
 
-        // Live Clock
+        // 5. Live Clock
         const now = new Date();
         const ist = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) + ' IST';
         ctx.font = '600 20px "JetBrains Mono", monospace';
@@ -302,8 +373,8 @@ class TempleLandingController {
         ctx.fillText('● ' + ist, canvas.width - 30, 38);
         ctx.textAlign = 'left';
 
-        // Bottom Location & Mantra
-        ctx.fillStyle = 'rgba(114, 28, 43, 0.88)';
+        // 6. Bottom Location & Mantra
+        ctx.fillStyle = 'rgba(114, 28, 43, 0.9)';
         ctx.fillRect(0, canvas.height - 52, canvas.width, 52);
 
         ctx.font = 'bold 18px Cinzel, Georgia, serif';
@@ -312,6 +383,12 @@ class TempleLandingController {
         ctx.fillText(`📍 ${loc.toUpperCase()} — ॐ ಶ್ರೀ ದುರ್ಗಾಪರಮೇಶ್ವರ್ಯೈ ನಮಃ`, 30, canvas.height - 19);
 
         animId = requestAnimationFrame(render);
+      };
+
+      this._viewerFeedCleanup = () => {
+        if (animId) cancelAnimationFrame(animId);
+        clearInterval(pollInterval);
+        if (unsub) unsub();
       };
 
       if (typeof canvas.captureStream === 'function') {

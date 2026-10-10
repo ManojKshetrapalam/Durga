@@ -130,6 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $state['isLive'] = false;
             $state['activeSession'] = null;
             $state['viewerCount'] = 0;
+            // Clean up live frame file to prevent stale playback
+            $frameFile = __DIR__ . '/data_live_frame.jpg';
+            if (file_exists($frameFile)) { @unlink($frameFile); }
+            $metaFile = __DIR__ . '/data_live_frame.json';
+            if (file_exists($metaFile)) { @unlink($metaFile); }
         }
 
         writeState($dataFile, $state);

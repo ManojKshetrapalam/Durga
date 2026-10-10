@@ -665,6 +665,22 @@ test("Cross-Device Server Sync: Ingests server live session and broadcasts STREA
   templeStore.endLiveSession('live-server-synced-123');
 });
 
+test("Real-Time Frame Relay & Endpoint Helper: Formats API URLs and handles frame storage", () => {
+  const statusUrl = streamingService.getApiUrl('api/live-status.php');
+  assert.ok(statusUrl.includes('api/live-status.php'));
+  assert.ok(statusUrl.includes('t='));
+
+  const frameUrl = streamingService.getApiUrl('api/live-frame.php?json=1');
+  assert.ok(frameUrl.includes('api/live-frame.php?json=1'));
+  assert.ok(frameUrl.includes('&t='));
+
+  // Test frame cache getter & stopBroadcastingFrames cleanup
+  streamingService.latestBroadcastFrame = 'data:image/jpeg;base64,sampleFakeFrame';
+  assert.strictEqual(streamingService.getLatestBroadcastFrame(), 'data:image/jpeg;base64,sampleFakeFrame');
+  streamingService.stopBroadcastingFrames();
+  assert.strictEqual(streamingService.getLatestBroadcastFrame(), null);
+});
+
 // --- SUITE 9: CENTRALIZED ANALYTICS & PLATFORM ATTRIBUTION ---
 console.log("\nSuite 9: Centralized Analytics & Platform Attribution");
 

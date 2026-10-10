@@ -3114,7 +3114,17 @@ class TempleAdminController {
   }
 
   _bindDashboardEvents() {
-    // any interactive events
+    // Re-attach active publisher stream to preview monitor in streaming console
+    if (this.currentTab === 'streaming') {
+      const pubStream = streamingService.getActivePublisherStream();
+      const video = document.getElementById('adminCameraPreview');
+      const placeholder = document.getElementById('admin-preview-placeholder');
+      if (video && pubStream) {
+        video.srcObject = pubStream;
+        video.play().catch(() => {});
+        if (placeholder) placeholder.style.display = 'none';
+      }
+    }
   }
 
   _startLiveClock() {

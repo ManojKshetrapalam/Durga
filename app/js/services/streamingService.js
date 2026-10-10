@@ -26,6 +26,10 @@ class StreamingService {
     this.activePublisherStream = null;
     this.activePublisherSession = null;
     this.broadcastChannel = null;
+    this.latestBroadcastFrame = null;
+    this._framePumpInterval = null;
+    this._broadcastVideoEl = null;
+    this._broadcastCanvas = null;
     this._initBroadcastChannel();
     this.listeners = new Set();
     this._initServerSync();
@@ -43,14 +47,20 @@ class StreamingService {
     }
   }
 
-  _getApiUrl() {
+  _getApiUrl(endpoint = 'api/live-status.php') {
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    const querySep = cleanEndpoint.includes('?') ? '&' : '?';
     if (typeof window !== 'undefined' && window.location && window.location.origin) {
       const path = window.location.pathname || '/';
       const lastSlash = path.lastIndexOf('/');
       const base = lastSlash >= 0 ? path.substring(0, lastSlash + 1) : '/';
-      return `${window.location.origin}${base}api/live-status.php?t=${Date.now()}`;
+      return `${window.location.origin}${base}${cleanEndpoint}${querySep}t=${Date.now()}`;
     }
-    return `api/live-status.php?t=${Date.now()}`;
+    return `${cleanEndpoint}${querySep}t=${Date.now()}`;
+  }
+
+  getApiUrl(endpoint = 'api/live-status.php') {
+    return this._getApiUrl(endpoint);
   }
 
   async _syncSessionToServer(action, payload = {}) {
@@ -142,6 +152,9 @@ class StreamingService {
 
   _handleBroadcastMessage(data) {
     if (!data || !data.type) return;
+    if (data.type === 'LIVE_CAMERA_FRAME' && data.payload) {
+      this.latestBroadcastFrame = data.payload.frame;
+    }
     this._notifyListeners(data);
   }
 
@@ -274,6 +287,11 @@ class StreamingService {
       templeStore.saveLiveSession(newSession);
       this._broadcastEvent('STREAM_STARTED', { session: newSession });
 
+      // If local camera stream is running, start broadcasting frames immediately
+      if (this.activePublisherStream) {
+        this.startBroadcastingFrames(this.activePublisherStream);
+      }
+
       // Trigger automatic Web Push notification dispatch
       this._dispatchLiveNotification(newSession, location);
 
@@ -299,6 +317,9 @@ class StreamingService {
 
     session.status = STREAM_STATUS.STOPPING;
     templeStore.saveLiveSession(session);
+
+    // Stop frame broadcasting pump
+    this.stopBroadcastingFrames();
 
     // Stop hardware publisher stream if this instance was broadcasting
     if (this.activePublisherStream) {
@@ -352,6 +373,11 @@ class StreamingService {
     try {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       this.activePublisherStream = stream;
+      // If a broadcast session is currently active, start frame pump immediately
+      const active = templeStore.getActiveLiveSessions();
+      if (active.length > 0) {
+        this.startBroadcastingFrames(stream);
+      }
       return stream;
     } catch (err) {
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
@@ -382,6 +408,93 @@ class StreamingService {
 
   getActivePublisherStream() {
     return this.activePublisherStream;
+  }
+
+  // ==================== REAL-TIME CAMERA FRAME PUMP ====================
+  startBroadcastingFrames(stream) {
+    if (!stream || typeof document === 'undefined') return;
+    this.stopBroadcastingFrames();
+
+    const video = document.createElement('video');
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.setAttribute('playsinline', 'true');
+    video.setAttribute('muted', 'true');
+    video.setAttribute('autoplay', 'true');
+    video.srcObject = stream;
+    video.play().catch(() => {});
+    this._broadcastVideoEl = video;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    this._broadcastCanvas = canvas;
+
+    let frameCount = 0;
+
+    this._framePumpInterval = setInterval(() => {
+      if (!this.activePublisherStream) return;
+      try {
+        // Prefer live preview video in admin console if playing with valid dimensions
+        const adminVideo = document.getElementById('adminCameraPreview');
+        const sourceVideo = (adminVideo && adminVideo.videoWidth > 0) ? adminVideo : video;
+
+        if (sourceVideo && sourceVideo.videoWidth > 0 && sourceVideo.videoHeight > 0) {
+          ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+          const frameData = canvas.toDataURL('image/jpeg', 0.65);
+          this.latestBroadcastFrame = frameData;
+
+          // 1. Instant local broadcast (cross-tab on same machine) via BroadcastChannel
+          this._broadcastEvent('LIVE_CAMERA_FRAME', { frame: frameData });
+
+          // 2. Server frame relay (for remote viewers on mobile / other networks) every 4th frame (~3.5 fps)
+          frameCount++;
+          if (frameCount % 4 === 0) {
+            this._uploadLiveFrameToServer(frameData);
+          }
+        }
+      } catch (e) {
+        // Silent catch for canvas capture
+      }
+    }, 70);
+  }
+
+  async _uploadLiveFrameToServer(frameData) {
+    if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+    const isHttp = typeof window.location === 'object' && 
+                   typeof window.location.href === 'string' && 
+                   (window.location.href.startsWith('http:') || window.location.href.startsWith('https:'));
+    if (!isHttp) return;
+    try {
+      const url = this._getApiUrl('api/live-frame.php');
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frame: frameData })
+      });
+    } catch (e) {
+      // Non-blocking frame upload
+    }
+  }
+
+  stopBroadcastingFrames() {
+    if (this._framePumpInterval) {
+      clearInterval(this._framePumpInterval);
+      this._framePumpInterval = null;
+    }
+    if (this._broadcastVideoEl) {
+      this._broadcastVideoEl.srcObject = null;
+      this._broadcastVideoEl = null;
+    }
+    this.latestBroadcastFrame = null;
+    this._broadcastEvent('LIVE_CAMERA_FRAME', { frame: null });
+  }
+
+  getLatestBroadcastFrame() {
+    return this.latestBroadcastFrame;
   }
 
   // ==================== 4. IP CAMERA PROVIDER ABSTRACTION ====================
