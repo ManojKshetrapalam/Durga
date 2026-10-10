@@ -56,8 +56,43 @@ function writeState($file, $data) {
     return true;
 }
 
+function pruneAndUpdateViewers(&$state) {
+    if (!isset($state['viewers']) || !is_array($state['viewers'])) {
+        $state['viewers'] = [];
+    }
+    $cutoff = time() - 35; // 35 seconds window for active viewers
+    foreach ($state['viewers'] as $vid => $time) {
+        if ($time < $cutoff) {
+            unset($state['viewers'][$vid]);
+        }
+    }
+    $activeCount = count($state['viewers']);
+    $isLive = !empty($state['isLive']);
+    // If broadcast is actively live, ensure at least 1 devotee (broadcaster/initial) is reflected
+    $viewerCount = $isLive ? max(1, $activeCount) : $activeCount;
+    $state['viewerCount'] = $viewerCount;
+
+    if ($isLive && !empty($state['activeSession'])) {
+        $state['activeSession']['currentViewers'] = $viewerCount;
+        $curPeak = intval($state['activeSession']['peakViewers'] ?? 0);
+        $state['activeSession']['peakViewers'] = max($curPeak, $viewerCount);
+    }
+    if ($isLive && !empty($state['activeSessions'])) {
+        foreach ($state['activeSessions'] as &$as) {
+            if ($as['id'] === ($state['activeSession']['id'] ?? '')) {
+                $as['currentViewers'] = $viewerCount;
+                $as['peakViewers'] = max(intval($as['peakViewers'] ?? 0), $viewerCount);
+            }
+        }
+        unset($as);
+    }
+    return $viewerCount;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $state = readState($dataFile);
+    pruneAndUpdateViewers($state);
+    writeState($dataFile, $state);
     echo json_encode([
         'success' => true,
         'isLive' => !empty($state['isLive']),
@@ -101,14 +136,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $session['status'] = 'LIVE';
+        $session['currentViewers'] = 1;
+        $session['peakViewers'] = max(1, intval($session['peakViewers'] ?? 1));
         $state['isLive'] = true;
+        $state['viewers'] = [ 'broadcaster_' . substr(md5($session['id']), 0, 8) => time() ];
         $state['activeSession'] = $session;
         if (!isset($state['activeSessions'])) $state['activeSessions'] = [];
         $state['activeSessions'] = array_values(array_filter($state['activeSessions'], function($s) use ($session) {
             return $s['id'] !== $session['id'];
         }));
         $state['activeSessions'][] = $session;
-        $state['viewerCount'] = max(1, intval($session['currentViewers'] ?? 1));
+        $state['viewerCount'] = 1;
 
         writeState($dataFile, $state);
 
@@ -116,12 +154,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($action === 'VIEWER_PING') {
+        $viewerId = $input['viewerId'] ?? ('vwr_' . substr(md5($_SERVER['REMOTE_ADDR'] ?? 'anon' . time()), 0, 8));
+        if (!isset($state['viewers']) || !is_array($state['viewers'])) {
+            $state['viewers'] = [];
+        }
+        $state['viewers'][$viewerId] = time();
+        $viewerCount = pruneAndUpdateViewers($state);
+        writeState($dataFile, $state);
+        echo json_encode([
+            'success' => true,
+            'viewerCount' => $viewerCount,
+            'peakViewers' => $state['activeSession']['peakViewers'] ?? $viewerCount,
+            'isLive' => !empty($state['isLive'])
+        ]);
+        exit;
+    }
+
+    if ($action === 'VIEWER_LEAVE') {
+        $viewerId = $input['viewerId'] ?? '';
+        if ($viewerId && isset($state['viewers'][$viewerId])) {
+            unset($state['viewers'][$viewerId]);
+        }
+        $viewerCount = pruneAndUpdateViewers($state);
+        writeState($dataFile, $state);
+        echo json_encode([
+            'success' => true,
+            'viewerCount' => $viewerCount
+        ]);
+        exit;
+    }
+
     if ($action === 'STOP') {
         $sessionId = $input['sessionId'] ?? '';
         $state['isLive'] = false;
+        $state['viewers'] = [];
         if (!empty($state['activeSession']) && ($state['activeSession']['id'] === $sessionId || empty($sessionId))) {
             $state['activeSession']['status'] = 'ENDED';
             $state['activeSession']['endedAt'] = date('c');
+            $state['activeSession']['currentViewers'] = 0;
         }
         $state['activeSessions'] = array_values(array_filter($state['activeSessions'] ?? [], function($s) use ($sessionId) {
             return !empty($sessionId) ? $s['id'] !== $sessionId : false;

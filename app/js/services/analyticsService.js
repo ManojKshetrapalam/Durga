@@ -185,16 +185,19 @@ class AnalyticsService {
       viewerSessionId
     });
 
-    // Start recurring heartbeat
+    // Send immediate initial ping to server
+    this._sendHeartbeat();
+
+    // Start recurring heartbeat every 10 seconds
     if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
     this.heartbeatTimer = setInterval(() => {
       this._sendHeartbeat();
-    }, this.HEARTBEAT_INTERVAL_MS);
+    }, 10000);
 
     return viewerRecord;
   }
 
-  _sendHeartbeat() {
+  async _sendHeartbeat() {
     if (!this.activeViewerSession || !this.activeViewerSession.isActive) return;
 
     try {
@@ -209,8 +212,40 @@ class AnalyticsService {
         viewerSessionId: this.activeViewerSession.id,
         durationSeconds: this.activeViewerSession.durationSeconds
       });
+
+      // Send cross-device viewer ping to server
+      if (typeof window !== 'undefined' && typeof fetch === 'undefined') return;
+      if (typeof streamingService !== 'undefined' && streamingService.getApiUrl) {
+        const url = streamingService.getApiUrl('api/live-status.php');
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'VIEWER_PING',
+            sessionId: this.activeViewerSession.liveSessionId,
+            viewerId: this.activeViewerSession.id
+          })
+        });
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && data.success && typeof data.viewerCount === 'number') {
+            templeStore.updateSessionViewerStats(
+              this.activeViewerSession.liveSessionId,
+              data.viewerCount,
+              data.peakViewers || data.viewerCount
+            );
+            if (streamingService._broadcastEvent) {
+              streamingService._broadcastEvent('VIEWER_COUNT_UPDATED', {
+                count: data.viewerCount,
+                peak: data.peakViewers || data.viewerCount,
+                sessionId: this.activeViewerSession.liveSessionId
+              });
+            }
+          }
+        }
+      }
     } catch (e) {
-      console.warn('[AnalyticsService] Heartbeat update error:', e);
+      // Non-blocking telemetry
     }
   }
 
@@ -222,20 +257,36 @@ class AnalyticsService {
 
     if (!this.activeViewerSession) return;
 
+    const oldSession = this.activeViewerSession;
+    this.activeViewerSession = null;
+
     try {
-      const finalSession = templeStore.endViewerSession(this.activeViewerSession.id);
+      const finalSession = templeStore.endViewerSession(oldSession.id);
       this.logEvent(ANALYTICS_EVENT.PLAYBACK_ENDED, {
-        liveSessionId: this.activeViewerSession.liveSessionId,
-        locationId: this.activeViewerSession.locationId,
-        viewerSessionId: this.activeViewerSession.id,
-        durationSeconds: finalSession ? finalSession.durationSeconds : (this.activeViewerSession.durationSeconds || 0),
+        liveSessionId: oldSession.liveSessionId,
+        locationId: oldSession.locationId,
+        viewerSessionId: oldSession.id,
+        durationSeconds: finalSession ? finalSession.durationSeconds : (oldSession.durationSeconds || 0),
         reason
       });
+
+      // Notify server of departure
+      if (typeof streamingService !== 'undefined' && streamingService.getApiUrl) {
+        const url = streamingService.getApiUrl('api/live-status.php');
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'VIEWER_LEAVE',
+            sessionId: oldSession.liveSessionId,
+            viewerId: oldSession.id
+          }),
+          keepalive: true
+        }).catch(() => {});
+      }
     } catch (e) {
       console.warn('[AnalyticsService] End viewer session error:', e);
     }
-
-    this.activeViewerSession = null;
   }
 
   getCurrentViewerSession() {

@@ -1007,6 +1007,21 @@ class TempleStore {
     return session;
   }
 
+  updateSessionViewerStats(sessionId, currentViewers, peakViewers) {
+    if (!sessionId) return null;
+    const sessions = this.getLiveSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (session) {
+      session.currentViewers = Math.max(0, parseInt(currentViewers, 10) || 0);
+      const curPeak = session.peakViewers || 0;
+      session.peakViewers = Math.max(curPeak, parseInt(peakViewers, 10) || 0, session.currentViewers);
+      session.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEYS.LIVE_SESSIONS, JSON.stringify(sessions));
+      return session;
+    }
+    return null;
+  }
+
   // ==================== VIEWER SESSIONS & HEARTBEAT CONCURRENCY ====================
   getViewerSessions() {
     return JSON.parse(localStorage.getItem(STORAGE_KEYS.VIEWER_SESSIONS) || '[]');

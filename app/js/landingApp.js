@@ -145,8 +145,8 @@ class TempleLandingController {
               <span style="background: rgba(229, 57, 53, 0.95); color: #FFF; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px;">
                 ● LIVE
               </span>
-              <span style="background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); color: #FFF; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px;">
-                👁️ ${session ? session.viewerCount : 1} Devotees Watching Live
+              <span id="landingViewerCountBadge" style="background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); color: #FFF; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px;">
+                👁️ ${session ? Math.max(1, session.viewerCount) : 1} Devotees Watching Live
               </span>
             </div>
 
@@ -205,7 +205,27 @@ class TempleLandingController {
       });
     });
 
-    if (isLive) {
+    if (isLive && session) {
+      // Start viewer telemetry heartbeat for landing page
+      analyticsService.startViewerHeartbeat(
+        session.id,
+        session.locationId,
+        session.locationName
+      );
+
+      // Listen for dynamic viewer count changes
+      if (!this._landingCountListenerAttached) {
+        this._landingCountListenerAttached = true;
+        streamingService.subscribe((msg) => {
+          if (msg.type === 'VIEWER_COUNT_UPDATED' && msg.payload) {
+            const badge = document.getElementById('landingViewerCountBadge');
+            if (badge) {
+              badge.textContent = `👁️ ${Math.max(1, msg.payload.count)} Devotees Watching Live`;
+            }
+          }
+        });
+      }
+
       const video = document.getElementById('landingLiveVideo');
       const muteBtn = document.getElementById('landingBtnMute');
       const fsBtn = document.getElementById('landingBtnFullscreen');
@@ -231,6 +251,8 @@ class TempleLandingController {
       } else if (video) {
         this._initViewerLiveFeed(video, selectedLocation);
       }
+    } else {
+      analyticsService.stopViewerHeartbeat('BROADCAST_OFFLINE');
     }
   }
 

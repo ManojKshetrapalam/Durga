@@ -118,10 +118,20 @@ class StreamingService {
         });
         const existing = templeStore.getLiveSessionById(s.id);
         const wasNotLive = !existing || existing.status !== STREAM_STATUS.LIVE;
+        
+        s.currentViewers = Math.max(s.currentViewers || 0, data.viewerCount || 1);
+        s.peakViewers = Math.max(s.peakViewers || 0, (data.session && data.session.peakViewers) || s.currentViewers);
         templeStore.saveLiveSession(s);
+        templeStore.updateSessionViewerStats(s.id, s.currentViewers, s.peakViewers);
+
         if (wasNotLive) {
           this._broadcastEvent('STREAM_STARTED', { session: s });
         }
+        this._broadcastEvent('VIEWER_COUNT_UPDATED', {
+          count: s.currentViewers,
+          peak: s.peakViewers,
+          sessionId: s.id
+        });
       } else {
         // Only end local sessions if WE are not currently the active publisher stream
         if (!this.activePublisherStream && localActive.length > 0) {
@@ -563,7 +573,8 @@ class StreamingService {
     }
 
     const isLive = !!(currentSession && currentSession.status === STREAM_STATUS.LIVE);
-    const viewerCount = currentSession ? templeStore.getActiveViewerCount(currentSession.id) : 0;
+    const viewerCount = currentSession ? Math.max(currentSession.currentViewers || 1, templeStore.getActiveViewerCount(currentSession.id)) : 0;
+    const peakViewers = currentSession ? Math.max(currentSession.peakViewers || 0, viewerCount) : 0;
 
     return {
       isLive,
@@ -577,7 +588,8 @@ class StreamingService {
         status: currentSession.status,
         startedAt: currentSession.startedAt,
         playbackUrl: currentSession.playbackUrl,
-        viewerCount: viewerCount
+        viewerCount: viewerCount,
+        peakViewers: peakViewers
       } : null,
       selectedLocation: selectedLocation ? {
         id: selectedLocation.id,

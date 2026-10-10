@@ -2222,8 +2222,8 @@ class TempleAdminController {
             </div>
             <div style="display: flex; align-items: center; gap: 14px;">
               <div style="text-align: right;">
-                <div style="font-size: 1.3rem; font-weight: 800; color: #E53935;">
-                  👁️ ${templeStore.getActiveViewerCount(activeSession.id)}
+                <div id="adminLiveViewerCount" style="font-size: 1.3rem; font-weight: 800; color: #E53935;">
+                  👁️ ${Math.max(activeSession ? (activeSession.currentViewers || 1) : 0, templeStore.getActiveViewerCount(activeSession ? activeSession.id : ''))}
                 </div>
                 <div style="font-size: 0.75rem; color: #666;">Current Viewers</div>
               </div>
@@ -2386,7 +2386,7 @@ class TempleAdminController {
                   <td><span class="badge">${s.sourceType}</span></td>
                   <td>${new Date(s.startedAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
                   <td>${s.durationSeconds ? Math.round(s.durationSeconds / 60) + ' min' : 'Active'}</td>
-                  <td><strong>${s.peakViewers || 0}</strong></td>
+                  <td><strong id="session-peak-${s.id}">${Math.max(s.peakViewers || 0, s.currentViewers || 0, s.status === 'LIVE' ? 1 : 0)}</strong></td>
                   <td>
                     <span class="badge ${s.status === 'LIVE' ? 'badge-live' : ''}" style="${s.status === 'LIVE' ? 'background: #E53935; color: #FFF;' : ''}">
                       ${s.status}
@@ -3123,6 +3123,37 @@ class TempleAdminController {
         video.srcObject = pubStream;
         video.play().catch(() => {});
         if (placeholder) placeholder.style.display = 'none';
+      }
+
+      // Start periodic sync of live server state and viewer telemetry
+      if (this._adminLiveTelemetryTimer) clearInterval(this._adminLiveTelemetryTimer);
+      this._adminLiveTelemetryTimer = setInterval(async () => {
+        if (this.currentTab !== 'streaming') {
+          clearInterval(this._adminLiveTelemetryTimer);
+          return;
+        }
+        const state = await streamingService.syncLiveStateFromServer();
+        if (state && state.session) {
+          const vCount = Math.max(state.viewerCount || 1, templeStore.getActiveViewerCount(state.session.id));
+          const countEl = document.getElementById('adminLiveViewerCount');
+          if (countEl) countEl.innerHTML = `👁️ ${vCount}`;
+
+          const peakEl = document.getElementById(`session-peak-${state.session.id}`);
+          if (peakEl) peakEl.textContent = Math.max(state.session.peakViewers || 0, vCount);
+        }
+      }, 3500);
+
+      // Listen to real-time viewer count broadcast events
+      if (!this._adminLiveCountSubscribed) {
+        this._adminLiveCountSubscribed = true;
+        streamingService.subscribe((msg) => {
+          if (msg.type === 'VIEWER_COUNT_UPDATED' && msg.payload) {
+            const countEl = document.getElementById('adminLiveViewerCount');
+            if (countEl) countEl.innerHTML = `👁️ ${Math.max(1, msg.payload.count)}`;
+            const peakEl = document.getElementById(`session-peak-${msg.payload.sessionId}`);
+            if (peakEl) peakEl.textContent = Math.max(1, msg.payload.peak || msg.payload.count);
+          }
+        });
       }
     }
   }

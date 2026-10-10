@@ -297,6 +297,16 @@ export function initLiveDarshanView(preferredLocationId = null) {
       });
     }
 
+    // Subscribe to real-time viewer count updates
+    streamingService.subscribe((msg) => {
+      if (msg.type === 'VIEWER_COUNT_UPDATED' && msg.payload) {
+        const numEl = document.getElementById('liveViewerCountNumber');
+        if (numEl) {
+          numEl.textContent = Math.max(1, msg.payload.count);
+        }
+      }
+    });
+
     // If local publisher stream is running in this browser window, feed directly
     const publisherStream = streamingService.getActivePublisherStream();
     if (publisherStream && video) {

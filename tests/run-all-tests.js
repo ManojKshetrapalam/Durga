@@ -725,6 +725,32 @@ test("Viewer Concurrency & Heartbeat Loop: Tracks active watch duration and auto
   assert.strictEqual(activeCount, 0, "Active viewer count decreases to 0 when finalized");
 });
 
+test("Cross-Device Viewer Stats: Updates active and peak viewers on live session", () => {
+  const dummySession = {
+    id: 'live-test-viewers-99',
+    locationId: 'loc-garbha-gudi',
+    status: STREAM_STATUS.LIVE,
+    currentViewers: 0,
+    peakViewers: 0
+  };
+  templeStore.saveLiveSession(dummySession);
+
+  // Update with 12 viewers
+  templeStore.updateSessionViewerStats('live-test-viewers-99', 12, 12);
+  let updated = templeStore.getLiveSessionById('live-test-viewers-99');
+  assert.strictEqual(updated.currentViewers, 12);
+  assert.strictEqual(updated.peakViewers, 12);
+
+  // Drop to 8 viewers, peak must remain 12
+  templeStore.updateSessionViewerStats('live-test-viewers-99', 8, 8);
+  updated = templeStore.getLiveSessionById('live-test-viewers-99');
+  assert.strictEqual(updated.currentViewers, 8);
+  assert.strictEqual(updated.peakViewers, 12, "Peak viewers remains at high-water mark");
+
+  // Clean up
+  templeStore.endLiveSession('live-test-viewers-99');
+});
+
 test("Metrics Summary: Accurately calculates page views, platform ratio, and live watch minutes", () => {
   analyticsService.trackPageView('Home');
   analyticsService.trackPageView('Poojas');

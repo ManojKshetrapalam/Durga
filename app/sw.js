@@ -8,7 +8,7 @@
  * excluded from offline caching to ensure zero stale live broadcast playback.
  */
 
-const CACHE_NAME = 'durga-mandapa-v16';
+const CACHE_NAME = 'durga-mandapa-v17';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
