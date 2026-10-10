@@ -65,6 +65,8 @@ class TempleLandingController {
         }
       });
     }
+  }
+
   // Unified Live Streaming Section
   _renderLiveStreamingSection(preferredLocId = null) {
     const container = document.getElementById('landing-live-container');
