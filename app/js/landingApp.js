@@ -8,16 +8,30 @@ import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
 import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_11';
 import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
 import { templeStore } from './services/store.js?v=20261007_11';
+import { streamingService } from './services/streamingService.js';
+import { analyticsService } from './services/analyticsService.js';
+import { pushNotificationService } from './services/pushNotificationService.js';
 
 class TempleLandingController {
   constructor() {
     this.currentCategory = 'all';
     this.audioElement = null;
     this.isPlayingAudio = false;
+    this.selectedLiveLocationId = null;
+    this._initLiveStreamSubscription();
+  }
+
+  _initLiveStreamSubscription() {
+    streamingService.subscribe((msg) => {
+      if (['STREAM_STARTED', 'STREAM_ENDED', 'LOCATION_UPDATED'].includes(msg.type)) {
+        this._renderLiveStreamingSection(this.selectedLiveLocationId);
+      }
+    });
   }
 
   init() {
     this._initAudioPlayer();
+    this._renderLiveStreamingSection();
     this._renderLivePanchangaStrip();
     this._renderSevasGrid();
     this._renderGalleryGrid();
@@ -50,6 +64,163 @@ class TempleLandingController {
           });
         }
       });
+    }
+  // Unified Live Streaming Section
+  _renderLiveStreamingSection(preferredLocId = null) {
+    const container = document.getElementById('landing-live-container');
+    if (!container) return;
+
+    if (preferredLocId) {
+      this.selectedLiveLocationId = preferredLocId;
+    }
+
+    const state = streamingService.getPublicLiveDarshanState(this.selectedLiveLocationId);
+    const isLive = state.isLive;
+    const session = state.session;
+    const selectedLocation = state.selectedLocation;
+    const locations = state.availableLocations;
+
+    // Concurrency heartbeat
+    if (isLive && session) {
+      analyticsService.startViewerHeartbeat(session.id, session.locationId, session.locationName);
+    } else {
+      analyticsService.stopViewerHeartbeat('STREAM_OFFLINE');
+    }
+
+    container.innerHTML = `
+      <!-- Location Switcher Pills -->
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+        ${locations.map(loc => {
+          const isSelected = selectedLocation && selectedLocation.id === loc.id;
+          return `
+            <button 
+              class="landing-location-btn ${isSelected ? 'active' : ''}" 
+              data-loc-id="${loc.id}"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: ${isSelected ? 'var(--color-primary)' : '#FFFDF8'};
+                color: ${isSelected ? '#FFFDF8' : 'var(--color-text-main)'};
+                border: 1px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border)'};
+                border-radius: 20px;
+                padding: 7px 16px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+                transition: all 0.2s ease;
+              "
+            >
+              ${loc.isCurrentlyLive ? `
+                <span style="width: 7px; height: 7px; background: #E53935; border-radius: 50%; display: inline-block;"></span>
+              ` : ''}
+              <span>${loc.name}</span>
+            </button>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Live Player Card -->
+      <div class="card" style="padding: 0; overflow: hidden; border: 1.5px solid var(--color-border); box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #000; border-radius: 16px;">
+        <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #1C1917; display: flex; align-items: center; justify-content: center;">
+          ${isLive ? `
+            <video 
+              id="landingLiveVideo" 
+              autoplay 
+              playsinline 
+              muted 
+              style="width: 100%; height: 100%; object-fit: cover; background: #000;"
+              poster="./assets/images/navaratri-invitation.jpg"
+            ></video>
+
+            <div style="position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 8px; z-index: 5;">
+              <span style="background: rgba(229, 57, 53, 0.95); color: #FFF; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px;">
+                ● LIVE
+              </span>
+              <span style="background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); color: #FFF; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px;">
+                👁️ ${session ? session.viewerCount : 1} Devotees Watching Live
+              </span>
+            </div>
+
+            <div style="position: absolute; bottom: 14px; right: 14px; display: flex; gap: 8px; z-index: 5;">
+              <button id="landingBtnMute" style="background: rgba(0,0,0,0.65); color: #FFF; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;">
+                🔊
+              </button>
+              <button id="landingBtnFullscreen" style="background: rgba(0,0,0,0.65); color: #FFF; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;">
+                ⛶
+              </button>
+            </div>
+          ` : `
+            <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; background: linear-gradient(180deg, #2A1719 0%, #150A0B 100%);">
+              <div style="font-size: 3rem; margin-bottom: 10px; filter: drop-shadow(0 2px 10px rgba(197, 155, 39, 0.5));">
+                🪔
+              </div>
+              <h3 style="font-family: var(--font-serif); color: #FAF7F2; font-size: 1.4rem; margin-bottom: 6px;">
+                ${selectedLocation ? selectedLocation.name : 'Sanctum'} Broadcast Offline
+              </h3>
+              <p style="color: #EADFCD; font-size: 0.95rem; max-width: 480px; margin: 0 auto 16px; line-height: 1.4; opacity: 0.9;">
+                The sanctum is currently open for in-person devotees in Chandra Layout, Bengaluru. Next scheduled live broadcast starts during temple aarti.
+              </p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <a href="app.html#live" class="btn btn-primary btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>📱</span> Open in Devotee App
+                </a>
+              </div>
+            </div>
+          `}
+        </div>
+
+        <div style="padding: 16px 20px; background: #FFFDF8; border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h4 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 2px;">
+              ${selectedLocation ? selectedLocation.name : 'Sri Durga Devi Garbha Gudi'}
+            </h4>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); margin: 0;">
+              ${selectedLocation && selectedLocation.description ? selectedLocation.description : 'Main sanctum of Goddess Durga Parameshwari.'}
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="app.html#live" class="btn btn-secondary btn-sm" style="text-decoration: none;">
+              Open Full Devotee Experience 🪔
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Attach pill events
+    container.querySelectorAll('.landing-location-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-loc-id');
+        this.selectedLiveLocationId = targetId;
+        this._renderLiveStreamingSection(targetId);
+      });
+    });
+
+    if (isLive) {
+      const video = document.getElementById('landingLiveVideo');
+      const muteBtn = document.getElementById('landingBtnMute');
+      const fsBtn = document.getElementById('landingBtnFullscreen');
+
+      if (muteBtn && video) {
+        muteBtn.addEventListener('click', () => {
+          video.muted = !video.muted;
+          muteBtn.textContent = video.muted ? '🔇' : '🔊';
+        });
+      }
+
+      if (fsBtn && video) {
+        fsBtn.addEventListener('click', () => {
+          if (video.requestFullscreen) video.requestFullscreen();
+          else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
+        });
+      }
+
+      const publisherStream = streamingService.getActivePublisherStream();
+      if (publisherStream && video) {
+        video.srcObject = publisherStream;
+      }
     }
   }
 

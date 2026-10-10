@@ -15,7 +15,15 @@ const STORAGE_KEYS = {
   CONTACT_CONFIG: 'sdd_contact_config_v1',
   PRIESTS: 'sdd_priests_v1',
   GALLERY: 'sdd_gallery_v1',
-  NOTIFICATIONS: 'sdd_special_notifications_v1'
+  NOTIFICATIONS: 'sdd_special_notifications_v1',
+  STREAMING_LOCATIONS: 'sdd_streaming_locations_v1',
+  LIVE_SESSIONS: 'sdd_live_sessions_v1',
+  VIEWER_SESSIONS: 'sdd_viewer_sessions_v1',
+  ANALYTICS_EVENTS: 'sdd_analytics_events_v1',
+  ANALYTICS_SESSIONS: 'sdd_analytics_sessions_v1',
+  PUSH_SUBSCRIPTIONS: 'sdd_push_subscriptions_v1',
+  NOTIFICATION_HISTORY: 'sdd_notification_history_v1',
+  STREAM_SETTINGS: 'sdd_stream_settings_v1'
 };
 
 // Initial Seed Data
@@ -371,6 +379,165 @@ const DEFAULT_BOOKINGS = [
   }
 ];
 
+export const DEFAULT_STREAMING_LOCATIONS = [
+  {
+    id: "loc-garbha-gudi",
+    name: "Main Garbha Gudi (Sanctum)",
+    kannadaName: "ಮುಖ್ಯ ಗರ್ಭಗುಡಿ (ಶ್ರೀ ದುರ್ಗಾ ಸನ್ನಿಧಿ)",
+    description: "Sacred inner sanctum darshan of Goddess Sri Durga Parameshwari, Suprabhata and Maha Mangalarathi.",
+    thumbnail: "assets/images/3.jpg",
+    displayOrder: 1,
+    status: "ACTIVE",
+    supportedSources: ["MOBILE", "IP_CAMERA"],
+    selectedSource: "MOBILE",
+    currentSessionId: null,
+    ipCameraConfig: {
+      name: "Sanctum High-Def Fixed PTZ",
+      streamUrl: "rtsp://camera-sanctum.temple.internal:554/live/stream1",
+      protocol: "RTSP",
+      status: "CONFIGURED",
+      lastTestedAt: null
+    }
+  },
+  {
+    id: "loc-yagashala",
+    name: "Durga Yagashala & Homa Kunda",
+    kannadaName: "ಶ್ರೀ ದುರ್ಗಾ ಯಾಗಶಾಲೆ & ಹೋಮಕುಂಡ",
+    description: "Sacred fire oblations, Friday Durga Homa, Chandi Parayana, and Navagraha Homas.",
+    thumbnail: "assets/images/5.jpg",
+    displayOrder: 2,
+    status: "ACTIVE",
+    supportedSources: ["MOBILE", "IP_CAMERA"],
+    selectedSource: "MOBILE",
+    currentSessionId: null,
+    ipCameraConfig: {
+      name: "Yagashala Wide Lens",
+      streamUrl: "rtsp://camera-yagashala.temple.internal:554/live/stream1",
+      protocol: "RTSP",
+      status: "CONFIGURED",
+      lastTestedAt: null
+    }
+  },
+  {
+    id: "loc-prakaara",
+    name: "Raja Gopuram & North Prakaara",
+    kannadaName: "ರಾಜಗೋಪುರ & ಉತ್ತರ ಪ್ರಾಕಾರ",
+    description: "Towering Raja Gopuram entrance, pradakshina prakaara, and vehicle blessings.",
+    thumbnail: "assets/images/1.jpg",
+    displayOrder: 3,
+    status: "ACTIVE",
+    supportedSources: ["MOBILE", "IP_CAMERA"],
+    selectedSource: "MOBILE",
+    currentSessionId: null,
+    ipCameraConfig: {
+      name: "Prakaara Entrance Cam",
+      streamUrl: "rtsp://camera-prakaara.temple.internal:554/live/stream1",
+      protocol: "RTSP",
+      status: "CONFIGURED",
+      lastTestedAt: null
+    }
+  },
+  {
+    id: "loc-utsava-mantapa",
+    name: "Utsava Mantapa & Rathotsava",
+    kannadaName: "ಉತ್ಸವ ಮಂಟಪ & ರಥೋತ್ಸವ ಬೀದಿ",
+    description: "Chariot procession, Bannichheda, Deepotsava evening lights, and special festival celebrations.",
+    thumbnail: "assets/images/2.jpg",
+    displayOrder: 4,
+    status: "ACTIVE",
+    supportedSources: ["MOBILE"],
+    selectedSource: "MOBILE",
+    currentSessionId: null,
+    ipCameraConfig: null
+  },
+  {
+    id: "loc-auditorium",
+    name: "Temple Cultural Auditorium",
+    kannadaName: "ದೇವಾಲಯದ ಸಾಂಸ್ಕೃತಿಕ ಸಭಾಂಗಣ",
+    description: "Devotional concerts, Yakshagana, Harikathe, and Pravachana spiritual discourses.",
+    thumbnail: "assets/images/4.jpg",
+    displayOrder: 5,
+    status: "ACTIVE",
+    supportedSources: ["MOBILE", "IP_CAMERA"],
+    selectedSource: "MOBILE",
+    currentSessionId: null,
+    ipCameraConfig: {
+      name: "Auditorium Stage Camera",
+      streamUrl: "rtsp://camera-auditorium.temple.internal:554/live/stream1",
+      protocol: "RTSP",
+      status: "CONFIGURED",
+      lastTestedAt: null
+    }
+  }
+];
+
+export const DEFAULT_STREAM_SETTINGS = {
+  autoNotifyLive: true,
+  webrtcGatewayUrl: "",
+  hlsFallbackUrl: "",
+  lowLatencyMode: true,
+  maxConcurrentViewersEstimate: 5000,
+  heartbeatIntervalSeconds: 15,
+  viewerSessionTimeoutSeconds: 45
+};
+
+export const DEFAULT_LIVE_SESSIONS = [
+  {
+    id: "sess-archived-1",
+    locationId: "loc-garbha-gudi",
+    locationName: "Main Garbha Gudi (Sanctum)",
+    sourceType: "MOBILE",
+    title: "Friday Special Maha Mangalarathi & Kumkumarchana",
+    description: "Sacred darshan of Sri Durga Parameshwari Ammanavaru with golden crown alankara.",
+    status: "ENDED",
+    startedBy: "Sri S. Ramesh (Chief Trustee)",
+    startedAt: "2026-10-09T09:30:00.000Z",
+    endedAt: "2026-10-09T10:45:00.000Z",
+    durationSeconds: 4500,
+    playbackUrl: "",
+    currentViewers: 0,
+    peakViewers: 428,
+    totalSessions: 1820,
+    totalWatchTimeSeconds: 412500,
+    errors: []
+  }
+];
+
+export const DEFAULT_PUSH_SUBSCRIPTIONS = [
+  {
+    endpoint: "https://fcm.googleapis.com/fcm/send/demo-sub-1",
+    keys: { p256dh: "BMc_demo_key_1", auth: "auth_demo_1" },
+    platform: "PWA",
+    preferences: { liveDarshan: true, events: true, announcements: true },
+    createdAt: "2026-10-01T12:00:00.000Z",
+    lastActiveAt: "2026-10-10T08:00:00.000Z"
+  },
+  {
+    endpoint: "https://fcm.googleapis.com/fcm/send/demo-sub-2",
+    keys: { p256dh: "BMc_demo_key_2", auth: "auth_demo_2" },
+    platform: "BROWSER",
+    preferences: { liveDarshan: true, events: false, announcements: true },
+    createdAt: "2026-10-05T14:30:00.000Z",
+    lastActiveAt: "2026-10-09T18:00:00.000Z"
+  }
+];
+
+export const DEFAULT_NOTIFICATION_HISTORY = [
+  {
+    id: "notif-hist-1",
+    title: "Live Darshan is Now Live",
+    kannadaTitle: "ನೇರ ದರ್ಶನ ಪ್ರಾರಂಭವಾಗಿದೆ",
+    body: "Sri Durga Devi Temple is live now. Join the Darshan from Main Garbha Gudi.",
+    targetUrl: "#live?loc=loc-garbha-gudi",
+    type: "LIVE_DARSHAN",
+    triggeredBy: "SYSTEM_BROADCAST",
+    sentCount: 142,
+    deliveredCount: 139,
+    openedCount: 88,
+    timestamp: "2026-10-09T09:30:05.000Z"
+  }
+];
+
 class TempleStore {
   constructor() {
     this._initStore();
@@ -394,6 +561,30 @@ class TempleStore {
     }
     if (!localStorage.getItem(STORAGE_KEYS.PREFERENCES)) {
       localStorage.setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify({ lang: 'en', pwaInstalled: false }));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.STREAMING_LOCATIONS)) {
+      localStorage.setItem(STORAGE_KEYS.STREAMING_LOCATIONS, JSON.stringify(DEFAULT_STREAMING_LOCATIONS));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.LIVE_SESSIONS)) {
+      localStorage.setItem(STORAGE_KEYS.LIVE_SESSIONS, JSON.stringify(DEFAULT_LIVE_SESSIONS));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.STREAM_SETTINGS)) {
+      localStorage.setItem(STORAGE_KEYS.STREAM_SETTINGS, JSON.stringify(DEFAULT_STREAM_SETTINGS));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.PUSH_SUBSCRIPTIONS)) {
+      localStorage.setItem(STORAGE_KEYS.PUSH_SUBSCRIPTIONS, JSON.stringify(DEFAULT_PUSH_SUBSCRIPTIONS));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.NOTIFICATION_HISTORY)) {
+      localStorage.setItem(STORAGE_KEYS.NOTIFICATION_HISTORY, JSON.stringify(DEFAULT_NOTIFICATION_HISTORY));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.VIEWER_SESSIONS)) {
+      localStorage.setItem(STORAGE_KEYS.VIEWER_SESSIONS, JSON.stringify([]));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.ANALYTICS_EVENTS)) {
+      localStorage.setItem(STORAGE_KEYS.ANALYTICS_EVENTS, JSON.stringify([]));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.ANALYTICS_SESSIONS)) {
+      localStorage.setItem(STORAGE_KEYS.ANALYTICS_SESSIONS, JSON.stringify([]));
     }
   }
 
@@ -664,6 +855,345 @@ class TempleStore {
       localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
     }
     return notifications;
+  }
+
+  // ==================== STREAMING LOCATIONS MANAGEMENT ====================
+  getStreamingLocations() {
+    const locs = JSON.parse(localStorage.getItem(STORAGE_KEYS.STREAMING_LOCATIONS) || JSON.stringify(DEFAULT_STREAMING_LOCATIONS));
+    return locs.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  }
+
+  getLocationById(id) {
+    return this.getStreamingLocations().find(l => l.id === id);
+  }
+
+  saveLocation(locationData) {
+    const locs = this.getStreamingLocations();
+    const existingIndex = locs.findIndex(l => l.id === locationData.id);
+    if (existingIndex >= 0) {
+      locs[existingIndex] = { ...locs[existingIndex], ...locationData, updatedAt: new Date().toISOString() };
+    } else {
+      if (!locationData.id) {
+        locationData.id = 'loc-' + Date.now();
+      }
+      locationData.displayOrder = locationData.displayOrder || (locs.length + 1);
+      locationData.status = locationData.status || 'ACTIVE';
+      locationData.createdAt = new Date().toISOString();
+      locs.push(locationData);
+    }
+    localStorage.setItem(STORAGE_KEYS.STREAMING_LOCATIONS, JSON.stringify(locs));
+    return locs;
+  }
+
+  deleteLocation(id) {
+    let locs = this.getStreamingLocations();
+    locs = locs.filter(l => l.id !== id);
+    localStorage.setItem(STORAGE_KEYS.STREAMING_LOCATIONS, JSON.stringify(locs));
+    return locs;
+  }
+
+  toggleLocationStatus(id) {
+    const locs = this.getStreamingLocations();
+    const loc = locs.find(l => l.id === id);
+    if (loc) {
+      loc.status = loc.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      loc.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEYS.STREAMING_LOCATIONS, JSON.stringify(locs));
+    }
+    return locs;
+  }
+
+  reorderLocations(orderedIds) {
+    const locs = this.getStreamingLocations();
+    orderedIds.forEach((id, index) => {
+      const loc = locs.find(l => l.id === id);
+      if (loc) loc.displayOrder = index + 1;
+    });
+    localStorage.setItem(STORAGE_KEYS.STREAMING_LOCATIONS, JSON.stringify(locs));
+    return this.getStreamingLocations();
+  }
+
+  // ==================== LIVE BROADCAST SESSIONS & LIFECYCLE ====================
+  getLiveSessions() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.LIVE_SESSIONS) || JSON.stringify(DEFAULT_LIVE_SESSIONS));
+  }
+
+  getLiveSessionById(id) {
+    return this.getLiveSessions().find(s => s.id === id);
+  }
+
+  getActiveLiveSessionByLocation(locationId) {
+    return this.getLiveSessions().find(s => 
+      s.locationId === locationId && 
+      (s.status === 'LIVE' || s.status === 'STARTING' || s.status === 'RECONNECTING')
+    );
+  }
+
+  getActiveLiveSessions() {
+    return this.getLiveSessions().filter(s => 
+      s.status === 'LIVE' || s.status === 'STARTING' || s.status === 'RECONNECTING'
+    );
+  }
+
+  saveLiveSession(sessionData) {
+    const sessions = this.getLiveSessions();
+    const isActiveStatus = sessionData.status === 'LIVE' || sessionData.status === 'STARTING' || sessionData.status === 'RECONNECTING';
+
+    // Strict Mutex: Prevent duplicate concurrent active sessions for the same location
+    if (isActiveStatus && sessionData.locationId) {
+      const conflict = sessions.find(s => 
+        s.locationId === sessionData.locationId && 
+        s.id !== sessionData.id && 
+        (s.status === 'LIVE' || s.status === 'STARTING' || s.status === 'RECONNECTING')
+      );
+      if (conflict) {
+        throw new Error(`Location mutex violation: "${conflict.locationName}" already has an active broadcast session (${conflict.id}). Terminate previous session before publishing.`);
+      }
+    }
+
+    const existingIndex = sessions.findIndex(s => s.id === sessionData.id);
+    if (existingIndex >= 0) {
+      sessions[existingIndex] = { ...sessions[existingIndex], ...sessionData, updatedAt: new Date().toISOString() };
+    } else {
+      if (!sessionData.id) {
+        sessionData.id = 'sess-' + Date.now();
+      }
+      sessionData.createdAt = new Date().toISOString();
+      sessions.unshift(sessionData);
+    }
+
+    localStorage.setItem(STORAGE_KEYS.LIVE_SESSIONS, JSON.stringify(sessions));
+
+    // Update location currentSessionId
+    if (sessionData.locationId) {
+      const locs = this.getStreamingLocations();
+      const loc = locs.find(l => l.id === sessionData.locationId);
+      if (loc) {
+        loc.currentSessionId = isActiveStatus ? sessionData.id : null;
+        loc.currentStatus = sessionData.status;
+        localStorage.setItem(STORAGE_KEYS.STREAMING_LOCATIONS, JSON.stringify(locs));
+      }
+    }
+
+    return sessionData;
+  }
+
+  endLiveSession(sessionId, finalStats = {}) {
+    const sessions = this.getLiveSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (session) {
+      session.status = 'ENDED';
+      session.endedAt = session.endedAt || new Date().toISOString();
+      if (session.startedAt) {
+        const startMs = new Date(session.startedAt).getTime();
+        const endMs = new Date(session.endedAt).getTime();
+        session.durationSeconds = Math.max(0, Math.round((endMs - startMs) / 1000));
+      }
+      Object.assign(session, finalStats);
+      session.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEYS.LIVE_SESSIONS, JSON.stringify(sessions));
+
+      // Clear location active session
+      if (session.locationId) {
+        const locs = this.getStreamingLocations();
+        const loc = locs.find(l => l.id === session.locationId);
+        if (loc && loc.currentSessionId === sessionId) {
+          loc.currentSessionId = null;
+          loc.currentStatus = 'OFFLINE';
+          localStorage.setItem(STORAGE_KEYS.STREAMING_LOCATIONS, JSON.stringify(locs));
+        }
+      }
+    }
+    return session;
+  }
+
+  // ==================== VIEWER SESSIONS & HEARTBEAT CONCURRENCY ====================
+  getViewerSessions() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.VIEWER_SESSIONS) || '[]');
+  }
+
+  saveViewerSession(session) {
+    const sessions = this.getViewerSessions();
+    const existingIndex = sessions.findIndex(s => s.id === session.id);
+    if (existingIndex >= 0) {
+      sessions[existingIndex] = { ...sessions[existingIndex], ...session, lastHeartbeatAt: new Date().toISOString() };
+    } else {
+      session.startedAt = session.startedAt || new Date().toISOString();
+      session.lastHeartbeatAt = new Date().toISOString();
+      session.durationSeconds = session.durationSeconds || 0;
+      session.isActive = true;
+      sessions.push(session);
+    }
+    // Cap memory footprint to 1,000 recent viewer sessions
+    if (sessions.length > 1000) sessions.splice(0, sessions.length - 1000);
+    localStorage.setItem(STORAGE_KEYS.VIEWER_SESSIONS, JSON.stringify(sessions));
+    return session;
+  }
+
+  updateViewerHeartbeat(sessionId) {
+    const sessions = this.getViewerSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (session && session.isActive) {
+      const now = Date.now();
+      const last = new Date(session.lastHeartbeatAt || session.startedAt).getTime();
+      const deltaSec = Math.max(0, Math.round((now - last) / 1000));
+      session.durationSeconds = (session.durationSeconds || 0) + deltaSec;
+      session.lastHeartbeatAt = new Date(now).toISOString();
+      localStorage.setItem(STORAGE_KEYS.VIEWER_SESSIONS, JSON.stringify(sessions));
+    }
+    return session;
+  }
+
+  endViewerSession(sessionId) {
+    const sessions = this.getViewerSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (session) {
+      session.isActive = false;
+      session.endedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEYS.VIEWER_SESSIONS, JSON.stringify(sessions));
+    }
+    return session;
+  }
+
+  expireInactiveViewerSessions(timeoutSeconds = 45) {
+    const sessions = this.getViewerSessions();
+    const threshold = Date.now() - (timeoutSeconds * 1000);
+    let changed = false;
+
+    sessions.forEach(s => {
+      if (s.isActive) {
+        const lastHb = new Date(s.lastHeartbeatAt || s.startedAt).getTime();
+        if (lastHb < threshold) {
+          s.isActive = false;
+          s.endedAt = new Date(lastHb + (timeoutSeconds * 1000)).toISOString();
+          changed = true;
+        }
+      }
+    });
+
+    if (changed) {
+      localStorage.setItem(STORAGE_KEYS.VIEWER_SESSIONS, JSON.stringify(sessions));
+    }
+    return sessions;
+  }
+
+  getActiveViewerCount(liveSessionId) {
+    this.expireInactiveViewerSessions(45);
+    const sessions = this.getViewerSessions();
+    return sessions.filter(s => s.liveSessionId === liveSessionId && s.isActive).length;
+  }
+
+  // ==================== CENTRALIZED ANALYTICS STORAGE ====================
+  getAnalyticsEvents() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ANALYTICS_EVENTS) || '[]');
+  }
+
+  logAnalyticsEvent(eventData) {
+    const events = this.getAnalyticsEvents();
+    const eventRecord = {
+      id: 'evt-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      ...eventData,
+      timestamp: eventData.timestamp || new Date().toISOString()
+    };
+    events.push(eventRecord);
+    // ponytail: cap lightweight local queue to last 2,500 events to prevent quota overflow
+    if (events.length > 2500) {
+      events.splice(0, events.length - 2500);
+    }
+    localStorage.setItem(STORAGE_KEYS.ANALYTICS_EVENTS, JSON.stringify(events));
+    return eventRecord;
+  }
+
+  getAnalyticsSessions() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.ANALYTICS_SESSIONS) || '[]');
+  }
+
+  recordAnalyticsSession(session) {
+    const sessions = this.getAnalyticsSessions();
+    const existingIndex = sessions.findIndex(s => s.id === session.id);
+    if (existingIndex >= 0) {
+      sessions[existingIndex] = { ...sessions[existingIndex], ...session, lastActiveAt: new Date().toISOString() };
+    } else {
+      session.startedAt = session.startedAt || new Date().toISOString();
+      session.lastActiveAt = new Date().toISOString();
+      sessions.push(session);
+    }
+    if (sessions.length > 1000) sessions.splice(0, sessions.length - 1000);
+    localStorage.setItem(STORAGE_KEYS.ANALYTICS_SESSIONS, JSON.stringify(sessions));
+    return session;
+  }
+
+  // ==================== WEB PUSH SUBSCRIPTIONS & HISTORY ====================
+  getPushSubscriptions() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PUSH_SUBSCRIPTIONS) || JSON.stringify(DEFAULT_PUSH_SUBSCRIPTIONS));
+  }
+
+  savePushSubscription(subscription) {
+    const subs = this.getPushSubscriptions();
+    const existingIndex = subs.findIndex(s => s.endpoint === subscription.endpoint);
+    if (existingIndex >= 0) {
+      subs[existingIndex] = {
+        ...subs[existingIndex],
+        ...subscription,
+        lastActiveAt: new Date().toISOString()
+      };
+    } else {
+      subs.push({
+        ...subscription,
+        preferences: subscription.preferences || { liveDarshan: true, events: true, announcements: true },
+        createdAt: new Date().toISOString(),
+        lastActiveAt: new Date().toISOString()
+      });
+    }
+    localStorage.setItem(STORAGE_KEYS.PUSH_SUBSCRIPTIONS, JSON.stringify(subs));
+    return subs;
+  }
+
+  deletePushSubscription(endpoint) {
+    let subs = this.getPushSubscriptions();
+    subs = subs.filter(s => s.endpoint !== endpoint);
+    localStorage.setItem(STORAGE_KEYS.PUSH_SUBSCRIPTIONS, JSON.stringify(subs));
+    return subs;
+  }
+
+  updatePushPreferences(endpoint, preferences) {
+    const subs = this.getPushSubscriptions();
+    const sub = subs.find(s => s.endpoint === endpoint);
+    if (sub) {
+      sub.preferences = { ...sub.preferences, ...preferences };
+      sub.lastActiveAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEYS.PUSH_SUBSCRIPTIONS, JSON.stringify(subs));
+    }
+    return sub;
+  }
+
+  getNotificationHistory() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATION_HISTORY) || JSON.stringify(DEFAULT_NOTIFICATION_HISTORY));
+  }
+
+  logNotificationDispatch(record) {
+    const history = this.getNotificationHistory();
+    const item = {
+      id: record.id || ('notif-disp-' + Date.now()),
+      ...record,
+      timestamp: record.timestamp || new Date().toISOString()
+    };
+    history.unshift(item);
+    if (history.length > 200) history.pop();
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATION_HISTORY, JSON.stringify(history));
+    return item;
+  }
+
+  // ==================== STREAM SETTINGS ====================
+  getStreamSettings() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.STREAM_SETTINGS) || JSON.stringify(DEFAULT_STREAM_SETTINGS));
+  }
+
+  updateStreamSettings(settings) {
+    const current = this.getStreamSettings();
+    const updated = { ...current, ...settings, updatedAt: new Date().toISOString() };
+    localStorage.setItem(STORAGE_KEYS.STREAM_SETTINGS, JSON.stringify(updated));
+    return updated;
   }
 }
 

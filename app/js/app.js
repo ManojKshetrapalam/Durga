@@ -14,10 +14,13 @@ import { renderBookingView } from './views/bookingView.js?v=20261007_11';
 import { renderQrLandingView } from './views/qrLandingView.js?v=20261007_11';
 import { renderAdminView } from './views/adminView.js?v=20261007_11';
 import { renderPanchangaMonthModal } from './views/panchangaMonthModal.js?v=20261007_12';
+import { renderLiveDarshanView, initLiveDarshanView, cleanupLiveDarshanView } from './views/liveDarshanView.js';
 
 import { templeStore } from './services/store.js?v=20261007_11';
 import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
 import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
+import { analyticsService } from './services/analyticsService.js';
+import { pushNotificationService } from './services/pushNotificationService.js';
 
 class DigitalMandapaApp {
   constructor() {
@@ -53,7 +56,7 @@ class DigitalMandapaApp {
       this.navigate('qr');
     } else {
       const hash = window.location.hash.replace('#', '');
-      if (['home', 'poojas', 'calendar', 'panchanga', 'admin', 'qr'].includes(hash)) {
+      if (['home', 'poojas', 'calendar', 'panchanga', 'admin', 'qr', 'live'].includes(hash)) {
         this.navigate(hash);
       } else {
         this.navigate('home');
@@ -65,12 +68,17 @@ class DigitalMandapaApp {
   }
 
   navigate(viewName, params = {}) {
+    if (this.currentView === 'live' && viewName !== 'live') {
+      cleanupLiveDarshanView();
+    }
+
     this.currentView = viewName;
     Object.assign(this.viewState, params);
 
     // Map view to bottom navigation tab
     const tabMap = {
       'home': 'home',
+      'live': 'home',
       'poojas': 'poojas',
       'pooja-detail': 'poojas',
       'calendar': 'calendar',
@@ -84,6 +92,13 @@ class DigitalMandapaApp {
     window.location.hash = viewName;
     this.render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Track analytics page view
+    try {
+      analyticsService.trackPageView(viewName);
+    } catch (e) {
+      // Non-blocking analytics
+    }
   }
 
   render() {
@@ -94,6 +109,9 @@ class DigitalMandapaApp {
     switch (this.currentView) {
       case 'home':
         contentHtml = renderHomeView();
+        break;
+      case 'live':
+        contentHtml = renderLiveDarshanView(this.viewState.selectedLiveLocationId);
         break;
       case 'poojas':
         contentHtml = renderPoojasView(this.viewState.selectedCategory, this.viewState.searchQuery);
@@ -143,6 +161,16 @@ class DigitalMandapaApp {
         }
       });
     });
+
+    // Live darshan button in header
+    const liveBtn = document.getElementById('btn-live-darshan');
+    if (liveBtn) {
+      liveBtn.addEventListener('click', () => this.navigate('live'));
+    }
+
+    if (this.currentView === 'live') {
+      initLiveDarshanView(this.viewState.selectedLiveLocationId);
+    }
 
     // Admin button in header
     const adminBtn = document.getElementById('btn-admin-desk');

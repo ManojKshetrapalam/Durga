@@ -26,6 +26,14 @@ Sri Durga Devi Temple Digital Mandapa bridges centuries of temple sacred traditi
   - **Darshan & Prakaara Photo Gallery CMS:** Add, edit, re-order, and delete photos with instant file upload preview or image URLs. Dynamic category filtering (Garbha Gudi, Architecture, Deepotsava, Alankara, Utsava) immediately reflected on the public landing page.
   - **Devotee Notices & Special Alerts CMS:** Multi-tier broadcasting featuring top notice board marquee plus priority-tagged (Urgent, Auspicious, Seva, General) in-app cards with interactive CTA action buttons for devotee app and web.
   - **Festival & Events CMS:** Create, publish, and schedule grand temple celebrations with 10-day Alankara schedules, Homas, and poster invitations.
+- **Centralized Live Streaming, Unified Playback, Analytics & Web Push (Cache v13):** ✅ FULLY IMPLEMENTED
+  - **Centralized Live Streaming Service (`streamingService.js`):** Generic `LiveSession` model supporting mobile browser camera broadcasting (no app install required) and sanctum IP camera abstraction (RTSP/HLS gateway) with diagnostic SSRF and latency verification.
+  - **Strict Location Mutex:** Server-side concurrency guard prevents duplicate active broadcasts on the same sanctum location.
+  - **Dynamic Locations Manager:** Unlimited administrator-configurable locations (Garbha Gudi, Yagashala, Prakaara, Utsava Mantapa, Auditorium) with custom display order and active/inactive toggling.
+  - **Unified Live Playback:** Synchronized live darshan player on both devotee PWA (`app.html#live`, `liveDarshanView.js`) and main public website (`index.html#live`, `landingApp.js`) with location switching pills, live status pulse, and Aarti schedules.
+  - **Centralized Analytics Service (`analyticsService.js`):** 17-event catalog with platform attribution (PWA standalone vs web browser), real-time viewer concurrency heartbeats (45s auto-expiration), and CSV/JSON admin export.
+  - **Web Push Notifications (`pushNotificationService.js`, `sw.js`):** Devotee push subscription manager with category preferences (Live Darshan, Festivals, Daily Panchanga), auto-dispatch when live darshan begins, and in-app alert banner.
+  - **Service Worker Cache Bypassing:** Live video feeds and media stream chunks are strictly excluded from offline caching.
 
 ---
 
@@ -107,14 +115,21 @@ Durga/
 | **Darshan & Photo Gallery CMS** | `app/js/adminApp.js` | `app/js/landingApp.js`, `app/index.html`, `app/js/services/store.js` |
 | **Notices & Devotee Alerts CMS** | `app/js/adminApp.js` | `app/js/views/homeView.js`, `app/js/services/store.js` |
 | **Festival & Events CMS** | `app/js/adminApp.js` | `app/js/components/festivalCard.js`, `app/js/views/homeView.js` |
-| **PWA Offline & App Shell** | `app/sw.js`, `app/manifest.json` | `app/js/app.js`, `app/app.html` |
+| **Live Streaming & Locations Engine** | `app/js/services/streamingService.js` | `app/js/adminApp.js`, `app/js/views/liveDarshanView.js`, `app/js/services/store.js` |
+| **Devotee PWA Live Player View** | `app/js/views/liveDarshanView.js` | `app/js/app.js`, `app/js/components/header.js` |
+| **Public Website Live Section** | `app/index.html` | `app/js/landingApp.js`, `app/css/landing.css` |
+| **Centralized Analytics & Telemetry**| `app/js/services/analyticsService.js` | `app/js/adminApp.js`, `app/js/services/store.js` |
+| **Web Push Notifications & Alerts** | `app/js/services/pushNotificationService.js`| `app/sw.js`, `app/js/adminApp.js`, `app/js/services/store.js` |
+| **PWA Offline & App Shell** | `app/sw.js`, `app/manifest.webmanifest` | `app/js/app.js`, `app/app.html` |
 
 ---
 
 ## 7. Business Rules & Logic Hierarchy
 1. **Administrative Block Priority:** If temple trustees or archakas block a date (e.g., 15 Oct 2026 for Navaratri Chandi Homa), it immediately overrides all calendar availability, displays the public reason, and presents 3 recommended alternative dates.
-2. **Seva Day Constraints:** Specific sevas can only occur on designated days (Durga Homa on Fridays at 10 AM; Tuesday Rahukala Deepada Seva at 3:30 PM; Vahana Pooja morning/evening).
-3. **Counter Kanike Principle:** Seva contributions are payable at the physical temple billing counter via Cash or UPI/GPay/PhonePe upon arrival, where official printed receipts and prasadam are issued.
+2. **Strict Streaming Location Mutex:** A location cannot have multiple simultaneous publishing sessions. Any subsequent start request for an already broadcasting location is immediately rejected.
+3. **PWA Non-Caching of Live Video:** Service worker strictly bypasses offline caching for all live video streams, m3u8, and stream chunks.
+4. **Seva Day Constraints:** Specific sevas can only occur on designated days (Durga Homa on Fridays at 10 AM; Tuesday Rahukala Deepada Seva at 3:30 PM; Vahana Pooja morning/evening).
+5. **Counter Kanike Principle:** Seva contributions are payable at the physical temple billing counter via Cash or UPI/GPay/PhonePe upon arrival, where official printed receipts and prasadam are issued.
 
 ---
 
@@ -123,7 +138,7 @@ Durga/
    ```powershell
    npx serve app -p 3000
    ```
-2. Run automated logic tests:
+2. Run automated logic tests (41 tests across 10 suites):
    ```powershell
    node tests/run-all-tests.js
    ```

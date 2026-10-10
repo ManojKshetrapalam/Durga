@@ -19,6 +19,12 @@ export function renderHeader() {
         </div>
       </div>
       <div class="top-header-actions">
+        <button id="btn-live-darshan" class="icon-btn" title="Live Darshan 🪔" aria-label="Live Darshan" style="position: relative; color: var(--color-primary);">
+          <span style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #E53935; border-radius: 50%; box-shadow: 0 0 6px #E53935;"></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
+          </svg>
+        </button>
         <button id="btn-admin-desk" class="icon-btn" title="Temple Management Desk" aria-label="Admin Desk">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>

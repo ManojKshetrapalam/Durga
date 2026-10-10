@@ -5,7 +5,7 @@
 
 import assert from 'assert';
 
-// Mock localStorage for Node.js test environment
+// Mock localStorage and browser globals for Node.js test environment
 const mockStorage = new Map();
 global.localStorage = {
   getItem: (key) => mockStorage.get(key) || null,
@@ -14,6 +14,29 @@ global.localStorage = {
   clear: () => mockStorage.clear()
 };
 
+global.sessionStorage = {
+  getItem: (key) => mockStorage.get(key) || null,
+  setItem: (key, val) => mockStorage.set(key, String(val)),
+  removeItem: (key) => mockStorage.delete(key),
+  clear: () => mockStorage.clear()
+};
+
+global.window = {
+  location: { hash: '#home', pathname: '/' },
+  matchMedia: () => ({ matches: false }),
+  addEventListener: () => {}
+};
+try {
+  Object.defineProperty(global, 'navigator', {
+    value: { userAgent: 'NodeTestRunner', mediaDevices: null, standalone: false },
+    configurable: true,
+    writable: true
+  });
+} catch (e) {
+  // Ignore if existing
+}
+global.document = { referrer: '', getElementById: () => null, querySelectorAll: () => [] };
+
 // Import modules under test
 const { SEVAS_DATA } = await import('../app/js/data/sevas.js');
 const { TEMPLE_TIMINGS } = await import('../app/js/data/timings.js');
@@ -21,20 +44,26 @@ const { templeStore } = await import('../app/js/services/store.js');
 const { PanchangaService } = await import('../app/js/services/panchangaService.js');
 const { AvailabilityEngine } = await import('../app/js/services/availabilityEngine.js');
 const { WhatsAppService } = await import('../app/js/services/whatsappService.js');
+const { streamingService, STREAM_STATUS, SOURCE_TYPE } = await import('../app/js/services/streamingService.js');
+const { analyticsService, ANALYTICS_EVENT, PLATFORM_TYPE } = await import('../app/js/services/analyticsService.js');
+const { pushNotificationService, NOTIFICATION_CATEGORY } = await import('../app/js/services/pushNotificationService.js');
 
 let passCount = 0;
 let failCount = 0;
+let testQueue = Promise.resolve();
 
 function test(description, fn) {
-  try {
-    fn();
-    console.log(`  ✓ PASS: ${description}`);
-    passCount++;
-  } catch (err) {
-    console.error(`  ✕ FAIL: ${description}`);
-    console.error(`    ${err.message}`);
-    failCount++;
-  }
+  testQueue = testQueue.then(async () => {
+    try {
+      await fn();
+      console.log(`  ✓ PASS: ${description}`);
+      passCount++;
+    } catch (err) {
+      console.error(`  ✕ FAIL: ${description}`);
+      console.error(`    ${err.message}`);
+      failCount++;
+    }
+  });
 }
 
 console.log("\n============================================================");
@@ -468,6 +497,238 @@ test("CMS Special Notifications allows broadcasting alerts with action CTAs and 
   assert.strictEqual(templeStore.getSpecialNotificationById("notif-test-1"), undefined, "Alert deleted");
 });
 
+// --- SUITE 8: CENTRALIZED LIVE STREAMING ARCHITECTURE & LOCATION MUTEX ---
+console.log("\nSuite 8: Centralized Live Streaming Architecture & Location Mutex");
+
+test("Streaming locations catalog contains default 5 authentic sanctum locations", () => {
+  const locs = streamingService.getLocations();
+  assert.ok(locs.length >= 5, "Has at least 5 locations");
+  const garbha = locs.find(l => l.id === 'loc-garbha-gudi');
+  assert.ok(garbha, "Main Garbha Gudi exists");
+  assert.strictEqual(garbha.status, 'ACTIVE');
+});
+
+test("Location CRUD & Reordering: Can add, reorder, and toggle location status", () => {
+  const newLoc = {
+    id: "loc-test-navarathri",
+    name: "Special Navaratri Mantapa",
+    kannadaName: "ವಿಶೇಷ ನವರಾತ್ರಿ ಮಂಟಪ",
+    description: "Temporary sanctum dais for Navaratri Alankara",
+    supportedSources: "BOTH",
+    status: "ACTIVE",
+    displayOrder: 99
+  };
+
+  streamingService.saveLocation(newLoc);
+  const fetched = streamingService.getLocationById("loc-test-navarathri");
+  assert.ok(fetched, "Location created");
+  assert.strictEqual(fetched.name, "Special Navaratri Mantapa");
+
+  // Reorder
+  streamingService.reorderLocations([fetched.id, 'loc-garbha-gudi']);
+  assert.strictEqual(streamingService.getLocationById("loc-test-navarathri").displayOrder, 1);
+
+  // Toggle status
+  streamingService.toggleLocationStatus("loc-test-navarathri");
+  assert.strictEqual(streamingService.getLocationById("loc-test-navarathri").status, "INACTIVE");
+
+  // Cleanup
+  streamingService.deleteLocation("loc-test-navarathri");
+  assert.strictEqual(streamingService.getLocationById("loc-test-navarathri"), undefined);
+});
+
+test("Starting a Live Session transitions state to LIVE and assigns playback URL", async () => {
+  const session = await streamingService.startLiveSession({
+    locationId: 'loc-garbha-gudi',
+    sourceType: SOURCE_TYPE.MOBILE,
+    title: 'Garbha Gudi — Ushakala Mangalarathi',
+    adminUser: { name: 'Sri S. Ramesh' }
+  });
+
+  assert.ok(session, "Session created");
+  assert.strictEqual(session.status, STREAM_STATUS.LIVE);
+  assert.strictEqual(session.locationId, 'loc-garbha-gudi');
+  assert.ok(session.playbackUrl.startsWith('stream://'));
+
+  const active = streamingService.getActiveBroadcastForLocation('loc-garbha-gudi');
+  assert.ok(active, "Active broadcast registered");
+  assert.strictEqual(active.id, session.id);
+});
+
+test("Strict Mutex Safeguard: Second broadcast on same location is strictly rejected", async () => {
+  let threw = false;
+  try {
+    await streamingService.startLiveSession({
+      locationId: 'loc-garbha-gudi',
+      sourceType: SOURCE_TYPE.MOBILE,
+      title: 'Conflicting Duplicate Broadcast'
+    });
+  } catch (err) {
+    threw = true;
+    assert.ok(err.message.includes("already broadcasting live") || err.message.includes("mutex violation"));
+  }
+  assert.strictEqual(threw, true, "Must reject concurrent duplicate session on same location");
+});
+
+test("Safe Deletion Guard: Cannot delete a location while actively broadcasting", () => {
+  let threw = false;
+  try {
+    streamingService.deleteLocation('loc-garbha-gudi');
+  } catch (err) {
+    threw = true;
+    assert.ok(err.message.includes("Cannot delete a location while an active broadcast is in progress"));
+  }
+  assert.strictEqual(threw, true, "Prevented deleting active live location");
+});
+
+test("IP Camera Abstraction: Validates protocol and blocks SSRF cloud metadata targets", async () => {
+  // Invalid protocol test
+  const badProto = await streamingService.testIpCameraConnection({ streamUrl: 'ftp://bad-url' });
+  assert.strictEqual(badProto.success, false);
+  assert.ok(badProto.details.includes("Invalid protocol"));
+
+  // SSRF attack test
+  const ssrf = await streamingService.testIpCameraConnection({ streamUrl: 'http://169.254.169.254/latest/meta-data/' });
+  assert.strictEqual(ssrf.success, false);
+  assert.ok(ssrf.details.includes("Security block"));
+
+  // Valid RTSP test
+  const valid = await streamingService.testIpCameraConnection({ streamUrl: 'rtsp://sanctum-cam1.temple.lan:554/live/ch0' });
+  assert.strictEqual(valid.success, true);
+  assert.ok(valid.pingMs > 0);
+});
+
+test("Public Live State Sanitizer: Strips private admin fields and provides sanitized playback state", () => {
+  const publicState = streamingService.getPublicLiveDarshanState('loc-garbha-gudi');
+  assert.strictEqual(publicState.isLive, true);
+  assert.ok(publicState.session);
+  assert.ok(publicState.session.locationName.includes("Main Garbha Gudi"));
+  assert.strictEqual(publicState.session.adminUser, undefined, "Admin details not leaked");
+  assert.strictEqual(publicState.session.ipCameraConfig, undefined, "IP camera passwords not leaked");
+});
+
+test("Stopping Live Session: Transitions status to ENDED and releases publisher resources", async () => {
+  const active = streamingService.getActiveBroadcastForLocation('loc-garbha-gudi');
+  assert.ok(active, "Active session exists");
+
+  const ended = await streamingService.stopLiveSession(active.id);
+  assert.strictEqual(ended.status, STREAM_STATUS.ENDED);
+  assert.ok(ended.endedAt);
+
+  const activeAfter = streamingService.getActiveBroadcastForLocation('loc-garbha-gudi');
+  assert.strictEqual(activeAfter, undefined, "No active session remains for location");
+});
+
+// --- SUITE 9: CENTRALIZED ANALYTICS & PLATFORM ATTRIBUTION ---
+console.log("\nSuite 9: Centralized Analytics & Platform Attribution");
+
+test("Standardized Event Catalog: Logs events with timestamps, session, and platform", () => {
+  const evt = analyticsService.logEvent(ANALYTICS_EVENT.POOJA_VIEW, {
+    poojaId: 'durga-homa',
+    poojaName: 'Durga Homa',
+    kanike: 1501
+  });
+
+  assert.ok(evt.id.startsWith('evt-'));
+  assert.strictEqual(evt.event, ANALYTICS_EVENT.POOJA_VIEW);
+  assert.ok(evt.timestamp);
+  assert.strictEqual(evt.properties.poojaId, 'durga-homa');
+});
+
+test("Platform Detection & Session Management: Attributes visitor sessions", () => {
+  const platform = analyticsService.getPlatform();
+  assert.ok([PLATFORM_TYPE.PWA, PLATFORM_TYPE.BROWSER, PLATFORM_TYPE.UNKNOWN].includes(platform));
+});
+
+test("Viewer Concurrency & Heartbeat Loop: Tracks active watch duration and auto-expires inactive viewers", () => {
+  const dummyLiveSessionId = 'live-test-analytics';
+  const viewerSession = analyticsService.startViewerHeartbeat(dummyLiveSessionId, 'loc-garbha-gudi', 'Main Garbha Gudi');
+  assert.ok(viewerSession.id.startsWith('vwr-'));
+  assert.strictEqual(viewerSession.isActive, true);
+
+  // Concurrency count should reflect active viewer
+  let activeCount = templeStore.getActiveViewerCount(dummyLiveSessionId);
+  assert.strictEqual(activeCount, 1);
+
+  // Heartbeat updates duration
+  analyticsService._sendHeartbeat();
+  const updated = templeStore.getViewerSessions().find(s => s.id === viewerSession.id);
+  assert.ok(updated.lastHeartbeatAt);
+
+  // Stop heartbeat
+  analyticsService.stopViewerHeartbeat('TEST_FINALIZE');
+  assert.strictEqual(analyticsService.getCurrentViewerSession(), null);
+
+  activeCount = templeStore.getActiveViewerCount(dummyLiveSessionId);
+  assert.strictEqual(activeCount, 0, "Active viewer count decreases to 0 when finalized");
+});
+
+test("Metrics Summary: Accurately calculates page views, platform ratio, and live watch minutes", () => {
+  analyticsService.trackPageView('Home');
+  analyticsService.trackPageView('Poojas');
+  const summary = analyticsService.getMetricsSummary();
+
+  assert.ok(summary.totalPageViews >= 2);
+  assert.ok(summary.totalSessions >= 1);
+  assert.ok(typeof summary.pwaRatio === 'number');
+  assert.ok(typeof summary.browserRatio === 'number');
+});
+
+// --- SUITE 10: WEB PUSH NOTIFICATIONS & BROADCAST DISPATCH ---
+console.log("\nSuite 10: Web Push Notifications & Broadcast Dispatch");
+
+test("Push Subscription Management: Saves endpoint and authentic categories", () => {
+  const testSub = {
+    endpoint: "sdd-push-token-test-1",
+    keys: { p256dh: "key1", auth: "auth1" },
+    status: "ACTIVE",
+    preferences: {
+      liveDarshan: true,
+      events: true,
+      specialPoojas: false,
+      dailyPanchanga: true
+    }
+  };
+
+  templeStore.savePushSubscription(testSub);
+  const subs = templeStore.getPushSubscriptions();
+  const found = subs.find(s => s.endpoint === "sdd-push-token-test-1");
+  assert.ok(found, "Subscription saved");
+  assert.strictEqual(found.preferences.liveDarshan, true);
+
+  // Update preferences
+  templeStore.updatePushPreferences("sdd-push-token-test-1", { specialPoojas: true });
+  const updated = templeStore.getPushSubscriptions().find(s => s.endpoint === "sdd-push-token-test-1");
+  assert.strictEqual(updated.preferences.specialPoojas, true);
+
+  // Cleanup
+  templeStore.deletePushSubscription("sdd-push-token-test-1");
+});
+
+test("Admin Notification Dispatch: Sends targeted alerts matching category filters", async () => {
+  const record = await pushNotificationService.dispatchNotification({
+    title: "Navaratri Chandi Homa Alert 🪔",
+    kannadaTitle: "ನವರಾತ್ರಿ ಚಂಡಿಕಾ ಹೋಮ",
+    body: "Sanctum Chandi Homa is commencing today.",
+    category: NOTIFICATION_CATEGORY.FESTIVALS_EVENTS,
+    targetUrl: "app.html#calendar",
+    adminUser: "Chief Trustee"
+  });
+
+  assert.ok(record.id.startsWith('disp-'));
+  assert.strictEqual(record.title, "Navaratri Chandi Homa Alert 🪔");
+  assert.strictEqual(record.category, NOTIFICATION_CATEGORY.FESTIVALS_EVENTS);
+  assert.ok(record.timestamp);
+
+  // Check history
+  const history = templeStore.getNotificationHistory();
+  const inHistory = history.find(h => h.id === record.id);
+  assert.ok(inHistory, "Dispatch saved in notification history log");
+});
+
+// Await full execution of all sequential tests
+await testQueue;
+
 console.log("\n============================================================");
 console.log(`TOTAL TESTS: ${passCount + failCount} | PASSED: ${passCount} | FAILED: ${failCount}`);
 console.log("============================================================\n");
@@ -475,3 +736,4 @@ console.log("============================================================\n");
 if (failCount > 0) {
   process.exit(1);
 }
+

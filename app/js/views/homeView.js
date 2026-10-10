@@ -24,7 +24,7 @@ export function renderHomeView() {
       <section class="card card-gold-accent" style="background: linear-gradient(180deg, #FFFDF8 0%, #FAF2E8 100%);">
         <div class="card-header-row">
           <span class="badge badge-gold">Sri Durga Parameshwari Sannidhi</span>
-          <span class="badge badge-live">Darshan Open</span>
+          <span class="badge badge-live" style="cursor: pointer;" onclick="window.app.navigate('live')">● Darshan Open 🪔</span>
         </div>
         <h2 style="font-family: var(--font-serif); font-size: 1.45rem; color: var(--color-primary); line-height: 1.25; margin-bottom: 6px;">
           Namaskara 🙏
@@ -32,9 +32,13 @@ export function renderHomeView() {
         <p style="font-size: 0.95rem; color: var(--color-text-muted); margin-bottom: 14px;">
           Plan Your Visit. Prepare Your Prayer. Experience the Divine Mandapa.
         </p>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary btn-sm" onclick="window.app.navigate('poojas')">
-            Explore Sevas 🪔
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-primary btn-sm" onclick="window.app.navigate('live')" style="background: var(--color-primary); display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 7px; height: 7px; background: #E53935; border-radius: 50%; box-shadow: 0 0 6px #E53935; display: inline-block;"></span>
+            <span>Live Darshan 🪔</span>
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="window.app.navigate('poojas')">
+            Explore Sevas
           </button>
           <button class="btn btn-secondary btn-sm" onclick="window.app.navigate('calendar')">
             Check Dates 📅

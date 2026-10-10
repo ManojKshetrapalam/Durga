@@ -8,14 +8,21 @@ import { PanchangaService } from './services/panchangaService.js?v=20261007_12';
 import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_12';
 import { WhatsAppService } from './services/whatsappService.js?v=20261007_12';
 import { showToast } from './components/toast.js?v=20261007_12';
+import { streamingService, STREAM_STATUS, SOURCE_TYPE } from './services/streamingService.js';
+import { analyticsService, ANALYTICS_EVENT, PLATFORM_TYPE } from './services/analyticsService.js';
+import { pushNotificationService, NOTIFICATION_CATEGORY } from './services/pushNotificationService.js';
 
 class TempleAdminController {
   constructor() {
     this.isAuthenticated = false;
     this.currentAdminUser = null;
-    this.currentTab = 'overview'; // 'overview', 'calendar', 'sevas', 'bookings', 'events', 'priests', 'gallery', 'broadcast', 'settings'
+    this.currentTab = 'overview';
     this.selectedDate = new Date().toISOString().split('T')[0];
     this.galleryFilter = 'all';
+    this.currentFacingMode = 'environment';
+    this.isMicMuted = false;
+    this.editingLocation = null;
+    this.activeBroadcastTimer = null;
   }
 
   init() {
@@ -222,6 +229,19 @@ class TempleAdminController {
           <button class="sidebar-nav-item ${this.currentTab === 'overview' ? 'active' : ''}" onclick="window.admin.switchTab('overview')">
             <span>📊</span> Dashboard Overview
           </button>
+
+          <div style="padding: 8px 16px 2px; font-size: 0.72rem; text-transform: uppercase; color: var(--color-gold); font-weight: 800; letter-spacing: 0.5px;">Live Darshan & Media</div>
+          <button class="sidebar-nav-item ${this.currentTab === 'live' ? 'active' : ''}" onclick="window.admin.switchTab('live')">
+            <span>🎥</span> Live Broadcast Console
+          </button>
+          <button class="sidebar-nav-item ${this.currentTab === 'locations' ? 'active' : ''}" onclick="window.admin.switchTab('locations')">
+            <span>📍</span> Streaming Locations
+          </button>
+          <button class="sidebar-nav-item ${this.currentTab === 'live-analytics' ? 'active' : ''}" onclick="window.admin.switchTab('live-analytics')">
+            <span>📡</span> Live Darshan Analytics
+          </button>
+
+          <div style="padding: 8px 16px 2px; font-size: 0.72rem; text-transform: uppercase; color: var(--color-gold); font-weight: 800; letter-spacing: 0.5px;">Sanctum & Services</div>
           <button class="sidebar-nav-item ${this.currentTab === 'calendar' ? 'active' : ''}" onclick="window.admin.switchTab('calendar')">
             <span>📅</span> Date Blocks & Festivals
           </button>
@@ -239,6 +259,14 @@ class TempleAdminController {
           </button>
           <button class="sidebar-nav-item ${this.currentTab === 'gallery' ? 'active' : ''}" onclick="window.admin.switchTab('gallery')">
             <span>🖼️</span> Photo Gallery CMS
+          </button>
+
+          <div style="padding: 8px 16px 2px; font-size: 0.72rem; text-transform: uppercase; color: var(--color-gold); font-weight: 800; letter-spacing: 0.5px;">Analytics & Alerts</div>
+          <button class="sidebar-nav-item ${this.currentTab === 'analytics' ? 'active' : ''}" onclick="window.admin.switchTab('analytics')">
+            <span>📈</span> Devotee Platform Analytics
+          </button>
+          <button class="sidebar-nav-item ${this.currentTab === 'notifications' ? 'active' : ''}" onclick="window.admin.switchTab('notifications')">
+            <span>🔔</span> Web Push Notifications
           </button>
           <button class="sidebar-nav-item ${this.currentTab === 'broadcast' ? 'active' : ''}" onclick="window.admin.switchTab('broadcast')">
             <span>📢</span> Notices & Special Alerts
@@ -294,12 +322,17 @@ class TempleAdminController {
   _getTabTitle() {
     switch (this.currentTab) {
       case 'overview': return '📊 Real-Time Operations Desk';
+      case 'live': return '🎥 Live Broadcast Console & Mobile Camera';
+      case 'locations': return '📍 Dynamic Streaming Locations Manager';
+      case 'live-analytics': return '📡 Live Darshan Viewer Concurrency & Telemetry';
       case 'calendar': return '📅 Date Availability & Sanctum Overrides';
       case 'sevas': return '🪔 21 Authentic Sevas & Pricing Manager';
       case 'bookings': return '📱 WhatsApp Booking Requests & Priest Assignment';
       case 'events': return '🎪 Festival & Events CMS';
       case 'priests': return '🧘 Archakas & Priests Management';
       case 'gallery': return '🖼️ Temple Darshan & Prakaara Gallery CMS';
+      case 'analytics': return '📈 Devotee Engagement & Platform Attribution Analytics';
+      case 'notifications': return '🔔 Web Push Alerts & Broadcast Center';
       case 'broadcast': return '📢 Devotee Announcements & Special Alerts';
       case 'settings': return '⚙️ Temple WhatsApp & Contact Settings';
       default: return 'Administrative Desk';
@@ -309,12 +342,17 @@ class TempleAdminController {
   _renderActiveContent() {
     switch (this.currentTab) {
       case 'overview': return this._renderOverviewTab();
+      case 'live': return this._renderLiveTab();
+      case 'locations': return this._renderLocationsTab();
+      case 'live-analytics': return this._renderLiveAnalyticsTab();
       case 'calendar': return this._renderCalendarTab();
       case 'sevas': return this._renderSevasTab();
       case 'bookings': return this._renderBookingsTab();
       case 'events': return this._renderEventsTab();
       case 'priests': return this._renderPriestsTab();
       case 'gallery': return this._renderGalleryTab();
+      case 'analytics': return this._renderAnalyticsTab();
+      case 'notifications': return this._renderNotificationsTab();
       case 'broadcast': return this._renderBroadcastTab();
       case 'settings': return this._renderSettingsTab();
       default: return this._renderOverviewTab();
@@ -2138,6 +2176,907 @@ class TempleAdminController {
     const phone = phoneInput ? phoneInput.value.replace(/\D/g, '') : '919845012345';
     const text = encodeURIComponent("Namaskara Sri Durga Devi Temple Desk 🙏 This is a test message from the Admin Portal.");
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+  }
+
+  // ==================== TAB: LIVE BROADCAST CONSOLE ====================
+  _renderLiveTab() {
+    const locations = streamingService.getActiveLocations();
+    const activeBroadcasts = streamingService.getActiveBroadcasts();
+    const allSessions = templeStore.getLiveSessions().slice(0, 10);
+    const activeSession = activeBroadcasts.length > 0 ? activeBroadcasts[0] : null;
+
+    return `
+      <!-- Active Live Status Banner -->
+      ${activeSession ? `
+        <div class="card" style="border: 2px solid #E53935; background: #FFF5F5; margin-bottom: 24px; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="font-size: 2rem; animation: pulseGlow 1.5s infinite;">🔴</span>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge" style="background: #E53935; color: #FFF; font-weight: 800; font-size: 0.75rem;">LIVE NOW</span>
+                  <span style="font-weight: 800; font-size: 1.15rem; color: #721C2B;">${activeSession.locationName}</span>
+                </div>
+                <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                  Source: <strong>${activeSession.sourceType}</strong> • Started by <strong>${activeSession.startedBy}</strong> at ${new Date(activeSession.startedAt).toLocaleTimeString('en-IN')}
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="text-align: right;">
+                <div style="font-size: 1.3rem; font-weight: 800; color: #E53935;">
+                  👁️ ${templeStore.getActiveViewerCount(activeSession.id)}
+                </div>
+                <div style="font-size: 0.75rem; color: #666;">Current Viewers</div>
+              </div>
+              <button class="btn btn-sm" onclick="window.admin.stopActiveBroadcast('${activeSession.id}')" style="background: #721C2B; color: #FFF; font-weight: 700; padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer;">
+                ⏹️ Stop Broadcast
+              </button>
+            </div>
+          </div>
+        </div>
+      ` : `
+        <div class="card" style="background: #FFFDF8; border-left: 4px solid var(--color-gold); margin-bottom: 24px; padding: 16px 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.4rem;">🪔</span>
+              <div>
+                <strong style="color: var(--color-primary); font-size: 0.95rem;">No Active Live Broadcast</strong>
+                <p style="margin: 2px 0 0; font-size: 0.82rem; color: var(--color-text-soft);">Select a temple location below to start broadcasting directly from your mobile camera or sanctum IP camera.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `}
+
+      <!-- Broadcast Setup Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-bottom: 28px;">
+        <!-- Left: Configuration & Controls -->
+        <div class="card" style="padding: 24px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 16px;">
+            1. Broadcast Destination & Source
+          </h3>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="live-loc-select">Temple Streaming Location</label>
+            <select id="live-loc-select" class="form-input" style="font-weight: 600;">
+              ${locations.map(l => `
+                <option value="${l.id}">${l.name} (${l.kannadaName || ''})</option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Broadcasting Source</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <label style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1.5px solid var(--color-border); border-radius: 8px; cursor: pointer; background: #FFFDF8;">
+                <input type="radio" name="broadcast-source-type" value="MOBILE" checked onchange="window.admin.toggleSourceTypeView('MOBILE')">
+                <span style="font-size: 0.88rem; font-weight: 600;">📱 Mobile Camera</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1.5px solid var(--color-border); border-radius: 8px; cursor: pointer; background: #FFFDF8;">
+                <input type="radio" name="broadcast-source-type" value="IP_CAMERA" onchange="window.admin.toggleSourceTypeView('IP_CAMERA')">
+                <span style="font-size: 0.88rem; font-weight: 600;">📹 Sanctum IP Cam</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label class="form-label" for="live-session-title">Broadcast Title & Aarti Occasion</label>
+            <input type="text" id="live-session-title" class="form-input" placeholder="e.g. Madhyahna Mahamangalarathi & Alankara Darshan" value="Garbha Gudi — Live Sanctum Darshan">
+          </div>
+
+          <!-- Mobile Camera Console Box -->
+          <div id="mobile-camera-controls-box" style="display: block; background: #FAF7F2; padding: 16px; border-radius: 10px; border: 1px solid var(--color-border); margin-bottom: 18px;">
+            <h4 style="font-size: 0.92rem; color: var(--color-primary); margin: 0 0 10px; display: flex; align-items: center; gap: 6px;">
+              <span>📱</span> Mobile Browser Camera Controls
+            </h4>
+            <p style="font-size: 0.78rem; color: var(--color-text-soft); margin: 0 0 12px; line-height: 1.35;">
+              Broadcasting runs natively inside this mobile browser tab without installing any app. Switch between back and front camera as needed.
+            </p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.admin.requestCameraPreview()">
+                📹 Test Camera Preview
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.admin.toggleFacingMode()">
+                🔄 Flip (${this.currentFacingMode === 'environment' ? 'Rear Cam' : 'Front Cam'})
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.admin.toggleMic()">
+                ${this.isMicMuted ? '🔇 Mic Muted' : '🎤 Mic Active'}
+              </button>
+            </div>
+          </div>
+
+          <!-- IP Camera Console Box (Hidden by default) -->
+          <div id="ip-camera-controls-box" style="display: none; background: #FAF7F2; padding: 16px; border-radius: 10px; border: 1px solid var(--color-border); margin-bottom: 18px;">
+            <h4 style="font-size: 0.92rem; color: var(--color-primary); margin: 0 0 10px; display: flex; align-items: center; gap: 6px;">
+              <span>📹</span> IP Camera / RTSP / HLS Gateway
+            </h4>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" for="ip-stream-url">Camera Stream Endpoint URL</label>
+              <input type="text" id="ip-stream-url" class="form-input" placeholder="rtsp://admin:pass@192.168.1.100:554/live/ch0 or https://..." value="rtsp://sanctum-cam1.temple.lan:554/live/ch0">
+              <span style="font-size: 0.72rem; color: var(--color-text-soft); display: block; margin-top: 4px;">Credentials are masked and never exposed to public devotees.</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.admin.testIpCameraStream()">
+                🔍 Diagnostic Ping & SSRF Test
+              </button>
+              <span id="ip-test-status" style="font-size: 0.8rem; font-weight: 600;"></span>
+            </div>
+          </div>
+
+          <!-- Big Action Button -->
+          <button class="btn btn-primary" onclick="window.admin.startBroadcastFromConsole()" style="width: 100%; padding: 14px; font-weight: 800; font-size: 1rem; background: #E53935; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🔴</span> START LIVE BROADCAST
+          </button>
+        </div>
+
+        <!-- Right: Camera / Feed Live Preview -->
+        <div class="card" style="padding: 24px; display: flex; flex-direction: column;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 16px;">
+            2. Real-Time Monitor Preview
+          </h3>
+          <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-border);">
+            <video id="adminCameraPreview" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <div id="admin-preview-placeholder" style="position: absolute; text-align: center; color: #AAA; padding: 20px;">
+              <span style="font-size: 2.2rem; display: block; margin-bottom: 6px;">📷</span>
+              <span style="font-size: 0.85rem;">Camera preview inactive.<br>Tap "Test Camera Preview" or Start Broadcast.</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; background: #FFFDF8; padding: 14px; border-radius: 8px; border: 1px solid var(--color-border); font-size: 0.82rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="color: var(--color-text-soft);">Resolution / Codec:</span>
+              <strong>720p HD @ 30fps (H.264 / AAC)</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <span style="color: var(--color-text-soft);">Push Notification Trigger:</span>
+              <strong style="color: #059669;">Auto-Dispatches to Opted-in Devotees ✓</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--color-text-soft);">Location Mutex:</span>
+              <strong style="color: var(--color-primary);">Active Safeguard Protected ✓</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Broadcast Sessions Table -->
+      <div class="card" style="padding: 24px;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 14px;">
+          📜 Recent Sanctum Broadcast Sessions
+        </h3>
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Location</th>
+                <th>Source</th>
+                <th>Started</th>
+                <th>Duration</th>
+                <th>Peak Devotees</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allSessions.length === 0 ? `
+                <tr><td colspan="7" style="text-align: center; color: #888;">No broadcast sessions recorded yet.</td></tr>
+              ` : allSessions.map(s => `
+                <tr>
+                  <td><code>${s.id}</code></td>
+                  <td><strong>${s.locationName || s.locationId}</strong></td>
+                  <td><span class="badge">${s.sourceType}</span></td>
+                  <td>${new Date(s.startedAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td>${s.durationSeconds ? Math.round(s.durationSeconds / 60) + ' min' : 'Active'}</td>
+                  <td><strong>${s.peakViewers || 0}</strong></td>
+                  <td>
+                    <span class="badge ${s.status === 'LIVE' ? 'badge-live' : ''}" style="${s.status === 'LIVE' ? 'background: #E53935; color: #FFF;' : ''}">
+                      ${s.status}
+                    </span>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  toggleSourceTypeView(sourceType) {
+    const mobileBox = document.getElementById('mobile-camera-controls-box');
+    const ipBox = document.getElementById('ip-camera-controls-box');
+    if (mobileBox && ipBox) {
+      if (sourceType === 'MOBILE') {
+        mobileBox.style.display = 'block';
+        ipBox.style.display = 'none';
+      } else {
+        mobileBox.style.display = 'none';
+        ipBox.style.display = 'block';
+      }
+    }
+  }
+
+  async requestCameraPreview() {
+    try {
+      const stream = await streamingService.requestCameraStream(this.currentFacingMode);
+      const video = document.getElementById('adminCameraPreview');
+      const placeholder = document.getElementById('admin-preview-placeholder');
+      if (video) {
+        video.srcObject = stream;
+        video.play();
+      }
+      if (placeholder) placeholder.style.display = 'none';
+      showToast("Camera preview connected successfully. 📹", "success");
+    } catch (e) {
+      alert("Camera Error: " + e.message);
+    }
+  }
+
+  async toggleFacingMode() {
+    this.currentFacingMode = this.currentFacingMode === 'environment' ? 'user' : 'environment';
+    if (streamingService.getActivePublisherStream()) {
+      await this.requestCameraPreview();
+    } else {
+      this.render();
+    }
+  }
+
+  toggleMic() {
+    this.isMicMuted = !this.isMicMuted;
+    streamingService.toggleMicrophone(this.isMicMuted);
+    this.render();
+  }
+
+  async testIpCameraStream() {
+    const urlInput = document.getElementById('ip-stream-url');
+    const statusEl = document.getElementById('ip-test-status');
+    if (!urlInput || !urlInput.value) return;
+
+    if (statusEl) {
+      statusEl.style.color = 'var(--color-primary)';
+      statusEl.textContent = 'Probing camera gateway...';
+    }
+
+    const res = await streamingService.testIpCameraConnection({ streamUrl: urlInput.value });
+    if (statusEl) {
+      if (res.success) {
+        statusEl.style.color = '#059669';
+        statusEl.textContent = `✓ Reachable (${res.pingMs}ms latency) - SSRF Clean`;
+      } else {
+        statusEl.style.color = '#E53935';
+        statusEl.textContent = `✕ Failed: ${res.details}`;
+      }
+    }
+  }
+
+  async startBroadcastFromConsole() {
+    const locSelect = document.getElementById('live-loc-select');
+    const titleInput = document.getElementById('live-session-title');
+    const sourceRadio = document.querySelector('input[name="broadcast-source-type"]:checked');
+    const ipUrlInput = document.getElementById('ip-stream-url');
+
+    const locationId = locSelect ? locSelect.value : null;
+    const title = titleInput ? titleInput.value : '';
+    const sourceType = sourceRadio ? sourceRadio.value : 'MOBILE';
+
+    if (!locationId) {
+      alert("Please select a streaming location.");
+      return;
+    }
+
+    try {
+      if (sourceType === 'MOBILE') {
+        // Ensure camera stream is initiated
+        if (!streamingService.getActivePublisherStream()) {
+          await streamingService.requestCameraStream(this.currentFacingMode);
+        }
+      }
+
+      await streamingService.startLiveSession({
+        locationId,
+        sourceType,
+        title,
+        adminUser: this.currentAdminUser,
+        ipCameraConfig: sourceType === 'IP_CAMERA' ? { streamUrl: ipUrlInput ? ipUrlInput.value : '' } : null
+      });
+
+      showToast("Live broadcast successfully launched! Web push alert sent to devotees. 🪔", "success");
+      this.render();
+    } catch (e) {
+      alert("Failed to start broadcast: " + e.message);
+    }
+  }
+
+  async stopActiveBroadcast(sessionId) {
+    if (!confirm("Are you sure you want to stop the live sanctum broadcast? Devotee players will transition to offline schedule.")) return;
+
+    try {
+      await streamingService.stopLiveSession(sessionId, 'ADMIN_MANUAL_STOP');
+      showToast("Broadcast safely stopped. Finalized viewer analytics.", "info");
+      this.render();
+    } catch (e) {
+      alert("Failed to stop broadcast: " + e.message);
+    }
+  }
+
+  // ==================== TAB: STREAMING LOCATIONS ====================
+  _renderLocationsTab() {
+    const locations = streamingService.getLocations();
+    const activeBroadcasts = streamingService.getActiveBroadcasts();
+
+    return `
+      <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-primary); margin: 0 0 4px;">
+              📍 Dynamic Sanctum Locations Manager
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--color-text-soft); margin: 0;">
+              Add, configure, reorder, or deactivate temple streaming vantage points.
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="window.admin.openLocationModal()">
+            ➕ Add New Streaming Location
+          </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Location Name</th>
+                <th>Kannada Name</th>
+                <th>Supported Sources</th>
+                <th>Current Status</th>
+                <th>Live Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${locations.map((loc, idx) => {
+                const isLive = activeBroadcasts.some(b => b.locationId === loc.id && b.status === 'LIVE');
+                return `
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 4px;">
+                        <button class="icon-btn" onclick="window.admin.moveLocation('${loc.id}', -1)" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''} title="Move Up">▲</button>
+                        <span style="font-weight: 700;">${loc.displayOrder || (idx + 1)}</span>
+                        <button class="icon-btn" onclick="window.admin.moveLocation('${loc.id}', 1)" ${idx === locations.length - 1 ? 'disabled style="opacity:0.3;"' : ''} title="Move Down">▼</button>
+                      </div>
+                    </td>
+                    <td>
+                      <strong>${loc.name}</strong>
+                      <div style="font-size: 0.75rem; color: #666;">${loc.description || ''}</div>
+                    </td>
+                    <td><span style="font-family: var(--font-sans);">${loc.kannadaName || '—'}</span></td>
+                    <td><span class="badge">${loc.supportedSources || 'BOTH'}</span></td>
+                    <td>
+                      <button class="badge ${loc.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}" onclick="window.admin.toggleLocationStatus('${loc.id}')" style="cursor: pointer; border: none;">
+                        ${loc.status}
+                      </button>
+                    </td>
+                    <td>
+                      ${isLive ? `
+                        <span class="badge" style="background: #E53935; color: #FFF; font-weight: 800; animation: pulseGlow 1.5s infinite;">
+                          ● BROADCASTING
+                        </span>
+                      ` : `
+                        <span class="badge" style="background: #EADFCD; color: #555;">OFFLINE</span>
+                      `}
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 6px;">
+                        <button class="btn btn-secondary btn-sm" onclick="window.admin.openLocationModal('${loc.id}')" title="Edit">
+                          ✏️
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.admin.deleteLocation('${loc.id}')" style="color: #E53935;" title="Delete">
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  openLocationModal(locationId = null) {
+    const loc = locationId ? streamingService.getLocationById(locationId) : null;
+    this.editingLocation = loc;
+
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (!overlay) return;
+
+    overlay.innerHTML = `
+      <div class="admin-modal" style="max-width: 520px;">
+        <div class="modal-header">
+          <h3>${loc ? '✏️ Edit Streaming Location' : '➕ Add New Streaming Location'}</h3>
+          <button class="modal-close-btn" onclick="window.admin.closeLocationModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <form onsubmit="event.preventDefault(); window.admin.saveLocationForm();">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" for="modal-loc-name">Location Name (English) *</label>
+              <input type="text" id="modal-loc-name" class="form-input" required value="${loc ? loc.name : ''}" placeholder="e.g. Utsava Mantapa">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" for="modal-loc-kannada">Location Name (Kannada)</label>
+              <input type="text" id="modal-loc-kannada" class="form-input" value="${loc ? (loc.kannadaName || '') : ''}" placeholder="e.g. ಉತ್ಸವ ಮಂಟಪ">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" for="modal-loc-desc">Description</label>
+              <textarea id="modal-loc-desc" class="form-input" rows="2" placeholder="Brief description of this temple area">${loc ? (loc.description || '') : ''}</textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="form-label" for="modal-loc-sources">Supported Broadcasting Sources</label>
+              <select id="modal-loc-sources" class="form-input">
+                <option value="BOTH" ${loc && loc.supportedSources === 'BOTH' ? 'selected' : ''}>Both Mobile Camera & IP Camera</option>
+                <option value="MOBILE" ${loc && loc.supportedSources === 'MOBILE' ? 'selected' : ''}>Mobile Browser Camera Only</option>
+                <option value="IP_CAMERA" ${loc && loc.supportedSources === 'IP_CAMERA' ? 'selected' : ''}>Sanctum IP Camera Only</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button type="button" class="btn btn-secondary" onclick="window.admin.closeLocationModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary">${loc ? 'Save Changes' : 'Create Location'}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    overlay.style.display = 'flex';
+  }
+
+  saveLocationForm() {
+    const name = document.getElementById('modal-loc-name').value.trim();
+    const kannada = document.getElementById('modal-loc-kannada').value.trim();
+    const desc = document.getElementById('modal-loc-desc').value.trim();
+    const sources = document.getElementById('modal-loc-sources').value;
+
+    if (!name) {
+      alert("Location name is required.");
+      return;
+    }
+
+    const payload = {
+      id: this.editingLocation ? this.editingLocation.id : null,
+      name,
+      kannadaName: kannada,
+      description: desc,
+      supportedSources: sources,
+      status: this.editingLocation ? this.editingLocation.status : 'ACTIVE'
+    };
+
+    streamingService.saveLocation(payload);
+    showToast("Streaming location saved successfully.", "success");
+    this.closeLocationModal();
+    this.render();
+  }
+
+  toggleLocationStatus(id) {
+    streamingService.toggleLocationStatus(id);
+    this.render();
+  }
+
+  moveLocation(id, direction) {
+    const locs = streamingService.getLocations();
+    const idx = locs.findIndex(l => l.id === id);
+    if (idx < 0) return;
+
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= locs.length) return;
+
+    // Swap order
+    const orderedIds = locs.map(l => l.id);
+    const temp = orderedIds[idx];
+    orderedIds[idx] = orderedIds[targetIdx];
+    orderedIds[targetIdx] = temp;
+
+    streamingService.reorderLocations(orderedIds);
+    this.render();
+  }
+
+  deleteLocation(id) {
+    if (!confirm("Are you sure you want to delete this streaming location? Historical session analytics will remain safely preserved.")) return;
+
+    try {
+      streamingService.deleteLocation(id);
+      showToast("Location deleted.", "info");
+      this.render();
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+
+  closeLocationModal() {
+    const overlay = document.getElementById('admin-modal-overlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+    }
+    this.editingLocation = null;
+  }
+
+  // ==================== TAB: LIVE DARSHAN ANALYTICS ====================
+  _renderLiveAnalyticsTab() {
+    const summary = analyticsService.getMetricsSummary();
+    const activeBroadcasts = streamingService.getActiveBroadcasts();
+    const viewerSessions = templeStore.getViewerSessions().slice(-15).reverse();
+
+    return `
+      <!-- Top Live KPI Row -->
+      <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Live Viewers Right Now</h4>
+            <div class="metric-num" style="color: #E53935; font-size: 1.8rem;">${summary.currentLiveViewers}</div>
+            <div class="metric-sub">Verified real-time heartbeats</div>
+          </div>
+          <div class="metric-icon">👁️</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Peak Concurrent Viewers</h4>
+            <div class="metric-num" style="color: var(--color-primary);">${summary.peakConcurrency}</div>
+            <div class="metric-sub">Highest simultaneous audience</div>
+          </div>
+          <div class="metric-icon">📈</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Total Watch Minutes</h4>
+            <div class="metric-num" style="color: #D95D0F;">${summary.totalWatchMinutes} m</div>
+            <div class="metric-sub">Total sanctum prayer time</div>
+          </div>
+          <div class="metric-icon">⏱️</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Active Streams</h4>
+            <div class="metric-num">${activeBroadcasts.length}</div>
+            <div class="metric-sub">Broadcasting right now</div>
+          </div>
+          <div class="metric-icon">📡</div>
+        </div>
+      </div>
+
+      <!-- Active Viewers Table -->
+      <div class="card" style="padding: 24px;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 14px;">
+          👥 Recent Devotee Viewer Heartbeats (Real-Time Telemetry)
+        </h3>
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Viewer Session</th>
+                <th>Location</th>
+                <th>Platform</th>
+                <th>Watch Duration</th>
+                <th>Status</th>
+                <th>Last Heartbeat</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${viewerSessions.length === 0 ? `
+                <tr><td colspan="6" style="text-align: center; color: #888;">No viewer sessions recorded yet. Start a broadcast and view on PWA to see live telemetry.</td></tr>
+              ` : viewerSessions.map(vs => `
+                <tr>
+                  <td><code>${vs.id}</code></td>
+                  <td><strong>${vs.locationName || vs.locationId}</strong></td>
+                  <td><span class="badge ${vs.platform === 'PWA' ? 'badge-gold' : ''}">${vs.platform}</span></td>
+                  <td>${Math.round((vs.durationSeconds || 0) / 60)} min (${vs.durationSeconds || 0}s)</td>
+                  <td>
+                    <span class="badge ${vs.isActive ? 'badge-success' : ''}">
+                      ${vs.isActive ? 'WATCHING NOW' : 'ENDED'}
+                    </span>
+                  </td>
+                  <td>${new Date(vs.lastHeartbeatAt || vs.startedAt).toLocaleTimeString('en-IN')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== TAB: PLATFORM ANALYTICS ====================
+  _renderAnalyticsTab() {
+    const summary = analyticsService.getMetricsSummary();
+
+    return `
+      <!-- Analytics KPI Row -->
+      <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Total Page Views</h4>
+            <div class="metric-num" style="color: var(--color-primary);">${summary.totalPageViews}</div>
+            <div class="metric-sub">Unique content impressions</div>
+          </div>
+          <div class="metric-icon">📄</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Devotee Sessions</h4>
+            <div class="metric-num">${summary.totalSessions}</div>
+            <div class="metric-sub">PWA: ${summary.pwaRatio}% | Browser: ${summary.browserRatio}%</div>
+          </div>
+          <div class="metric-icon">👥</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Seva Inquiries</h4>
+            <div class="metric-num" style="color: #D95D0F;">${summary.totalPoojaViews}</div>
+            <div class="metric-sub">${summary.totalReservations} Sankalpa Reservations</div>
+          </div>
+          <div class="metric-icon">🪔</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Push Subscribers</h4>
+            <div class="metric-num" style="color: #059669;">${summary.activePushSubscribers}</div>
+            <div class="metric-sub">Registered notification tokens</div>
+          </div>
+          <div class="metric-icon">🔔</div>
+        </div>
+      </div>
+
+      <!-- Platform Attribution Visual Card -->
+      <div class="card" style="padding: 24px; margin-bottom: 24px;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 14px;">
+          📱 Platform Attribution: Installed Devotee PWA vs Standard Browser
+        </h3>
+        
+        <div style="background: #F5F1EA; border-radius: 12px; height: 32px; overflow: hidden; display: flex; margin-bottom: 12px;">
+          <div style="width: ${summary.pwaRatio}%; background: #721C2B; color: #FFF; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center;">
+            ${summary.pwaRatio > 10 ? `PWA (${summary.pwaRatio}%)` : ''}
+          </div>
+          <div style="width: ${summary.browserRatio}%; background: #C59B27; color: #1C1917; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center;">
+            ${summary.browserRatio > 10 ? `Web Browser (${summary.browserRatio}%)` : ''}
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 24px; font-size: 0.88rem;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 12px; height: 12px; background: #721C2B; border-radius: 3px; display: inline-block;"></span>
+            <span><strong>Installed PWA Devotees:</strong> ${summary.pwaSessionsCount} sessions (${summary.pwaRatio}%)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 12px; height: 12px; background: #C59B27; border-radius: 3px; display: inline-block;"></span>
+            <span><strong>Web Browser Devotees:</strong> ${summary.browserSessionsCount} sessions (${summary.browserRatio}%)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export & Raw Telemetry -->
+      <div class="card" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 4px;">
+              📊 Export Analytics & Telemetry Log
+            </h3>
+            <p style="font-size: 0.82rem; color: var(--color-text-soft); margin: 0;">
+              Download authentic temple analytics records for audit, trustee review, and monthly reports.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary btn-sm" onclick="window.admin.exportAnalyticsJson()">
+              📥 Export JSON
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.admin.exportAnalyticsCsv()">
+              📊 Export CSV
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  exportAnalyticsJson() {
+    const data = {
+      summary: analyticsService.getMetricsSummary(),
+      events: templeStore.getAnalyticsEvents(),
+      viewerSessions: templeStore.getViewerSessions(),
+      exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `temple-analytics-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    showToast("Analytics JSON exported successfully.", "success");
+  }
+
+  exportAnalyticsCsv() {
+    const events = templeStore.getAnalyticsEvents();
+    if (events.length === 0) {
+      alert("No events recorded yet to export.");
+      return;
+    }
+
+    const headers = ['id', 'timestamp', 'event', 'platform', 'sessionId'];
+    const rows = events.map(e => [
+      e.id,
+      e.timestamp,
+      e.event,
+      e.platform || 'UNKNOWN',
+      e.sessionId || ''
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `temple-events-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    showToast("Analytics CSV exported successfully.", "success");
+  }
+
+  // ==================== TAB: WEB PUSH NOTIFICATIONS ====================
+  _renderNotificationsTab() {
+    const subs = templeStore.getPushSubscriptions();
+    const history = templeStore.getNotificationHistory();
+    const activeCount = subs.filter(s => s.status === 'ACTIVE').length;
+
+    return `
+      <!-- Push Subscribers Overview -->
+      <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Total Push Tokens</h4>
+            <div class="metric-num" style="color: #059669;">${subs.length}</div>
+            <div class="metric-sub">${activeCount} active devotees</div>
+          </div>
+          <div class="metric-icon">🔔</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Live Darshan Alerts</h4>
+            <div class="metric-num">${subs.filter(s => s.preferences && s.preferences.liveDarshan).length}</div>
+            <div class="metric-sub">Opted-in for live notifications</div>
+          </div>
+          <div class="metric-icon">🪔</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-info">
+            <h4>Total Dispatched</h4>
+            <div class="metric-num" style="color: var(--color-primary);">${history.length}</div>
+            <div class="metric-sub">Alerts broadcasted to date</div>
+          </div>
+          <div class="metric-icon">📢</div>
+        </div>
+      </div>
+
+      <!-- Broadcast Composer Form -->
+      <div class="card" style="padding: 24px; margin-bottom: 24px;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-primary); margin: 0 0 16px;">
+          🚀 Broadcast Web Push Notification to Devotees
+        </h3>
+
+        <form onsubmit="event.preventDefault(); window.admin.sendPushBroadcast();">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+            <div class="form-group">
+              <label class="form-label" for="push-title">Notification Title (English) *</label>
+              <input type="text" id="push-title" class="form-input" required placeholder="e.g. Mahamangalarathi Live Darshan Starting 🪔" value="Live Darshan Starting at Garbha Gudi 🪔">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="push-kannada-title">Kannada Title</label>
+              <input type="text" id="push-kannada-title" class="form-input" placeholder="e.g. ಗರ್ಭಗುಡಿಯಲ್ಲಿ ಮಹಾಮಂಗಳಾರತಿ ನೇರ ಪ್ರಸಾರ" value="ಮುಖ್ಯ ಗರ್ಭಗುಡಿಯಲ್ಲಿ ನೇರ ದರ್ಶನ ಪ್ರಾರಂಭವಾಗಿದೆ">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="push-body">Message Body *</label>
+            <textarea id="push-body" class="form-input" rows="2" required placeholder="Auspicious message sent directly to devotee mobile lock screens">Join the sacred live telecast from Sri Durga Devi Temple, Chandra Layout, Bengaluru.</textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px;">
+            <div class="form-group">
+              <label class="form-label" for="push-category">Target Category</label>
+              <select id="push-category" class="form-input">
+                <option value="ALL">All Devotees</option>
+                <option value="LIVE_DARSHAN" selected>Live Darshan Subscribers Only</option>
+                <option value="FESTIVALS_EVENTS">Festivals & Special Utsavas</option>
+                <option value="SPECIAL_POOJAS">Special Poojas & Homas</option>
+                <option value="DAILY_PANCHAANGA">Daily Vedic Panchanga</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="push-url">Target Destination URL</label>
+              <input type="text" id="push-url" class="form-input" value="app.html#live">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="padding: 12px 24px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+            <span>🚀</span> Send Web Push Notification Now
+          </button>
+        </form>
+      </div>
+
+      <!-- Dispatch History Log Table -->
+      <div class="card" style="padding: 24px;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-primary); margin: 0 0 14px;">
+          📜 Notification Broadcast History
+        </h3>
+        <div style="overflow-x: auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Dispatched At</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Recipients</th>
+                <th>Triggered By</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${history.length === 0 ? `
+                <tr><td colspan="5" style="text-align: center; color: #888;">No notification dispatches recorded yet.</td></tr>
+              ` : history.map(h => `
+                <tr>
+                  <td>${new Date(h.timestamp).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td><strong>${h.title}</strong></td>
+                  <td><span class="badge">${h.category || h.type || 'ALL'}</span></td>
+                  <td><strong>${h.sentCount || 1}</strong> devotees</td>
+                  <td><span style="font-size: 0.8rem; color: #555;">${h.sentBy || h.triggeredBy || 'System'}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  async sendPushBroadcast() {
+    const title = document.getElementById('push-title').value.trim();
+    const kannadaTitle = document.getElementById('push-kannada-title').value.trim();
+    const body = document.getElementById('push-body').value.trim();
+    const category = document.getElementById('push-category').value;
+    const targetUrl = document.getElementById('push-url').value.trim();
+
+    if (!title || !body) {
+      alert("Notification title and body are required.");
+      return;
+    }
+
+    try {
+      const record = await pushNotificationService.dispatchNotification({
+        title,
+        kannadaTitle,
+        body,
+        category,
+        targetUrl,
+        adminUser: this.currentAdminUser ? this.currentAdminUser.name : 'Trustee Desk'
+      });
+
+      showToast(`Notification sent to ${record.sentCount} devotees! 🪔`, "success");
+      this.render();
+    } catch (e) {
+      alert("Failed to dispatch notification: " + e.message);
+    }
   }
 
   _bindLoginEvents() {
