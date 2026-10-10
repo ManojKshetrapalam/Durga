@@ -37,31 +37,60 @@ class StreamingService {
                      typeof window.location.href === 'string' && 
                      (window.location.href.startsWith('http:') || window.location.href.startsWith('https:'));
       if (isHttp) {
-        setTimeout(() => this.syncLiveStateFromServer(), 600);
-        setInterval(() => this.syncLiveStateFromServer(), 6000);
+        setTimeout(() => this.syncLiveStateFromServer(), 300);
+        setInterval(() => this.syncLiveStateFromServer(), 3500);
       }
     }
   }
 
+  _getApiUrl() {
+    if (typeof window !== 'undefined' && window.location && window.location.origin) {
+      const path = window.location.pathname || '/';
+      const lastSlash = path.lastIndexOf('/');
+      const base = lastSlash >= 0 ? path.substring(0, lastSlash + 1) : '/';
+      return `${window.location.origin}${base}api/live-status.php?t=${Date.now()}`;
+    }
+    return `api/live-status.php?t=${Date.now()}`;
+  }
+
   async _syncSessionToServer(action, payload = {}) {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return null;
+    const isHttp = typeof window.location === 'object' && 
+                   typeof window.location.href === 'string' && 
+                   (window.location.href.startsWith('http:') || window.location.href.startsWith('https:'));
+    if (!isHttp) return null;
     try {
-      const res = await fetch('api/live-status.php', {
+      const url = this._getApiUrl();
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, ...payload })
       });
-      if (!res.ok) return null;
-      return await res.json();
+      if (!res.ok) {
+        console.warn('[StreamingService] Server sync response status:', res.status);
+        return null;
+      }
+      const data = await res.json();
+      console.log('[StreamingService] Server sync action succeeded:', action, data);
+      return data;
     } catch (e) {
+      console.warn('[StreamingService] Server sync exception:', e.message);
       return null;
     }
   }
 
   async syncLiveStateFromServer() {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return null;
+    const isHttp = typeof window.location === 'object' && 
+                   typeof window.location.href === 'string' && 
+                   (window.location.href.startsWith('http:') || window.location.href.startsWith('https:'));
+    if (!isHttp) return null;
     try {
-      const res = await fetch('api/live-status.php');
+      const url = this._getApiUrl();
+      const res = await fetch(url, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store', 'Pragma': 'no-cache' }
+      });
       if (!res.ok) return null;
       const data = await res.json();
       if (!data || !data.success) return null;
@@ -78,13 +107,13 @@ class StreamingService {
           }
         });
         const existing = templeStore.getLiveSessionById(s.id);
-        const needsUpdate = !existing || existing.status !== STREAM_STATUS.LIVE;
-        if (needsUpdate) {
-          templeStore.saveLiveSession(s);
+        const wasNotLive = !existing || existing.status !== STREAM_STATUS.LIVE;
+        templeStore.saveLiveSession(s);
+        if (wasNotLive) {
           this._broadcastEvent('STREAM_STARTED', { session: s });
         }
       } else {
-        // Only end local sessions if WE are not currently publishing
+        // Only end local sessions if WE are not currently the active publisher stream
         if (!this.activePublisherStream && localActive.length > 0) {
           localActive.forEach(session => {
             templeStore.endLiveSession(session.id, { errors: [] });

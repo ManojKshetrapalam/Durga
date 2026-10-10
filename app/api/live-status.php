@@ -8,6 +8,9 @@ header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -85,14 +88,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Mutex check: prevent concurrent publishing on same location
+        // Auto-supersede previous active sessions for this location
         $locId = $session['locationId'] ?? '';
-        foreach ($state['activeSessions'] ?? [] as $s) {
-            if ($s['locationId'] === $locId && $s['id'] !== $session['id'] && in_array($s['status'], ['LIVE', 'STARTING'])) {
-                http_response_code(409);
-                echo json_encode(['success' => false, 'error' => 'Location mutex conflict: another session is currently active for this location.']);
-                exit;
+        if (!empty($state['activeSessions'])) {
+            foreach ($state['activeSessions'] as &$s) {
+                if ($s['locationId'] === $locId && $s['id'] !== $session['id']) {
+                    $s['status'] = 'ENDED';
+                    $s['endedAt'] = date('c');
+                }
             }
+            unset($s);
         }
 
         $session['status'] = 'LIVE';

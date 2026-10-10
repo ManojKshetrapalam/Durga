@@ -21,7 +21,7 @@ import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
 import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
 import { analyticsService } from './services/analyticsService.js';
 import { pushNotificationService } from './services/pushNotificationService.js';
-import { streamingService } from './services/streamingService.js';
+import { streamingService } from './services/streamingService.js?v=20261010_16';
 
 class DigitalMandapaApp {
   constructor() {
@@ -76,8 +76,8 @@ class DigitalMandapaApp {
       }
     });
 
-    streamingService.syncLiveStateFromServer().then((data) => {
-      if (data && data.isLive && (this.currentView === 'live' || this.currentView === 'home')) {
+    streamingService.syncLiveStateFromServer().then(() => {
+      if (this.currentView === 'live' || this.currentView === 'home') {
         this.render();
       }
     }).catch(() => {});

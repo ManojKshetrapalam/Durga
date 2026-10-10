@@ -8,7 +8,7 @@ import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
 import { TEMPLE_TIMINGS } from './data/timings.js?v=20261007_11';
 import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
 import { templeStore } from './services/store.js?v=20261007_11';
-import { streamingService } from './services/streamingService.js';
+import { streamingService } from './services/streamingService.js?v=20261010_16';
 import { analyticsService } from './services/analyticsService.js';
 import { pushNotificationService } from './services/pushNotificationService.js';
 
@@ -38,10 +38,8 @@ class TempleLandingController {
     this._updateContactLinks();
 
     // Rapid initial server sync to pick up active broadcasts
-    streamingService.syncLiveStateFromServer().then((data) => {
-      if (data && data.isLive) {
-        this._renderLiveStreamingSection(this.selectedLiveLocationId);
-      }
+    streamingService.syncLiveStateFromServer().then(() => {
+      this._renderLiveStreamingSection(this.selectedLiveLocationId);
     }).catch(() => {});
   }
 

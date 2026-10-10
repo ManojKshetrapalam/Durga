@@ -5,7 +5,7 @@
  * location switcher, sanctum schedules, and Web Push opt-in.
  */
 
-import { streamingService, STREAM_STATUS } from '../services/streamingService.js';
+import { streamingService, STREAM_STATUS } from '../services/streamingService.js?v=20261010_16';
 import { analyticsService, ANALYTICS_EVENT } from '../services/analyticsService.js';
 import { pushNotificationService } from '../services/pushNotificationService.js';
 import { TEMPLE_TIMINGS } from '../data/timings.js';

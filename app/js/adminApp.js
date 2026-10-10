@@ -8,7 +8,7 @@ import { PanchangaService } from './services/panchangaService.js?v=20261007_12';
 import { AvailabilityEngine } from './services/availabilityEngine.js?v=20261007_12';
 import { WhatsAppService } from './services/whatsappService.js?v=20261007_12';
 import { showToast } from './components/toast.js?v=20261007_12';
-import { streamingService, STREAM_STATUS, SOURCE_TYPE } from './services/streamingService.js';
+import { streamingService, STREAM_STATUS, SOURCE_TYPE } from './services/streamingService.js?v=20261010_16';
 import { analyticsService, ANALYTICS_EVENT, PLATFORM_TYPE } from './services/analyticsService.js';
 import { pushNotificationService, NOTIFICATION_CATEGORY } from './services/pushNotificationService.js';
 
@@ -42,6 +42,24 @@ class TempleAdminController {
 
     this.render();
     this._startLiveClock();
+
+    // Server-side live state synchronization
+    const localActive = streamingService.getActiveBroadcasts();
+    if (localActive.length > 0) {
+      streamingService._syncSessionToServer('START', { session: localActive[0] }).then(() => {
+        this.render();
+      }).catch(() => {});
+    } else {
+      streamingService.syncLiveStateFromServer().then(() => {
+        this.render();
+      }).catch(() => {});
+    }
+
+    streamingService.subscribe((msg) => {
+      if (['STREAM_STARTED', 'STREAM_ENDED', 'LOCATION_UPDATED'].includes(msg.type)) {
+        this.render();
+      }
+    });
   }
 
   // ==================== AUTHENTICATION ====================
@@ -2467,9 +2485,13 @@ class TempleAdminController {
 
     try {
       if (sourceType === 'MOBILE') {
-        // Ensure camera stream is initiated
+        // Ensure camera stream is initiated if browser allows
         if (!streamingService.getActivePublisherStream()) {
-          await streamingService.requestCameraStream(this.currentFacingMode);
+          try {
+            await streamingService.requestCameraStream(this.currentFacingMode);
+          } catch (camErr) {
+            console.warn("[AdminApp] Camera access notice:", camErr.message);
+          }
         }
       }
 
@@ -2481,7 +2503,7 @@ class TempleAdminController {
         ipCameraConfig: sourceType === 'IP_CAMERA' ? { streamUrl: ipUrlInput ? ipUrlInput.value : '' } : null
       });
 
-      showToast("Live broadcast successfully launched! Web push alert sent to devotees. 🪔", "success");
+      showToast("Live broadcast successfully launched! Devotee screens updated. 🪔", "success");
       this.render();
     } catch (e) {
       alert("Failed to start broadcast: " + e.message);

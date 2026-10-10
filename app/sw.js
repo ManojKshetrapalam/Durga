@@ -8,7 +8,7 @@
  * excluded from offline caching to ensure zero stale live broadcast playback.
  */
 
-const CACHE_NAME = 'durga-mandapa-v13';
+const CACHE_NAME = 'durga-mandapa-v15';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -82,6 +82,11 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
+
+  // CRITICAL: Live streaming API and PHP endpoints must ALWAYS fetch directly from network without SW interference
+  if (url.pathname.includes('/api/') || url.pathname.endsWith('.php')) {
+    return;
+  }
 
   // Administrative portal MUST always fetch directly from network without SW interference
   if (url.pathname.includes('admin')) {

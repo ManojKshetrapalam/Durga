@@ -22,7 +22,7 @@ global.sessionStorage = {
 };
 
 global.window = {
-  location: { hash: '#home', pathname: '/' },
+  location: { hash: '#home', pathname: '/durga/', href: 'https://localhost/durga/', origin: 'https://localhost' },
   matchMedia: () => ({ matches: false }),
   addEventListener: () => {}
 };
