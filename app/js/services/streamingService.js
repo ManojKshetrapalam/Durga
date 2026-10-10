@@ -28,6 +28,74 @@ class StreamingService {
     this.broadcastChannel = null;
     this._initBroadcastChannel();
     this.listeners = new Set();
+    this._initServerSync();
+  }
+
+  _initServerSync() {
+    if (typeof window !== 'undefined') {
+      const isHttp = typeof window.location === 'object' && 
+                     typeof window.location.href === 'string' && 
+                     (window.location.href.startsWith('http:') || window.location.href.startsWith('https:'));
+      if (isHttp) {
+        setTimeout(() => this.syncLiveStateFromServer(), 600);
+        setInterval(() => this.syncLiveStateFromServer(), 6000);
+      }
+    }
+  }
+
+  async _syncSessionToServer(action, payload = {}) {
+    if (typeof window === 'undefined' || typeof fetch === 'undefined') return null;
+    try {
+      const res = await fetch('api/live-status.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...payload })
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async syncLiveStateFromServer() {
+    if (typeof window === 'undefined' || typeof fetch === 'undefined') return null;
+    try {
+      const res = await fetch('api/live-status.php');
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || !data.success) return null;
+
+      const localActive = templeStore.getActiveLiveSessions();
+      const serverLive = !!(data.isLive && data.session);
+
+      if (serverLive) {
+        const s = data.session;
+        // Clean up any stale conflicting sessions in local storage
+        localActive.forEach(oldSess => {
+          if (oldSess.id !== s.id) {
+            templeStore.endLiveSession(oldSess.id, { errors: [] });
+          }
+        });
+        const existing = templeStore.getLiveSessionById(s.id);
+        const needsUpdate = !existing || existing.status !== STREAM_STATUS.LIVE;
+        if (needsUpdate) {
+          templeStore.saveLiveSession(s);
+          this._broadcastEvent('STREAM_STARTED', { session: s });
+        }
+      } else {
+        // Only end local sessions if WE are not currently publishing
+        if (!this.activePublisherStream && localActive.length > 0) {
+          localActive.forEach(session => {
+            templeStore.endLiveSession(session.id, { errors: [] });
+          });
+          this._broadcastEvent('STREAM_ENDED', { sessionId: localActive[0].id, reason: 'SERVER_SYNC' });
+        }
+      }
+      return data;
+    } catch (e) {
+      return null;
+    }
   }
 
   _initBroadcastChannel() {
@@ -180,6 +248,9 @@ class StreamingService {
       // Trigger automatic Web Push notification dispatch
       this._dispatchLiveNotification(newSession, location);
 
+      // Atomic Server Sync for multi-device broadcast
+      await this._syncSessionToServer('START', { session: newSession });
+
       return newSession;
     } catch (err) {
       newSession.status = STREAM_STATUS.FAILED;
@@ -212,6 +283,9 @@ class StreamingService {
 
     this.activePublisherSession = null;
     this._broadcastEvent('STREAM_ENDED', { sessionId, reason });
+
+    // Atomic Server Sync for multi-device broadcast stop
+    await this._syncSessionToServer('STOP', { sessionId });
 
     return endedSession;
   }

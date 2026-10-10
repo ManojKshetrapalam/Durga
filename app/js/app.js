@@ -21,6 +21,7 @@ import { WhatsAppService } from './services/whatsappService.js?v=20261007_11';
 import { PanchangaService } from './services/panchangaService.js?v=20261007_11';
 import { analyticsService } from './services/analyticsService.js';
 import { pushNotificationService } from './services/pushNotificationService.js';
+import { streamingService } from './services/streamingService.js';
 
 class DigitalMandapaApp {
   constructor() {
@@ -65,6 +66,21 @@ class DigitalMandapaApp {
 
     this._setupGlobalListeners();
     this._registerServiceWorker();
+
+    // Cross-device live streaming state listener
+    streamingService.subscribe((msg) => {
+      if (['STREAM_STARTED', 'STREAM_ENDED', 'LOCATION_UPDATED'].includes(msg.type)) {
+        if (this.currentView === 'live' || this.currentView === 'home') {
+          this.render();
+        }
+      }
+    });
+
+    streamingService.syncLiveStateFromServer().then((data) => {
+      if (data && data.isLive && (this.currentView === 'live' || this.currentView === 'home')) {
+        this.render();
+      }
+    }).catch(() => {});
   }
 
   navigate(viewName, params = {}) {

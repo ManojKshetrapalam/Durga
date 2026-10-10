@@ -619,6 +619,52 @@ test("Stopping Live Session: Transitions status to ENDED and releases publisher 
   assert.strictEqual(activeAfter, undefined, "No active session remains for location");
 });
 
+test("Cross-Device Server Sync: Ingests server live session and broadcasts STREAM_STARTED", async () => {
+  const origFetch = global.fetch;
+  const mockServerSession = {
+    id: 'live-server-synced-123',
+    locationId: 'loc-garbha-gudi',
+    locationName: 'Main Garbha Gudi (Sanctum)',
+    status: STREAM_STATUS.LIVE,
+    currentViewers: 18,
+    startedAt: new Date().toISOString()
+  };
+
+  global.fetch = async (url) => {
+    return {
+      ok: true,
+      json: async () => ({
+        success: true,
+        isLive: true,
+        session: mockServerSession,
+        viewerCount: 18
+      })
+    };
+  };
+
+  let eventFired = null;
+  const unsubscribe = streamingService.subscribe((msg) => {
+    if (msg.type === 'STREAM_STARTED') eventFired = msg.payload.session;
+  });
+
+  const synced = await streamingService.syncLiveStateFromServer();
+  unsubscribe();
+  global.fetch = origFetch;
+
+  assert.ok(synced);
+  assert.strictEqual(synced.isLive, true);
+  assert.ok(eventFired);
+  assert.strictEqual(eventFired.id, 'live-server-synced-123');
+
+  // Verify templeStore now reflects this live session
+  const activeSess = streamingService.getActiveBroadcastForLocation('loc-garbha-gudi');
+  assert.ok(activeSess);
+  assert.strictEqual(activeSess.id, 'live-server-synced-123');
+
+  // Clean up
+  templeStore.endLiveSession('live-server-synced-123');
+});
+
 // --- SUITE 9: CENTRALIZED ANALYTICS & PLATFORM ATTRIBUTION ---
 console.log("\nSuite 9: Centralized Analytics & Platform Attribution");
 

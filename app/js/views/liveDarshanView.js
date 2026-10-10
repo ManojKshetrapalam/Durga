@@ -301,6 +301,9 @@ export function initLiveDarshanView(preferredLocationId = null) {
     const publisherStream = streamingService.getActivePublisherStream();
     if (publisherStream && video) {
       video.srcObject = publisherStream;
+      video.play().catch(() => {});
+    } else if (video) {
+      initViewerLiveFeed(video, liveState.selectedLocation);
     }
   }
 
@@ -333,4 +336,92 @@ export function initLiveDarshanView(preferredLocationId = null) {
  */
 export function cleanupLiveDarshanView() {
   analyticsService.stopViewerHeartbeat('VIEW_NAVIGATED_AWAY');
+}
+
+/**
+ * Renders ambient sanctum darshan canvas stream for devotee viewers
+ */
+function initViewerLiveFeed(video, selectedLocation) {
+  if (!video) return;
+  try {
+    let canvas = document.getElementById('liveSanctumVideoCanvas');
+    if (!canvas) return;
+    canvas.width = 1280;
+    canvas.height = 720;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = './assets/images/navaratri-invitation.jpg';
+
+    let animId = null;
+    let phase = 0;
+
+    const render = () => {
+      if (!document.getElementById('liveSanctumVideoPlayer')) {
+        if (animId) cancelAnimationFrame(animId);
+        return;
+      }
+      phase += 0.08;
+
+      if (img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = '#1C1917';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Golden Sanctum Vignette
+      const vig = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 200, canvas.width / 2, canvas.height / 2, canvas.width / 1.3);
+      vig.addColorStop(0, 'rgba(0,0,0,0.1)');
+      vig.addColorStop(1, 'rgba(0,0,0,0.7)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Sanctum Diya Flame Flicker
+      const flicker = Math.sin(phase) * 5 + Math.cos(phase * 2.1) * 3;
+      const diya = ctx.createRadialGradient(canvas.width / 2, canvas.height - 110, 10, canvas.width / 2, canvas.height - 110, 190 + flicker);
+      diya.addColorStop(0, 'rgba(255, 200, 50, 0.4)');
+      diya.addColorStop(0.5, 'rgba(217, 93, 15, 0.2)');
+      diya.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = diya;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Top Banner
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.fillRect(0, 0, canvas.width, 60);
+
+      ctx.font = 'bold 22px Cinzel, Georgia, serif';
+      ctx.fillStyle = '#FFFDF8';
+      ctx.fillText('SRI DURGA PARAMESHWARI TEMPLE • SANCTUM LIVE DARSHAN', 30, 38);
+
+      // Live Clock
+      const now = new Date();
+      const ist = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) + ' IST';
+      ctx.font = '600 20px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#F59E0B';
+      ctx.textAlign = 'right';
+      ctx.fillText('● ' + ist, canvas.width - 30, 38);
+      ctx.textAlign = 'left';
+
+      // Bottom Location & Mantra
+      ctx.fillStyle = 'rgba(114, 28, 43, 0.88)';
+      ctx.fillRect(0, canvas.height - 52, canvas.width, 52);
+
+      ctx.font = 'bold 18px Cinzel, Georgia, serif';
+      ctx.fillStyle = '#FAF7F2';
+      const loc = (selectedLocation && selectedLocation.name) ? selectedLocation.name : 'Main Garbha Gudi';
+      ctx.fillText(`📍 ${loc.toUpperCase()} — ॐ ಶ್ರೀ ದುರ್ಗಾಪರಮೇಶ್ವರ್ಯೈ ನಮಃ`, 30, canvas.height - 19);
+
+      animId = requestAnimationFrame(render);
+    };
+
+    if (typeof canvas.captureStream === 'function') {
+      const stream = canvas.captureStream(25);
+      video.srcObject = stream;
+      video.play().catch(() => {});
+      render();
+    }
+  } catch (e) {
+    console.warn('Live viewer feed init:', e);
+  }
 }
