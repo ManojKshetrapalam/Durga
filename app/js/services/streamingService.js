@@ -30,6 +30,23 @@ class StreamingService {
     this._framePumpInterval = null;
     this._broadcastVideoEl = null;
     this._broadcastCanvas = null;
+    this._publisherMetrics = {
+      captureResolution: '0x0',
+      encodedResolution: '640x360',
+      captureFps: 0,
+      encodedFps: 0,
+      uploadFps: 0,
+      uploadBitrateKbps: 0,
+      rttMs: 0,
+      droppedFrames: 0,
+      totalFramesSent: 0,
+      lastUploadTimestamp: 0
+    };
+    this._isUploadingFrame = false;
+    this._encodedFramesAcc = 0;
+    this._uploadedFramesAcc = 0;
+    this._uploadedBytesAcc = 0;
+    this._metricsStatTimer = null;
     this._initBroadcastChannel();
     this.listeners = new Set();
     this._initServerSync();
@@ -369,8 +386,8 @@ class StreamingService {
     const constraints = {
       video: {
         facingMode: { ideal: facingMode },
-        width: { ideal: 1280, max: 1920 },
-        height: { ideal: 720, max: 1080 },
+        width: { ideal: 1280, max: 1280 },
+        height: { ideal: 720, max: 720 },
         frameRate: { ideal: 30, max: 30 }
       },
       audio: {
@@ -443,50 +460,98 @@ class StreamingService {
     const ctx = canvas.getContext('2d');
     this._broadcastCanvas = canvas;
 
-    let frameCount = 0;
+    this._encodedFramesAcc = 0;
+    this._uploadedFramesAcc = 0;
+    this._uploadedBytesAcc = 0;
 
+    // Periodic 1-second publisher telemetry aggregation
+    this._metricsStatTimer = setInterval(() => {
+      this._publisherMetrics.encodedFps = this._encodedFramesAcc;
+      this._publisherMetrics.uploadFps = this._uploadedFramesAcc;
+      this._publisherMetrics.uploadBitrateKbps = Math.round((this._uploadedBytesAcc * 8) / 1000);
+      this._encodedFramesAcc = 0;
+      this._uploadedFramesAcc = 0;
+      this._uploadedBytesAcc = 0;
+    }, 1000);
+
+    // High-frequency frame pump running at 48ms (~20-21 FPS)
     this._framePumpInterval = setInterval(() => {
       if (!this.activePublisherStream) return;
       try {
-        // Prefer live preview video in admin console if playing with valid dimensions
         const adminVideo = document.getElementById('adminCameraPreview');
         const sourceVideo = (adminVideo && adminVideo.videoWidth > 0) ? adminVideo : video;
 
         if (sourceVideo && sourceVideo.videoWidth > 0 && sourceVideo.videoHeight > 0) {
+          this._publisherMetrics.captureResolution = `${sourceVideo.videoWidth}x${sourceVideo.videoHeight}`;
+
           ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
-          const frameData = canvas.toDataURL('image/jpeg', 0.65);
-          this.latestBroadcastFrame = frameData;
+          this._encodedFramesAcc++;
 
           // 1. Instant local broadcast (cross-tab on same machine) via BroadcastChannel
+          const frameData = canvas.toDataURL('image/jpeg', 0.60);
+          this.latestBroadcastFrame = frameData;
           this._broadcastEvent('LIVE_CAMERA_FRAME', { frame: frameData });
 
-          // 2. Server frame relay (for remote viewers on mobile / other networks) every 4th frame (~3.5 fps)
-          frameCount++;
-          if (frameCount % 4 === 0) {
-            this._uploadLiveFrameToServer(frameData);
+          // 2. High-performance binary frame upload for remote viewers (mobile / remote clients)
+          if (this._isUploadingFrame) {
+            this._publisherMetrics.droppedFrames++;
+          } else {
+            if (typeof canvas.toBlob === 'function') {
+              canvas.toBlob((blob) => {
+                if (blob) this._uploadLiveFrameToServer(blob);
+              }, 'image/jpeg', 0.58);
+            } else {
+              this._uploadLiveFrameToServer(frameData);
+            }
           }
         }
       } catch (e) {
         // Silent catch for canvas capture
       }
-    }, 70);
+    }, 48);
   }
 
-  async _uploadLiveFrameToServer(frameData) {
+  async _uploadLiveFrameToServer(blobOrData) {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     const isHttp = typeof window.location === 'object' && 
                    typeof window.location.href === 'string' && 
                    (window.location.href.startsWith('http:') || window.location.href.startsWith('https:'));
     if (!isHttp) return;
+    if (this._isUploadingFrame) {
+      this._publisherMetrics.droppedFrames++;
+      return;
+    }
+
+    this._isUploadingFrame = true;
+    const t0 = performance.now();
     try {
       const url = this._getApiUrl('api/live-frame.php');
-      await fetch(url, {
+      const isBlob = typeof Blob !== 'undefined' && blobOrData instanceof Blob;
+
+      const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frame: frameData })
+        headers: isBlob ? {
+          'Content-Type': 'image/jpeg',
+          'X-Frame-Fps': String(this._publisherMetrics.encodedFps || 20),
+          'X-Frame-Time': String(Date.now())
+        } : {
+          'Content-Type': 'application/json'
+        },
+        body: isBlob ? blobOrData : JSON.stringify({ frame: blobOrData })
       });
+
+      const rtt = Math.round(performance.now() - t0);
+      this._publisherMetrics.rttMs = rtt;
+      this._publisherMetrics.totalFramesSent++;
+      this._publisherMetrics.lastUploadTimestamp = Date.now();
+
+      const sizeBytes = isBlob ? blobOrData.size : (blobOrData ? blobOrData.length : 0);
+      this._uploadedBytesAcc += sizeBytes;
+      this._uploadedFramesAcc++;
     } catch (e) {
-      // Non-blocking frame upload
+      this._publisherMetrics.droppedFrames++;
+    } finally {
+      this._isUploadingFrame = false;
     }
   }
 
@@ -495,16 +560,31 @@ class StreamingService {
       clearInterval(this._framePumpInterval);
       this._framePumpInterval = null;
     }
+    if (this._metricsStatTimer) {
+      clearInterval(this._metricsStatTimer);
+      this._metricsStatTimer = null;
+    }
     if (this._broadcastVideoEl) {
       this._broadcastVideoEl.srcObject = null;
       this._broadcastVideoEl = null;
     }
     this.latestBroadcastFrame = null;
+    this._isUploadingFrame = false;
     this._broadcastEvent('LIVE_CAMERA_FRAME', { frame: null });
   }
 
   getLatestBroadcastFrame() {
     return this.latestBroadcastFrame;
+  }
+
+  getPublisherDiagnostics() {
+    return {
+      ...this._publisherMetrics,
+      resolution: { width: 1280, height: 720 },
+      isBroadcasting: !!this.activePublisherStream,
+      isActive: !!this.activePublisherStream,
+      timestamp: Date.now()
+    };
   }
 
   // ==================== 4. IP CAMERA PROVIDER ABSTRACTION ====================

@@ -35,7 +35,7 @@ const assetMatches = swContent.match(/'\.\/[^']+'/g);
 assert.ok(assetMatches && assetMatches.length > 0, "sw.js must declare precache assets");
 
 assetMatches.forEach(rawAsset => {
-  const assetRel = rawAsset.slice(1, -1).replace(/^\.\//, '');
+  const assetRel = rawAsset.slice(1, -1).replace(/^\.\//, '').split('#')[0].split('?')[0];
   if (assetRel === '' || assetRel === '.') return; // root
   const fullPath = path.resolve('app', assetRel);
   assert.ok(fs.existsSync(fullPath), `Precache asset must physically exist: ${assetRel}`);

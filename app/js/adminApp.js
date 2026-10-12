@@ -2341,18 +2341,22 @@ class TempleAdminController {
             </div>
           </div>
 
-          <div style="margin-top: 16px; background: #FFFDF8; padding: 14px; border-radius: 8px; border: 1px solid var(--color-border); font-size: 0.82rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-              <span style="color: var(--color-text-soft);">Resolution / Codec:</span>
-              <strong>720p HD @ 30fps (H.264 / AAC)</strong>
+          <div id="adminPublisherTelemetryBox" style="margin-top: 16px; background: #FFFDF8; padding: 14px; border-radius: 8px; border: 1px solid var(--color-border); font-size: 0.82rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed var(--color-border); padding-bottom: 6px;">
+              <strong style="color: var(--color-primary); font-size: 0.85rem;">⚡ Real-Time Broadcaster Telemetry</strong>
+              <span id="adminPubStatusBadge" class="badge" style="background: #666; color: #FFF; font-size: 0.7rem; font-weight: 700;">STANDBY</span>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-              <span style="color: var(--color-text-soft);">Push Notification Trigger:</span>
-              <strong style="color: #059669;">Auto-Dispatches to Opted-in Devotees ✓</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div>• Resolution: <strong id="adminPubRes">720p (1280x720)</strong></div>
+              <div>• Capture FPS: <strong id="adminPubCapFps" style="color: #059669;">-- FPS</strong></div>
+              <div>• Upload Relay FPS: <strong id="adminPubUpFps" style="color: #D95D0F;">-- FPS</strong></div>
+              <div>• Upload Bitrate: <strong id="adminPubBitrate">-- kbps</strong></div>
+              <div>• Relay RTT: <strong id="adminPubRtt">-- ms</strong></div>
+              <div>• Dropped Frames: <strong id="adminPubDrops" style="color: #059669;">0</strong></div>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span style="color: var(--color-text-soft);">Location Mutex:</span>
-              <strong style="color: var(--color-primary);">Active Safeguard Protected ✓</strong>
+            <div style="margin-top: 8px; font-size: 0.74rem; color: var(--color-text-soft); border-top: 1px dashed var(--color-border); padding-top: 6px; display: flex; justify-content: space-between;">
+              <span>Transport: <strong>Comet Binary Push</strong></span>
+              <span style="color: #059669; font-weight: 600;">Push Alerts: Auto-Active ✓</span>
             </div>
           </div>
         </div>
@@ -3124,6 +3128,33 @@ class TempleAdminController {
         video.play().catch(() => {});
         if (placeholder) placeholder.style.display = 'none';
       }
+
+      // Periodic broadcaster telemetry update every 1000ms
+      if (this._adminBroadcasterDiagTimer) clearInterval(this._adminBroadcasterDiagTimer);
+      this._adminBroadcasterDiagTimer = setInterval(() => {
+        if (this.currentTab !== 'streaming') {
+          clearInterval(this._adminBroadcasterDiagTimer);
+          return;
+        }
+        const diag = streamingService.getPublisherDiagnostics();
+        const badge = document.getElementById('adminPubStatusBadge');
+        if (badge) {
+          badge.textContent = diag.isBroadcasting ? 'BROADCASTING LIVE' : 'PREVIEW / IDLE';
+          badge.style.background = diag.isBroadcasting ? '#059669' : '#666';
+        }
+        const resEl = document.getElementById('adminPubRes');
+        if (resEl && diag.resolution) resEl.textContent = `${diag.resolution.width}x${diag.resolution.height}`;
+        const capFpsEl = document.getElementById('adminPubCapFps');
+        if (capFpsEl) capFpsEl.textContent = `${diag.captureFps} FPS`;
+        const upFpsEl = document.getElementById('adminPubUpFps');
+        if (upFpsEl) upFpsEl.textContent = `${diag.uploadFps} FPS`;
+        const bitEl = document.getElementById('adminPubBitrate');
+        if (bitEl) bitEl.textContent = `${diag.uploadBitrateKbps} kbps`;
+        const rttEl = document.getElementById('adminPubRtt');
+        if (rttEl) rttEl.textContent = `${diag.rttMs} ms`;
+        const dropEl = document.getElementById('adminPubDrops');
+        if (dropEl) dropEl.textContent = `${diag.droppedFrames}`;
+      }, 1000);
 
       // Start periodic sync of live server state and viewer telemetry
       if (this._adminLiveTelemetryTimer) clearInterval(this._adminLiveTelemetryTimer);

@@ -8,7 +8,7 @@
  * excluded from offline caching to ensure zero stale live broadcast playback.
  */
 
-const CACHE_NAME = 'durga-mandapa-v18';
+const CACHE_NAME = 'durga-mandapa-v19';
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -164,8 +164,8 @@ self.addEventListener('push', (event) => {
   let data = {
     title: 'Sri Durga Devi Temple 🪔',
     body: 'Sacred blessings from the temple sanctum.',
-    icon: './icons/icon-192.png',
-    badge: './icons/icon-72.png',
+    icon: './icons/icon.svg',
+    badge: './icons/icon.svg',
     data: { url: './app.html#live' }
   };
 
@@ -180,8 +180,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: data.icon || './icons/icon-192.png',
-    badge: data.badge || './icons/icon-72.png',
+    icon: data.icon || './icons/icon.svg',
+    badge: data.badge || './icons/icon.svg',
     vibrate: [200, 100, 200],
     data: data.data || { url: './app.html#live' },
     actions: [

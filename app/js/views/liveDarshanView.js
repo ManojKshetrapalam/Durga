@@ -113,12 +113,30 @@ export function renderLiveDarshanView(preferredLocationId = null) {
 
             <!-- Controls (Bottom Right) -->
             <div style="position: absolute; bottom: 10px; right: 10px; display: flex; gap: 8px; z-index: 5;">
+              <button id="btnPlayerDiag" class="player-ctrl-btn" title="Stream Diagnostics" style="background: rgba(0,0,0,0.65); color: #C59B27; border: 1px solid rgba(197, 155, 39, 0.4); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px;">
+                ⚡
+              </button>
               <button id="btnPlayerMute" class="player-ctrl-btn" title="Toggle Audio" style="background: rgba(0,0,0,0.65); color: #FFF; border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                 🔊
               </button>
               <button id="btnPlayerFullscreen" class="player-ctrl-btn" title="Fullscreen" style="background: rgba(0,0,0,0.65); color: #FFF; border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                 ⛶
               </button>
+            </div>
+
+            <!-- Development & Admin Stream Diagnostics Overlay -->
+            <div id="liveStreamDiagPanel" style="position: absolute; bottom: 50px; left: 10px; background: rgba(15, 12, 10, 0.94); border: 1px solid rgba(197, 155, 39, 0.7); backdrop-filter: blur(8px); border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.74rem; color: #EADFCD; z-index: 25; max-width: 320px; line-height: 1.5; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin-bottom: 6px; font-weight: 700; color: #FFF;">
+                <span>⚡ LIVE STREAM DIAGNOSTICS</span>
+                <button id="btnCloseDiag" style="background: none; border: none; color: #AAA; font-size: 14px; cursor: pointer;">✕</button>
+              </div>
+              <div>• Transport: <span id="diagTransport" style="color: #4ADE80; font-weight: 700;">Comet Binary Push</span></div>
+              <div>• Playback FPS: <span id="diagFps" style="color: #FCD34D; font-weight: 700;">--</span> (Target: 20-30)</div>
+              <div>• Bitrate: <span id="diagBitrate">-- kbps</span></div>
+              <div>• Latency: <span id="diagLatency">-- ms</span> (Glass-to-glass)</div>
+              <div>• Resolution: <span id="diagRes">640x360</span></div>
+              <div>• Decoder: <span id="diagDecoder">GPU ImageBitmap</span></div>
+              <div>• Freezes: <span id="diagFreezes">0 (0ms)</span></div>
             </div>
           ` : `
             <!-- Offline / Sanctum Quiet State -->
@@ -307,6 +325,40 @@ export function initLiveDarshanView(preferredLocationId = null) {
       }
     });
 
+    // Wire up Diagnostics HUD
+    const diagBtn = document.getElementById('btnPlayerDiag');
+    const closeDiagBtn = document.getElementById('btnCloseDiag');
+    const diagPanel = document.getElementById('liveStreamDiagPanel');
+    const badgeEl = document.getElementById('liveViewerBadge');
+
+    const toggleDiag = () => {
+      if (!diagPanel) return;
+      const isVisible = diagPanel.style.display === 'block';
+      diagPanel.style.display = isVisible ? 'none' : 'block';
+    };
+
+    if (diagBtn) diagBtn.addEventListener('click', toggleDiag);
+    if (closeDiagBtn) closeDiagBtn.addEventListener('click', () => { if (diagPanel) diagPanel.style.display = 'none'; });
+
+    // Secret triple tap on viewer badge or ?diag=1 URL parameter
+    let badgeTapCount = 0;
+    let badgeTapTimer = null;
+    if (badgeEl) {
+      badgeEl.addEventListener('click', () => {
+        badgeTapCount++;
+        if (badgeTapTimer) clearTimeout(badgeTapTimer);
+        badgeTapTimer = setTimeout(() => { badgeTapCount = 0; }, 600);
+        if (badgeTapCount >= 3) {
+          badgeTapCount = 0;
+          toggleDiag();
+        }
+      });
+    }
+
+    if (typeof window !== 'undefined' && window.location.search.includes('diag=1')) {
+      if (diagPanel) diagPanel.style.display = 'block';
+    }
+
     // If local publisher stream is running in this browser window, feed directly
     const publisherStream = streamingService.getActivePublisherStream();
     if (publisherStream && video) {
@@ -355,7 +407,7 @@ export function cleanupLiveDarshanView() {
 }
 
 /**
- * Renders ambient sanctum darshan canvas stream with live camera frames for devotee viewers
+ * Renders high-performance live camera stream using Comet Binary Push with GPU ImageBitmap decoding
  */
 function initViewerLiveFeed(video, selectedLocation) {
   if (!video) return;
@@ -378,68 +430,175 @@ function initViewerLiveFeed(video, selectedLocation) {
     cameraImg.crossOrigin = 'anonymous';
     let hasCameraFrame = false;
     let lastCameraFrameTime = 0;
-    let isFetchingRemoteFrame = false;
+    let activeBitmap = null;
 
-    // Check if frame is already cached in memory
+    // Telemetry state
+    let lastSeq = 0;
+    let isDestroyed = false;
+    let framesRenderedAcc = 0;
+    let bytesReceivedAcc = 0;
+    let currentFps = 0;
+    let currentBitrateKbps = 0;
+    let currentLatencyMs = 0;
+    let freezeCount = 0;
+    let totalFreezeDurationMs = 0;
+    let lastFrameReceivedTime = performance.now();
+    let decoderType = (typeof createImageBitmap === 'function') ? 'GPU ImageBitmap' : 'DOM Image';
+    let transportType = 'Comet Binary Push';
+
+    // 1. Initial cached frame if available
     const initialFrame = streamingService.getLatestBroadcastFrame();
     if (initialFrame) {
       cameraImg.src = initialFrame;
       hasCameraFrame = true;
       lastCameraFrameTime = Date.now();
+      transportType = 'Local BroadcastChannel';
     }
 
-    // 1. Listen for local broadcast channel frame sync (cross-tab on same machine)
+    // 2. Local BroadcastChannel subscriber (cross-tab on same machine)
     const unsub = streamingService.subscribe((msg) => {
       if (msg.type === 'LIVE_CAMERA_FRAME' && msg.payload) {
         if (msg.payload.frame) {
           cameraImg.src = msg.payload.frame;
           hasCameraFrame = true;
           lastCameraFrameTime = Date.now();
+          transportType = 'Local BroadcastChannel';
         } else {
           hasCameraFrame = false;
+          if (activeBitmap && typeof activeBitmap.close === 'function') {
+            activeBitmap.close();
+            activeBitmap = null;
+          }
         }
       }
     });
 
-    // 2. Poll server frame relay for remote devices (mobile / different browsers)
-    const pollRemoteFrame = async () => {
-      if (Date.now() - lastCameraFrameTime < 800) return; // Skip if local BroadcastChannel active
-      if (isFetchingRemoteFrame) return;
-      isFetchingRemoteFrame = true;
+    // 3. High-performance Comet long-poll binary push loop (for remote devices / mobile browsers)
+    const fetchNextBinaryFrame = async () => {
+      if (isDestroyed) return;
+      // Skip server poll if local BroadcastChannel is actively receiving in-memory frames (< 600ms)
+      if (Date.now() - lastCameraFrameTime < 600 && transportType === 'Local BroadcastChannel') {
+        setTimeout(fetchNextBinaryFrame, 150);
+        return;
+      }
+
+      transportType = 'Comet Binary Push';
       try {
-        const url = streamingService.getApiUrl('api/live-frame.php?json=1');
+        const url = streamingService.getApiUrl(`api/live-frame.php?wait_seq=${lastSeq}`);
         const res = await fetch(url, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.success && data.frame) {
-            cameraImg.src = data.frame;
-            hasCameraFrame = true;
-            lastCameraFrameTime = Date.now();
+
+        if (res.ok && res.status === 200) {
+          const now = performance.now();
+          const frameGap = now - lastFrameReceivedTime;
+          if (frameGap > 250 && lastSeq > 0) {
+            freezeCount++;
+            totalFreezeDurationMs += Math.round(frameGap - 50);
           }
+          lastFrameReceivedTime = now;
+
+          const seqHeader = res.headers.get('X-Frame-Seq');
+          const timeHeader = res.headers.get('X-Frame-Time');
+          if (seqHeader) lastSeq = parseInt(seqHeader, 10);
+          if (timeHeader) {
+            currentLatencyMs = Math.max(10, Date.now() - parseInt(timeHeader, 10));
+          }
+
+          const blob = await res.blob();
+          if (blob && blob.size > 100) {
+            bytesReceivedAcc += blob.size;
+
+            if (typeof createImageBitmap === 'function') {
+              try {
+                const bmp = await createImageBitmap(blob);
+                if (activeBitmap && typeof activeBitmap.close === 'function') {
+                  activeBitmap.close();
+                }
+                activeBitmap = bmp;
+                hasCameraFrame = true;
+                lastCameraFrameTime = Date.now();
+              } catch (_) {
+                const urlObj = URL.createObjectURL(blob);
+                cameraImg.src = urlObj;
+                cameraImg.onload = () => {
+                  URL.revokeObjectURL(urlObj);
+                  hasCameraFrame = true;
+                  lastCameraFrameTime = Date.now();
+                };
+              }
+            } else {
+              const urlObj = URL.createObjectURL(blob);
+              cameraImg.src = urlObj;
+              cameraImg.onload = () => {
+                URL.revokeObjectURL(urlObj);
+                hasCameraFrame = true;
+                lastCameraFrameTime = Date.now();
+              };
+            }
+          }
+        } else if (res.status === 204) {
+          await new Promise(r => setTimeout(r, 200));
         }
-      } catch (_) {
-      } finally {
-        isFetchingRemoteFrame = false;
+      } catch (err) {
+        await new Promise(r => setTimeout(r, 60));
+      }
+
+      if (!isDestroyed) {
+        fetchNextBinaryFrame();
       }
     };
 
-    const pollInterval = setInterval(pollRemoteFrame, 350);
-    pollRemoteFrame();
+    fetchNextBinaryFrame();
+
+    // Telemetry tick every 1000ms
+    const diagInterval = setInterval(() => {
+      currentFps = framesRenderedAcc;
+      currentBitrateKbps = Math.round((bytesReceivedAcc * 8) / 1000);
+      framesRenderedAcc = 0;
+      bytesReceivedAcc = 0;
+
+      // Update Diagnostics HUD elements if visible
+      const diagFpsEl = document.getElementById('diagFps');
+      if (diagFpsEl) diagFpsEl.textContent = `${currentFps} FPS`;
+      const diagBitrateEl = document.getElementById('diagBitrate');
+      if (diagBitrateEl) diagBitrateEl.textContent = `${currentBitrateKbps} kbps`;
+      const diagLatencyEl = document.getElementById('diagLatency');
+      if (diagLatencyEl) diagLatencyEl.textContent = `${currentLatencyMs} ms`;
+      const diagTransportEl = document.getElementById('diagTransport');
+      if (diagTransportEl) diagTransportEl.textContent = transportType;
+      const diagDecoderEl = document.getElementById('diagDecoder');
+      if (diagDecoderEl) diagDecoderEl.textContent = decoderType;
+      const diagFreezesEl = document.getElementById('diagFreezes');
+      if (diagFreezesEl) diagFreezesEl.textContent = `${freezeCount} (${totalFreezeDurationMs}ms)`;
+    }, 1000);
 
     let animId = null;
     let phase = 0;
 
     const render = () => {
       if (!document.getElementById('liveSanctumVideoPlayer')) {
+        isDestroyed = true;
         if (animId) cancelAnimationFrame(animId);
-        clearInterval(pollInterval);
+        clearInterval(diagInterval);
         if (unsub) unsub();
+        if (activeBitmap && typeof activeBitmap.close === 'function') activeBitmap.close();
         return;
       }
       phase += 0.08;
+      framesRenderedAcc++;
 
-      // 1. Draw video background: broadcaster webcam frame if active, else sanctum poster
-      if (hasCameraFrame && cameraImg.complete && cameraImg.naturalWidth > 0) {
+      // 1. Draw video background: broadcaster frame if active, else sanctum poster
+      if (activeBitmap) {
+        const hRatio = canvas.width / activeBitmap.width;
+        const vRatio = canvas.height / activeBitmap.height;
+        const ratio = Math.max(hRatio, vRatio);
+        const centerShiftX = (canvas.width - activeBitmap.width * ratio) / 2;
+        const centerShiftY = (canvas.height - activeBitmap.height * ratio) / 2;
+        ctx.drawImage(
+          activeBitmap,
+          0, 0, activeBitmap.width, activeBitmap.height,
+          centerShiftX, centerShiftY, activeBitmap.width * ratio, activeBitmap.height * ratio
+        );
+      } else if (hasCameraFrame && cameraImg.complete && cameraImg.naturalWidth > 0) {
         const hRatio = canvas.width / cameraImg.naturalWidth;
         const vRatio = canvas.height / cameraImg.naturalHeight;
         const ratio = Math.max(hRatio, vRatio);
@@ -503,17 +662,38 @@ function initViewerLiveFeed(video, selectedLocation) {
     };
 
     currentFeedCleanup = () => {
+      isDestroyed = true;
       if (animId) cancelAnimationFrame(animId);
-      clearInterval(pollInterval);
+      clearInterval(diagInterval);
       if (unsub) unsub();
+      if (activeBitmap && typeof activeBitmap.close === 'function') {
+        activeBitmap.close();
+        activeBitmap = null;
+      }
     };
 
+    // Use direct canvas presentation on mobile or fallback if captureStream is unavailable/stalled
+    let usedCaptureStream = false;
     if (typeof canvas.captureStream === 'function') {
-      const stream = canvas.captureStream(25);
-      video.srcObject = stream;
-      video.play().catch(() => {});
-      render();
+      try {
+        const stream = canvas.captureStream(30);
+        video.srcObject = stream;
+        video.play().catch(() => {});
+        usedCaptureStream = true;
+      } catch (_) {}
     }
+
+    // On mobile devices where captureStream may stall or is unsupported, ensure canvas displays directly
+    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+    if (!usedCaptureStream || isMobileDevice) {
+      canvas.style.display = 'block';
+      video.style.display = 'none';
+    } else {
+      canvas.style.display = 'none';
+      video.style.display = 'block';
+    }
+
+    render();
   } catch (e) {
     console.warn('Live viewer feed init:', e);
   }

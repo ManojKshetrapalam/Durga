@@ -681,6 +681,21 @@ test("Real-Time Frame Relay & Endpoint Helper: Formats API URLs and handles fram
   assert.strictEqual(streamingService.getLatestBroadcastFrame(), null);
 });
 
+test("Live Publisher Diagnostics: Reports framerate, bitrate, resolution, and relay telemetry", () => {
+  const diag = streamingService.getPublisherDiagnostics();
+  assert.ok(typeof diag === 'object');
+  assert.strictEqual(typeof diag.captureFps, 'number');
+  assert.strictEqual(typeof diag.uploadFps, 'number');
+  assert.strictEqual(typeof diag.uploadBitrateKbps, 'number');
+  assert.strictEqual(typeof diag.rttMs, 'number');
+  assert.strictEqual(typeof diag.droppedFrames, 'number');
+  assert.ok(diag.resolution && diag.resolution.width === 1280 && diag.resolution.height === 720);
+  assert.strictEqual(typeof diag.isBroadcasting, 'boolean');
+
+  const cometUrl = streamingService.getApiUrl('api/live-frame.php?wait_seq=42');
+  assert.ok(cometUrl.includes('wait_seq=42'));
+});
+
 // --- SUITE 9: CENTRALIZED ANALYTICS & PLATFORM ATTRIBUTION ---
 console.log("\nSuite 9: Centralized Analytics & Platform Attribution");
 

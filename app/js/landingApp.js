@@ -197,7 +197,6 @@ class TempleLandingController {
       <!-- Live Player Card -->
       <div class="card" style="padding: 0; overflow: hidden; border: 1.5px solid var(--color-border); box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #000; border-radius: 16px;">
         <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #1C1917; display: flex; align-items: center; justify-content: center;">
-          ${isLive ? `
             <video 
               id="landingLiveVideo" 
               autoplay 
@@ -206,9 +205,10 @@ class TempleLandingController {
               style="width: 100%; height: 100%; object-fit: cover; background: #000;"
               poster="./assets/images/navaratri-invitation.jpg"
             ></video>
+            <canvas id="landingLiveFeedCanvas" style="display: none; width: 100%; height: 100%; object-fit: cover; background: #000;"></canvas>
 
             <div style="position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 8px; z-index: 5;">
-              <span style="background: rgba(229, 57, 53, 0.95); color: #FFF; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px;">
+              <span id="landingLiveBadge" style="background: rgba(229, 57, 53, 0.95); color: #FFF; font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px; cursor: pointer;">
                 ● LIVE
               </span>
               <span id="landingViewerCountBadge" style="background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); color: #FFF; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px;">
@@ -217,12 +217,30 @@ class TempleLandingController {
             </div>
 
             <div style="position: absolute; bottom: 14px; right: 14px; display: flex; gap: 8px; z-index: 5;">
+              <button id="landingBtnDiag" title="Diagnostics HUD" style="background: rgba(0,0,0,0.65); color: #FCD34D; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;">
+                ⚡
+              </button>
               <button id="landingBtnMute" style="background: rgba(0,0,0,0.65); color: #FFF; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;">
                 🔊
               </button>
               <button id="landingBtnFullscreen" style="background: rgba(0,0,0,0.65); color: #FFF; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;">
                 ⛶
               </button>
+            </div>
+
+            <!-- Development & Admin Stream Diagnostics Overlay -->
+            <div id="landingLiveStreamDiagPanel" style="position: absolute; bottom: 58px; left: 14px; background: rgba(15, 12, 10, 0.94); border: 1px solid rgba(197, 155, 39, 0.7); backdrop-filter: blur(8px); border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.74rem; color: #EADFCD; z-index: 25; max-width: 320px; line-height: 1.5; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin-bottom: 6px; font-weight: 700; color: #FFF;">
+                <span>⚡ LIVE STREAM DIAGNOSTICS</span>
+                <button id="landingBtnCloseDiag" style="background: none; border: none; color: #AAA; font-size: 14px; cursor: pointer;">✕</button>
+              </div>
+              <div>• Transport: <span id="landingDiagTransport" style="color: #4ADE80; font-weight: 700;">Comet Binary Push</span></div>
+              <div>• Playback FPS: <span id="landingDiagFps" style="color: #FCD34D; font-weight: 700;">--</span> (Target: 20-30)</div>
+              <div>• Bitrate: <span id="landingDiagBitrate">-- kbps</span></div>
+              <div>• Latency: <span id="landingDiagLatency">-- ms</span> (Glass-to-glass)</div>
+              <div>• Resolution: <span id="landingDiagRes">1280x720</span></div>
+              <div>• Decoder: <span id="landingDiagDecoder">GPU ImageBitmap</span></div>
+              <div>• Freezes: <span id="landingDiagFreezes">0 (0ms)</span></div>
             </div>
           ` : `
             <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; background: linear-gradient(180deg, #2A1719 0%, #150A0B 100%);">
@@ -295,6 +313,10 @@ class TempleLandingController {
       const video = document.getElementById('landingLiveVideo');
       const muteBtn = document.getElementById('landingBtnMute');
       const fsBtn = document.getElementById('landingBtnFullscreen');
+      const diagBtn = document.getElementById('landingBtnDiag');
+      const closeDiagBtn = document.getElementById('landingBtnCloseDiag');
+      const diagPanel = document.getElementById('landingLiveStreamDiagPanel');
+      const badgeEl = document.getElementById('landingLiveBadge');
 
       if (muteBtn && video) {
         muteBtn.addEventListener('click', () => {
@@ -308,6 +330,33 @@ class TempleLandingController {
           if (video.requestFullscreen) video.requestFullscreen();
           else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
         });
+      }
+
+      const toggleDiag = () => {
+        if (!diagPanel) return;
+        const isVisible = diagPanel.style.display === 'block';
+        diagPanel.style.display = isVisible ? 'none' : 'block';
+      };
+
+      if (diagBtn) diagBtn.addEventListener('click', toggleDiag);
+      if (closeDiagBtn) closeDiagBtn.addEventListener('click', () => { if (diagPanel) diagPanel.style.display = 'none'; });
+
+      let badgeTapCount = 0;
+      let badgeTapTimer = null;
+      if (badgeEl) {
+        badgeEl.addEventListener('click', () => {
+          badgeTapCount++;
+          if (badgeTapTimer) clearTimeout(badgeTapTimer);
+          badgeTapTimer = setTimeout(() => { badgeTapCount = 0; }, 600);
+          if (badgeTapCount >= 3) {
+            badgeTapCount = 0;
+            toggleDiag();
+          }
+        });
+      }
+
+      if (typeof window !== 'undefined' && window.location.search.includes('diag=1')) {
+        if (diagPanel) diagPanel.style.display = 'block';
       }
 
       const publisherStream = streamingService.getActivePublisherStream();
@@ -340,6 +389,8 @@ class TempleLandingController {
         canvas.style.display = 'none';
         document.body.appendChild(canvas);
       }
+      canvas.width = 1280;
+      canvas.height = 720;
       const ctx = canvas.getContext('2d');
       const fallbackImg = new Image();
       fallbackImg.crossOrigin = 'anonymous';
@@ -349,7 +400,21 @@ class TempleLandingController {
       cameraImg.crossOrigin = 'anonymous';
       let hasCameraFrame = false;
       let lastCameraFrameTime = 0;
-      let isFetchingRemoteFrame = false;
+      let activeBitmap = null;
+
+      // Telemetry metrics
+      let lastSeq = 0;
+      let isDestroyed = false;
+      let framesRenderedAcc = 0;
+      let bytesReceivedAcc = 0;
+      let currentFps = 0;
+      let currentBitrateKbps = 0;
+      let currentLatencyMs = 0;
+      let freezeCount = 0;
+      let totalFreezeDurationMs = 0;
+      let lastFrameReceivedTime = performance.now();
+      let decoderType = (typeof createImageBitmap === 'function') ? 'GPU ImageBitmap' : 'DOM Image';
+      let transportType = 'Comet Binary Push';
 
       // Check if frame is already cached in memory
       const initialFrame = streamingService.getLatestBroadcastFrame();
@@ -357,6 +422,7 @@ class TempleLandingController {
         cameraImg.src = initialFrame;
         hasCameraFrame = true;
         lastCameraFrameTime = Date.now();
+        transportType = 'Local BroadcastChannel';
       }
 
       // 1. Listen for local broadcast channel frame sync (cross-tab on same machine)
@@ -366,51 +432,142 @@ class TempleLandingController {
             cameraImg.src = msg.payload.frame;
             hasCameraFrame = true;
             lastCameraFrameTime = Date.now();
+            transportType = 'Local BroadcastChannel';
           } else {
             hasCameraFrame = false;
+            if (activeBitmap && typeof activeBitmap.close === 'function') {
+              activeBitmap.close();
+              activeBitmap = null;
+            }
           }
         }
       });
 
-      // 2. Poll server frame relay for remote devices (mobile / different browsers)
-      const pollRemoteFrame = async () => {
-        if (Date.now() - lastCameraFrameTime < 800) return; // Skip if local BroadcastChannel active
-        if (isFetchingRemoteFrame) return;
-        isFetchingRemoteFrame = true;
+      // 2. High-performance Comet long-poll binary push loop (for remote devices / mobile browsers)
+      const fetchNextBinaryFrame = async () => {
+        if (isDestroyed) return;
+        // Skip server poll if local BroadcastChannel is actively receiving in-memory frames (< 600ms)
+        if (Date.now() - lastCameraFrameTime < 600 && transportType === 'Local BroadcastChannel') {
+          setTimeout(fetchNextBinaryFrame, 150);
+          return;
+        }
+
+        transportType = 'Comet Binary Push';
         try {
-          const url = streamingService.getApiUrl('api/live-frame.php?json=1');
+          const url = streamingService.getApiUrl(`api/live-frame.php?wait_seq=${lastSeq}`);
           const res = await fetch(url, { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.success && data.frame) {
-              cameraImg.src = data.frame;
-              hasCameraFrame = true;
-              lastCameraFrameTime = Date.now();
+
+          if (res.ok && res.status === 200) {
+            const now = performance.now();
+            const frameGap = now - lastFrameReceivedTime;
+            if (frameGap > 250 && lastSeq > 0) {
+              freezeCount++;
+              totalFreezeDurationMs += Math.round(frameGap - 50);
             }
+            lastFrameReceivedTime = now;
+
+            const seqHeader = res.headers.get('X-Frame-Seq');
+            const timeHeader = res.headers.get('X-Frame-Time');
+            if (seqHeader) lastSeq = parseInt(seqHeader, 10);
+            if (timeHeader) {
+              currentLatencyMs = Math.max(10, Date.now() - parseInt(timeHeader, 10));
+            }
+
+            const blob = await res.blob();
+            if (blob && blob.size > 100) {
+              bytesReceivedAcc += blob.size;
+
+              if (typeof createImageBitmap === 'function') {
+                try {
+                  const bmp = await createImageBitmap(blob);
+                  if (activeBitmap && typeof activeBitmap.close === 'function') {
+                    activeBitmap.close();
+                  }
+                  activeBitmap = bmp;
+                  hasCameraFrame = true;
+                  lastCameraFrameTime = Date.now();
+                } catch (_) {
+                  const urlObj = URL.createObjectURL(blob);
+                  cameraImg.src = urlObj;
+                  cameraImg.onload = () => {
+                    URL.revokeObjectURL(urlObj);
+                    hasCameraFrame = true;
+                    lastCameraFrameTime = Date.now();
+                  };
+                }
+              } else {
+                const urlObj = URL.createObjectURL(blob);
+                cameraImg.src = urlObj;
+                cameraImg.onload = () => {
+                  URL.revokeObjectURL(urlObj);
+                  hasCameraFrame = true;
+                  lastCameraFrameTime = Date.now();
+                };
+              }
+            }
+          } else if (res.status === 204) {
+            await new Promise(r => setTimeout(r, 200));
           }
         } catch (_) {
-        } finally {
-          isFetchingRemoteFrame = false;
+          await new Promise(r => setTimeout(r, 60));
+        }
+
+        if (!isDestroyed) {
+          fetchNextBinaryFrame();
         }
       };
 
-      const pollInterval = setInterval(pollRemoteFrame, 350);
-      pollRemoteFrame();
+      fetchNextBinaryFrame();
+
+      // Telemetry tick every 1000ms
+      const diagInterval = setInterval(() => {
+        currentFps = framesRenderedAcc;
+        currentBitrateKbps = Math.round((bytesReceivedAcc * 8) / 1000);
+        framesRenderedAcc = 0;
+        bytesReceivedAcc = 0;
+
+        const diagFpsEl = document.getElementById('landingDiagFps');
+        if (diagFpsEl) diagFpsEl.textContent = `${currentFps} FPS`;
+        const diagBitrateEl = document.getElementById('landingDiagBitrate');
+        if (diagBitrateEl) diagBitrateEl.textContent = `${currentBitrateKbps} kbps`;
+        const diagLatencyEl = document.getElementById('landingDiagLatency');
+        if (diagLatencyEl) diagLatencyEl.textContent = `${currentLatencyMs} ms`;
+        const diagTransportEl = document.getElementById('landingDiagTransport');
+        if (diagTransportEl) diagTransportEl.textContent = transportType;
+        const diagDecoderEl = document.getElementById('landingDiagDecoder');
+        if (diagDecoderEl) diagDecoderEl.textContent = decoderType;
+        const diagFreezesEl = document.getElementById('landingDiagFreezes');
+        if (diagFreezesEl) diagFreezesEl.textContent = `${freezeCount} (${totalFreezeDurationMs}ms)`;
+      }, 1000);
 
       let animId = null;
       let phase = 0;
 
       const render = () => {
         if (!document.getElementById('landingLiveVideo')) {
+          isDestroyed = true;
           if (animId) cancelAnimationFrame(animId);
-          clearInterval(pollInterval);
+          clearInterval(diagInterval);
           if (unsub) unsub();
+          if (activeBitmap && typeof activeBitmap.close === 'function') activeBitmap.close();
           return;
         }
         phase += 0.08;
+        framesRenderedAcc++;
 
         // 1. Draw video background: broadcaster webcam frame if active, else sanctum poster
-        if (hasCameraFrame && cameraImg.complete && cameraImg.naturalWidth > 0) {
+        if (activeBitmap) {
+          const hRatio = canvas.width / activeBitmap.width;
+          const vRatio = canvas.height / activeBitmap.height;
+          const ratio = Math.max(hRatio, vRatio);
+          const centerShiftX = (canvas.width - activeBitmap.width * ratio) / 2;
+          const centerShiftY = (canvas.height - activeBitmap.height * ratio) / 2;
+          ctx.drawImage(
+            activeBitmap,
+            0, 0, activeBitmap.width, activeBitmap.height,
+            centerShiftX, centerShiftY, activeBitmap.width * ratio, activeBitmap.height * ratio
+          );
+        } else if (hasCameraFrame && cameraImg.complete && cameraImg.naturalWidth > 0) {
           const hRatio = canvas.width / cameraImg.naturalWidth;
           const vRatio = canvas.height / cameraImg.naturalHeight;
           const ratio = Math.max(hRatio, vRatio);
@@ -474,17 +631,37 @@ class TempleLandingController {
       };
 
       this._viewerFeedCleanup = () => {
+        isDestroyed = true;
         if (animId) cancelAnimationFrame(animId);
-        clearInterval(pollInterval);
+        clearInterval(diagInterval);
         if (unsub) unsub();
+        if (activeBitmap && typeof activeBitmap.close === 'function') {
+          activeBitmap.close();
+          activeBitmap = null;
+        }
       };
 
+      let usedCaptureStream = false;
       if (typeof canvas.captureStream === 'function') {
-        const stream = canvas.captureStream(25);
-        video.srcObject = stream;
-        video.play().catch(() => {});
-        render();
+        try {
+          const stream = canvas.captureStream(30);
+          video.srcObject = stream;
+          video.play().catch(() => {});
+          usedCaptureStream = true;
+        } catch (_) {}
       }
+
+      // On mobile devices where captureStream may stall or is unsupported, ensure canvas displays directly
+      const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+      if (!usedCaptureStream || isMobileDevice) {
+        canvas.style.display = 'block';
+        video.style.display = 'none';
+      } else {
+        canvas.style.display = 'none';
+        video.style.display = 'block';
+      }
+
+      render();
     } catch (e) {
       console.warn('Live viewer feed init:', e);
     }
