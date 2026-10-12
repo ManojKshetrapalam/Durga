@@ -197,6 +197,7 @@ class TempleLandingController {
       <!-- Live Player Card -->
       <div class="card" style="padding: 0; overflow: hidden; border: 1.5px solid var(--color-border); box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #000; border-radius: 16px;">
         <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #1C1917; display: flex; align-items: center; justify-content: center;">
+          ${isLive ? `
             <video 
               id="landingLiveVideo" 
               autoplay 

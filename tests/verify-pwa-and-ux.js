@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import assert from 'assert';
+import { execSync } from 'child_process';
 
 console.log("\n============================================================");
 console.log("PWA & MOBILE UX VERIFICATION SUITE");
@@ -73,6 +74,27 @@ stitchDesigns.forEach(f => {
   assert.ok(fs.existsSync(p), `Stitch design asset must exist: ${f}`);
 });
 console.log(`  ✓ PASS: All ${stitchDesigns.length} Stitch Loop screen designs present and verified.`);
+
+// 5. Verify Syntax of All Application JavaScript Files
+console.log("Checking Syntax of all JS Modules...");
+const jsFiles = [];
+function findJs(dir) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) findJs(full);
+    else if (entry.isFile() && entry.name.endsWith('.js')) jsFiles.push(full);
+  }
+}
+findJs(path.resolve('app'));
+jsFiles.forEach(file => {
+  try {
+    execSync(`node --check "${file}"`);
+  } catch (e) {
+    assert.fail(`Syntax error in ${file}: ${e.message}`);
+  }
+});
+console.log(`  ✓ PASS: All ${jsFiles.length} JavaScript files in app/ passed node syntax checks.`);
 
 console.log("\n============================================================");
 console.log("ALL PWA & MOBILE UX VERIFICATIONS PASSED 100%");
