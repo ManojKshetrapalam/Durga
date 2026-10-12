@@ -31,6 +31,7 @@ class TempleLandingController {
 
   init() {
     this._initAudioPlayer();
+    this._initMobileNav();
     this._renderLiveStreamingSection();
     this._renderLivePanchangaStrip();
     this._renderSevasGrid();
@@ -41,6 +42,71 @@ class TempleLandingController {
     streamingService.syncLiveStateFromServer().then(() => {
       this._renderLiveStreamingSection(this.selectedLiveLocationId);
     }).catch(() => {});
+  }
+
+  // Mobile Navigation Drawer and Smooth Section Scrolling
+  _initMobileNav() {
+    const toggleBtn = document.getElementById('btn-mobile-nav-toggle');
+    const closeBtn = document.getElementById('btn-mobile-nav-close');
+    const drawer = document.getElementById('mobile-nav-drawer');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
+
+    if (!drawer) return;
+
+    const openDrawer = () => {
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeDrawer = () => {
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    };
+
+    if (toggleBtn) toggleBtn.addEventListener('click', openDrawer);
+    if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+    // Auto-close drawer on any drawer link click and handle smooth scrolling
+    drawer.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        closeDrawer();
+        const targetId = anchor.getAttribute('href').substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          const headerOffset = 110;
+          const elementPosition = targetEl.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    // Also handle quick-nav chips smooth scrolling
+    document.querySelectorAll('.mobile-quick-nav-scroll a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const targetId = anchor.getAttribute('href').substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          const headerOffset = 115;
+          const elementPosition = targetEl.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
   }
 
   // Audio Chant Player
